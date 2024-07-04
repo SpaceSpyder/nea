@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log in</title>
+</head>
+<h1>Log In</h1>
+<style>
+    body {font-family: Arial, Helvetica, sans-serif;}
+    
+    
+    input[type=text], input[type=password] {
+      width: 350px;
+      padding: 12px 20px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+</style>
+
+<php>
+$connect = mysqli_connect("Decks","Users","Cards");
+$result = mysqli_query($con,"SELECT * FROM Persons LIMIT 50");
+$data = $result->fetch_all(MYSQLI_ASSOC);
+</php>
+
+<script>
+    function checkDetails(Username,Password) {
+
+        if (Username == ){
+
+        }
+
+    }
+
+</script>
+<body>
+    <form>
+        <input type="text" name="user_input" placeholder="Username"> <!--asks for user name-->
+        <br/> <!--break line-->
+        <input type="text" name="user_input" placeholder="Password">
+        <br/>
+        <button type="button">Enter</button onclick="checkDetails()"> <!--button type-->
+    </form>
+
+    <br/>
+    <hr>
+    <a href="{{ url_for('signUp') }}" class="btn">Don't have an account? Make one here</a>
+</body>
+</html>

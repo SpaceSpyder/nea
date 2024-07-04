@@ -1,0 +1,22 @@
+MnaEvTrn = 5
+avw = 15
+max = 30
+dmg + hlth = 60
+Mna = 5
+ave overall = dmg + hlth = 30 = Mna
+Mna = (dmg + hlth)/6
+
+
+ideas:
+    Cuthulu:
+    most powerfull in game, every turn played it costs 2 Mana
+    Dragon Egg:
+    Hatches after 3 turns 
+    Scientist:
+    gives extra Mana every turn 
+    Knight & skeleton Captin:
+    increases damage of all Knights on team
+    Jester:
+    50% chance doges attack
+    Slime:
+    splits into 2 smaller slimes on death

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+    <h1>Fantasy Card Fight</h1>
+    <form action="/submit" method="post">
+        <input type="text" name="user_input" placeholder="Enter something">
+        <button type="submit">Submit</button>
+    </form>
+    <hr>
+    <a href="{{ url_for('login') }}" class="btn">Log in!</a>
+    <hr>
+    <a href="{{ url_for('testGame') }}" class="btn">Go to game test</a>
+    <hr>
+    <a href="{{ url_for('testGame2') }}" class="btn">Go to experimental test</a>
+    <hr>
+    <a href="{{ url_for('temp') }}" class="btn">temp</a>
+</body>
+</html>

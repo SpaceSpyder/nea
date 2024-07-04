@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual Mouse Check</title>
+    <style>
+        .element {
+            width: 200px;
+            height: 200px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 200px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .element:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="element" id="myElement">Hover over me!</div>
+
+<button onclick="checkMouseOverElement()">Check Mouse Over Element</button>
+
+<script>
+    var element = document.getElementById('myElement');
+
+    function checkMouseOverElement() {
+        // Check if the mouse is over the element
+        if (isMouseOverElement(element)) {
+            console.log('Mouse is touching the element.');
+            // Add actions to perform when mouse is touching the element
+            element.style.backgroundColor = 'lightblue';
+        } else {
+            console.log('Mouse is not touching the element.');
+            // Add actions to perform when mouse is not touching the element
+            element.style.backgroundColor = '#f0f0f0';
+        }
+    }
+
+    // Function to check if the mouse is over an element
+    function isMouseOverElement(elem) {
+        var bounding = elem.getBoundingClientRect();
+        return (
+            bounding.left <= event.clientX &&
+            event.clientX <= bounding.right &&
+            bounding.top <= event.clientY &&
+            event.clientY <= bounding.bottom
+        );
+    }
+</script>
+
+</body>
+</html>
