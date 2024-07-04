@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder='templates', static_url_path='')
 def index():
     return render_template('index.html')
 
-@app.route('/submit', methods=['GET', 'POST'])
+@app.route('/submit', methods=['GET', 'POST']) # assign webpage name and methods to use
 def submit():
     if request.method == 'POST':
         user_input = request.form['user_input']
@@ -59,6 +59,26 @@ def dbTest():
     conn.close()
 
     return render_template('record.html', name=result)
+
+@app.route('/loggingin', methods=['POST'])
+def loggingin():
+    # Select data from the database for the requested username and password
+    # check if the result shows a match
+    # if no match tell the user
+    # e.g. render template YOUOLOGGEDIN.html
+    # else
+    # set a cookie with the users name and database id
+    # render template game.html and load their deck (or new)
+
+    return ""
+   
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

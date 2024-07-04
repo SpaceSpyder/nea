@@ -19,29 +19,30 @@
     }
 </style>
 
-<php>
-$connect = mysqli_connect("Decks","Users","Cards");
-$result = mysqli_query($con,"SELECT * FROM Persons LIMIT 50");
-$data = $result->fetch_all(MYSQLI_ASSOC);
-</php>
 
 <script>
-    function checkDetails(Username,Password) {
-
-        if (Username == ){
-
+    function checkDetails() {
+        let username = document.querySelector("input[name='username']").value;
+        let password = document.querySelector("input[name='password']").value;
+        if(username == "" || password == ""){
+            alert("u twat");
+        }
+        else{
+            document.querySelector("form").submit();
         }
 
     }
 
 </script>
+
+
 <body>
-    <form>
-        <input type="text" name="user_input" placeholder="Username"> <!--asks for user name-->
+    <form method="post" action="loggingin">
+        <input type="text" name="username" placeholder="Username"> <!--asks for user name-->
         <br/> <!--break line-->
-        <input type="text" name="user_input" placeholder="Password">
+        <input type="text" name="password" placeholder="Password">
         <br/>
-        <button type="button">Enter</button onclick="checkDetails()"> <!--button type-->
+        <button type="button" onclick="checkDetails()" >login</button> <!--button type-->
     </form>
 
     <br/>
