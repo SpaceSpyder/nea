@@ -69,8 +69,33 @@ def loggingin():
     # else
     # set a cookie with the users name and database id
     # render template game.html and load their deck (or new)
+    loginAttempt = False
+    conn = sqlite3.connect('databases/database.db')
+    cursor = conn.cursor()
 
-    return ""
+    username = request.POST['username']
+    password = request.POST['password']
+    dbUsername = list(cursor.execute('SELECT Username FROM users'))
+    dbPassword = list(cursor.execute('SELECT Password FROM users'))
+
+    try:
+        dbUsername.index(username) 
+    except:
+        print("username not found")
+    else:
+        try:
+            dbPassword.index(password)
+        except:
+            print("password not found")
+        else:
+            loginAttempt = True
+    
+
+    conn.close()
+    if loginAttempt == False:
+        return loginAttempt,"ERROR"
+    else:
+        return loginAttempt, dbUsername
    
 
 
