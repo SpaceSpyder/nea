@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>sign up</title>
+</head>
+<h1>Sign Up</h1>
+<style>
+    body {font-family: Arial, Helvetica, sans-serif;}
+    
+    
+    input[type=text], input[type=password] {
+        width: 350px;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+
+    .hidden-text {
+        display: none;
+    }
+
+    .asterisks {
+        font-size: inherit;
+        font-family: inherit;
+    }
+
+</style>
+
+
+
+    
+
+<script>
+    function checkDetails() {
+        let username = document.querySelector("input[name='username']").value;
+        let password = document.querySelector("input[name='password']").value;
+        if(username == "" || password == ""){
+            alert("bruh");
+        }
+        else{
+            document.querySelector("form").submit();
+            return "";
+        }
+
+    }
+
+    
+
+
+</script>
+
+
+<body>
+    <form method="post" action="signingIn">
+        <input type="text" name="username" placeholder="Username"> <!--asks for user name-->
+        <br/> <!--break line-->
+        <input type="text" name="password" placeholder="Password">
+        <br/>
+        <input type="text" name="password" placeholder="Re-Enter Password">
+        <br/>
+        <button type="button" onclick="checkDetails()" >Sign Up</button> <!--button type-->
+    </form>
+    
+</body>
+
+
+
+</html>

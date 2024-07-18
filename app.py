@@ -1,11 +1,31 @@
-#pip install -U Flask
-#pip install Jinja2
+'''pip install -U Flask
+pip install Jinja2
+pip install SQLAlchemy
+pip install Flask SQLAlchemy'''
+
+
+
 
 import sqlite3
 from flask import Flask, render_template
 from flask import request
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, request, redirect, url_for, render_template
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import scoped_session, sessionmaker
+
 
 app = Flask(__name__, static_folder='templates', static_url_path='')
+app.config['SECRET_KEY'] = 't67wteq'  
+
+# Define your database connection
+DATABASE_URL = 'sqlite:///databases\database.db'
+engine = create_engine(DATABASE_URL)
+Session = sessionmaker(bind=engine)
+
+
+
+
 
 @app.route('/')
 def index():
@@ -31,13 +51,9 @@ def testGame2():
 def temp():
     return render_template('temp.html')
 
-@app.route('/login')
-def login():
-    return render_template('login.html')
 
-@app.route('/signUp')
-def signUp():
-    return render_template('signUp.html')
+
+
 
 @app.route('/dbTest')
 def dbTest():
@@ -46,7 +62,7 @@ def dbTest():
     # Create a cursor object
     cursor = conn.cursor()
 
-    cursor.execute('SELECT * FROM users')
+    cursor.execute('SELECT * FROM Users')
 
     # Fetch all rows from the executed query
     rows = cursor.fetchall()
@@ -60,7 +76,36 @@ def dbTest():
 
     return render_template('record.html', name=result)
 
-@app.route('/loggingin', methods=['POST'])
+
+
+
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        query = text("SELECT * FROM Users WHERE username = :username AND password = :password")
+        with Session() as session:
+            result = session.execute(query, {'username': username, 'password': password}).fetchone()
+
+        if result:
+            msg = 'Logged in successfully!'
+            return render_template('index.html', msg=msg)
+        else:
+            msg = 'Incorrect username / password!'
+            return render_template('login.html', msg=msg)
+
+    return render_template('login.html')
+
+
+
+
+
+
+'''
+@app.route('/loggingin', methods=['POST','GET'])
 def loggingin():
     # Select data from the database for the requested username and password
     # check if the result shows a match
@@ -71,32 +116,43 @@ def loggingin():
     # render template game.html and load their deck (or new)
     loginAttempt = False
     conn = sqlite3.connect('databases/database.db')
+    
+
     cursor = conn.cursor()
 
-    username = request.POST['username']
-    password = request.POST['password']
-    dbUsername = list(cursor.execute('SELECT Username FROM users'))
-    dbPassword = list(cursor.execute('SELECT Password FROM users'))
+    username = request.form.get['username']
+    password = request.form.get['password']
+    dbUsername = cursor.execute('SELECT * FROM Users WHERE Username = username')
+    dbPassword = cursor.execute('SELECT Password FROM Users WHERE Password = password')
 
-    try:
-        dbUsername.index(username) 
-    except:
-        print("username not found")
-    else:
-        try:
-            dbPassword.index(password)
-        except:
-            print("password not found")
-        else:
-            loginAttempt = True
     
 
     conn.close()
-    if loginAttempt == False:
-        return loginAttempt,"ERROR"
+    if dbUsername:
+        
+        msg = 'Logged in successfully !'
+        return render_template('index.html', msg = msg)
     else:
-        return loginAttempt, dbUsername
-   
+        msg = 'Incorrect username / password !'
+    return render_template('login.html', msg = msg)
+'''
+
+
+
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        user = Users(username=request.form.get("username"),
+                     password=request.form.get("password"))
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for("login"))
+    return render_template("signUp.html")
+ 
+@app.route('/signUp')
+def signUp():
+
+    return render_template('signUp.html')
 
 
 

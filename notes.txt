@@ -7,7 +7,7 @@ ave overall = dmg + hlth = 30 = Mna
 Mna = (dmg + hlth)/6
 
 
-ideas:
+cards ideas:
     Cuthulu:
     most powerfull in game, every turn played it costs 2 Mana
     Dragon Egg:
@@ -20,3 +20,6 @@ ideas:
     50% chance doges attack
     Slime:
     splits into 2 smaller slimes on death
+
+
+https://www.joshwcomeau.com/css/center-a-div/

@@ -3,47 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Log in</title>
+    <style>
+        
+        .error-message {
+            color: red;
+        }
+    
+        body {font-family: Arial, Helvetica, sans-serif;}
+        input[type=text], input[type=password] {
+            width: 350px;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
-<h1>Log In</h1>
-<style>
-    body {font-family: Arial, Helvetica, sans-serif;}
-    
-    
-    input[type=text], input[type=password] {
-      width: 350px;
-      padding: 12px 20px;
-      margin: 8px 0;
-      display: inline-block;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-</style>
-
-
-<script>
-    function checkDetails() {
-        let username = document.querySelector("input[name='username']").value;
-        let password = document.querySelector("input[name='password']").value;
-        if(username == "" || password == ""){
-            alert;
-        }
-        else{
-            document.querySelector("form").submit();
-            return "";
-        }
-
-    }
-
-</script>
-
-
 <body>
-    <form method="post" action="loggingin">
-        <input type="text" name="username" placeholder="Username"> <!--asks for user name-->
-        <br/> <!--break line-->
-        <input type="text" name="password" placeholder="Password">
+    <h1>Log In</h1>
+
+    {% if msg %}
+        <p class="{% if 'Incorrect' in msg %}error-message{% endif %}">{{ msg }}</p>
+    {% endif %}
+
+    <script>
+        function checkDetails() {
+            let username = document.querySelector("input[name='username']").value;
+            let password = document.querySelector("input[name='password']").value;
+            if(username === "" || password === ""){
+                alert("Both username and password are required.");
+            } else {
+                document.querySelector("form").submit();
+            }
+        }
+    </script>
+
+    <form method="post" action="{{ url_for('login') }}">
+        <input type="text" name="username" placeholder="Username"> <!-- asks for user name -->
+        <br/> <!-- break line -->
+        <input type="password" name="password" placeholder="Password">
         <br/>
-        <button type="button" onclick="checkDetails()" >login</button> <!--button type-->
+        <button type="button" onclick="checkDetails()">Login</button> <!-- button type -->
     </form>
 
     <br/>
