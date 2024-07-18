@@ -4,26 +4,19 @@ pip install SQLAlchemy
 pip install Flask SQLAlchemy'''
 
 
-
-
 import sqlite3
-from flask import Flask, render_template
-from flask import request
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, render_template, request, redirect, url_for, make_response
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 
 app = Flask(__name__, static_folder='templates', static_url_path='')
 app.config['SECRET_KEY'] = 't67wteq'  
 
 # Define your database connection
-DATABASE_URL = 'sqlite:///databases\database.db'
+DATABASE_URL = 'sqlite:///databases/database.db'
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
-
-
 
 
 
@@ -78,21 +71,22 @@ def dbTest():
 
 
 
-
-
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        username = request.form['username'] # gets username and pw entered on webpage
         password = request.form['password']
 
+        # no idea how this part works lol
         query = text("SELECT * FROM Users WHERE username = :username AND password = :password")
         with Session() as session:
             result = session.execute(query, {'username': username, 'password': password}).fetchone()
 
         if result:
             msg = 'Logged in successfully!'
-            return render_template('index.html', msg=msg)
+            response = make_response(redirect(url_for('index')))
+            response.set_cookie('username', username, max_age=3600)
+            return response
         else:
             msg = 'Incorrect username / password!'
             return render_template('login.html', msg=msg)
@@ -100,55 +94,6 @@ def login():
     return render_template('login.html')
 
 
-
-
-
-
-'''
-@app.route('/loggingin', methods=['POST','GET'])
-def loggingin():
-    # Select data from the database for the requested username and password
-    # check if the result shows a match
-    # if no match tell the user
-    # e.g. render template YOUOLOGGEDIN.html
-    # else
-    # set a cookie with the users name and database id
-    # render template game.html and load their deck (or new)
-    loginAttempt = False
-    conn = sqlite3.connect('databases/database.db')
-    
-
-    cursor = conn.cursor()
-
-    username = request.form.get['username']
-    password = request.form.get['password']
-    dbUsername = cursor.execute('SELECT * FROM Users WHERE Username = username')
-    dbPassword = cursor.execute('SELECT Password FROM Users WHERE Password = password')
-
-    
-
-    conn.close()
-    if dbUsername:
-        
-        msg = 'Logged in successfully !'
-        return render_template('index.html', msg = msg)
-    else:
-        msg = 'Incorrect username / password !'
-    return render_template('login.html', msg = msg)
-'''
-
-
-
-@app.route('/register', methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        user = Users(username=request.form.get("username"),
-                     password=request.form.get("password"))
-        db.session.add(user)
-        db.session.commit()
-        return redirect(url_for("login"))
-    return render_template("signUp.html")
- 
 @app.route('/signUp')
 def signUp():
 
