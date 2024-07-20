@@ -21,5 +21,9 @@ cards ideas:
     Slime:
     splits into 2 smaller slimes on death
 
+fancy stuff for later:
+    card shadow
+    highlight drop area
+
 
 https://www.joshwcomeau.com/css/center-a-div/

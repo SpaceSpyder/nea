@@ -2,61 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Board</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <style>
+
+      
+      body {
+        margin: 0;
+        padding: 0;
+        background-image: url('images/game_wood_background_001.png');
+        background-size: cover; /* Ensures the image covers the entire viewport */
+        background-position: center; /* Centers the image */
+        background-repeat: no-repeat; /* Prevents the image from repeating */
+        background-attachment: fixed; /* Makes the background image fixed */
+    }
+
+      
+
       .card {
         position: absolute;
         top: 20px; /* Adjust top position */
         left: 20px; /* Adjust left position */
         cursor: move; /* Optional: Add a move cursor to indicate draggable */
+        height:180px;
+        z-index: 1;
       }
-      #box1 {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-      position: absolute;
-      top: 100px; /* Adjust top position */
-      /*left: 300px;*/
-      z-index:-1; /*sets the z axis */
-      width: 230px;
-      height: 315px;
-      background-color: #f1f1f1;
-      border: 1px solid #ff0000;
-    }
+      
+    
     </style>
   </head>
 <body>
+<div class="background">
 
+</div>
 <!--images and id-->
 <div id="cardContainer">
-  <img src="images/Card.png" class="card" id="card1" height="175" z-index:1;>
-  <img src="images/Card.png" class="card" id="card2" height="175" z-index:1;>
-  <img src="images/Card.png" class="card" id="card3" height="175" z-index:1;>
+  <img src="images/Card.png" class="card" id="card1" >
+  <img src="images/Card.png" class="card" id="card2" >
+  <img src="images/Card.png" class="card" id="card3" >
   <!-- Add more cards as needed -->
 </div>
 
 
-<div id="box1"></div>
-<div id="box2" left: 600px></div>
-<div id="box1" left: 600px></div>
-
 <script>
   // Select all elements with class 'card' and make them draggable
   var cards = document.getElementsByClassName("card");
+  let inPlayAreas = [
+    { topLeft: { x: 25, y: 25}, bottomRight: { x: 225, y: 225}}
+    { topLeft: { x: 25, y: 25}, bottomRight: { x: 225, y: 225}}
+    { topLeft: { x: 25, y: 25}, bottomRight: { x: 225, y: 225}}
+    { topLeft: { x: 25, y: 25}, bottomRight: { x: 225, y: 225}}
+  ]
+
+  let inHandAreas = [
+    { topLeft: { x: 825, y: 25}, bottomRight: { x: 1125, y: 225}}
+    { topLeft: { x: 825, y: 25}, bottomRight: { x: 1125, y: 225}}
+  ]
 
   // Loop through each card and make it draggable
   for (var i = 0; i < cards.length; i++) {
     dragElement(cards[i]);
   }
 
-  function dragElement(elmnt) {
+  function dragElement(element) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     
-    elmnt.onmousedown = dragMouseDown;
+    element.onmousedown = dragMouseDown;
 
     function dragMouseDown(e) {
       e = e || window.event;
@@ -94,14 +107,18 @@
       pos3 = e.clientX;
       pos4 = e.clientY;
       // set the element's new position:
-      elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-      elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      element.style.top = (element.offsetTop - pos2) + "px";
+      element.style.left = (element.offsetLeft - pos1) + "px";
+      console.log(";"+element.style.zindex)
+      element.style.zIndex = 10
     }
 
     function closeDragElement() {
       // stop moving when mouse button is released:
       document.onmouseup = null;
       document.onmousemove = null;
+      element.style.zIndex = 1
+      clientX
     }
   }
 </script>
