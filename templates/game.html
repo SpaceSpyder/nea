@@ -14,9 +14,7 @@
         padding: 0;
         background-image: url('images/game_wood_background_001.png');
         background-size: cover; /* Ensures the image covers the entire viewport */
-        background-position: center; /* Centers the image */
         background-repeat: no-repeat; /* Prevents the image from repeating */
-        background-attachment: fixed; /* Makes the background image fixed */
     }
 
       
@@ -26,11 +24,18 @@
         top: 20px; /* Adjust top position */
         left: 20px; /* Adjust left position */
         cursor: move; /* Optional: Add a move cursor to indicate draggable */
-        height:180px;
+        height:230px;
         z-index: 1;
       }
-      
-    
+      .drag {
+        filter: drop-shadow(rgba(0, 0, 0, 0.5) 1rem 1rem 10px);
+      }
+      #highl {
+      position: absolute;
+        top: 20px; /* Adjust top position */
+        left: 20px; /* Adjust left position */
+        border: red solid 2px;
+      }
     </style>
   </head>
 <body>
@@ -50,16 +55,16 @@
   // Select all elements with class 'card' and make them draggable
   var cards = document.getElementsByClassName("card");
   let inPlayAreas = [
-    { topLeft: { x: 25, y: 25}, bottomRight: { x: 225, y: 225}}
-    { topLeft: { x: 25, y: 25}, bottomRight: { x: 225, y: 225}}
-    { topLeft: { x: 25, y: 25}, bottomRight: { x: 225, y: 225}}
-    { topLeft: { x: 25, y: 25}, bottomRight: { x: 225, y: 225}}
-  ]
+    { topLeft: { x: 25, y: 25}, bottomRight: { x: 935, y: 265}},
+    { topLeft: { x: 25, y: 285}, bottomRight: { x: 935, y: 525}},
+    { topLeft: { x: 25, y: 555}, bottomRight: { x: 935, y: 785}},
+    { topLeft: { x: 25, y: 805}, bottomRight: { x: 935, y: 1045}},
+  ];
 
   let inHandAreas = [
-    { topLeft: { x: 825, y: 25}, bottomRight: { x: 1125, y: 225}}
-    { topLeft: { x: 825, y: 25}, bottomRight: { x: 1125, y: 225}}
-  ]
+    { topLeft: { x: 985, y: 285}, bottomRight: { x: 1125, y: 525}},
+    { topLeft: { x: 985, y: 555}, bottomRight: { x: 1125, y: 785}},
+  ];
 
   // Loop through each card and make it draggable
   for (var i = 0; i < cards.length; i++) {
@@ -80,22 +85,8 @@
       document.onmouseup = closeDragElement;
       // call a function whenever the cursor moves:
       document.onmousemove = elementDrag;
-
-      if (isMouseOverElement(element)) {
-        var pos1 = 30
-        var pos2 = 30
-      }
+e.target.classList.add("drag");
       
-    }
-
-    function isMouseOverElement(elem) {
-        var bounding = elem.getBoundingClientRect();
-        return (
-            bounding.left <= event.clientX &&
-            event.clientX <= bounding.right &&
-            bounding.top <= event.clientY &&
-            event.clientY <= bounding.bottom
-        );
     }
 
     function elementDrag(e) {
@@ -109,19 +100,53 @@
       // set the element's new position:
       element.style.top = (element.offsetTop - pos2) + "px";
       element.style.left = (element.offsetLeft - pos1) + "px";
-      console.log(";"+element.style.zindex)
       element.style.zIndex = 10
     }
 
-    function closeDragElement() {
+    function closeDragElement(e) {
+      e.target.classList.remove("drag");
       // stop moving when mouse button is released:
       document.onmouseup = null;
       document.onmousemove = null;
-      element.style.zIndex = 1
-      clientX
+      element.style.zIndex = 1;
+      let dropLocation = dropToSnap(e.clientX, e.clientY);
+      if (dropLocation){
+        snapCardY(dropLocation,e.target);
+        snapCardX(dropLocation,e.target);
+      }
+    }
+
+    function snapCardX(dropLocation, element){
+      
+    }
+
+    function snapCardY(dropLocation, element){
+      element.style.top = (dropLocation.topLeft.y - 0) + "px";
+      let hl = document.getElementById("highl");
+      hl.style.left = dropLocation.topLeft.x + "px";
+      hl.style.top = dropLocation.topLeft.y + "px";
+      hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
+      hl.style.height = dropLocation.bottomRight.y -dropLocation.topLeft.y + "px";
+    }
+
+    function dropToSnap(x, y) {
+      let target;
+      inPlayAreas.forEach((area) => {
+        if ((x >= area.topLeft.x && x <=area.bottomRight.x) &&
+        (y >= area.topLeft.y && y <=area.bottomRight.y)) {
+          target =area;
+        }
+      });
+      inHandAreas.forEach((area) => {
+        if ((x >= area.topLeft.x && x <=area.bottomRight.x) &&
+        (y >= area.topLeft.y && y <=area.bottomRight.y)) {
+          target =area;
+        }
+      });
+      return target;
     }
   }
 </script>
-<div id="box1"></div>
+<div id="highl"></div>
 </body>
 </html>
