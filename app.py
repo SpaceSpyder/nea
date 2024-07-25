@@ -19,7 +19,7 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 
-
+@app.route('/index')
 @app.route('/')
 def index():
     return render_template('index.html')

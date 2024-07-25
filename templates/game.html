@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Game Board</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <style>
 
-
+      @media (-webkit-device-pixel-ratio: 1.25) {
+        * {
+          zoom: 1;
+        }
+      }
       
       body {
         height:1080px;
@@ -81,6 +85,10 @@
     { topLeft: { x: 985, y: 285}, bottomRight: { x: 1890, y: 510}},
     { topLeft: { x: 985, y: 570}, bottomRight: { x: 1890, y: 795}},
   ];
+
+  let cardPositions = [
+    {},{},{},{},{}
+  ]
 
   // Loop through each card and make it draggable
   for (var i = 0; i < cards.length; i++) {
