@@ -3,8 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
+    <style>
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #dddddd;
+        }
+
+        li {
+            float: left;
+        }
+
+        li a {
+            display: block;
+            padding: 8px;
+            text-decoration: none;
+            color: black; /* Ensure text is visible */
+        }
+
+        .float-right {
+            float: right;
+        }
+    </style>
 </head>
 <body>
+    <ul>
+        <li><a href="">Home</a></li>
+        <li><a href="">Play</a></li>
+        <li><a href="">How to Play</a></li>
+        <li class="float-right" id="cookie-menu-item"><a href="#" id="cookie-link">Cookie Value</a></li>
+    </ul>
+
     <h1>Fantasy Card Fight</h1>
     <form action="/submit" method="post">
         <input type="text" name="user_input" placeholder="Enter something">
@@ -19,6 +50,33 @@
     <a href="{{ url_for('testGame2') }}" class="btn">Go to experimental test</a>
     <br/>
     <br/>
-    <a href="{{ url_for('dbTest') }}" class="btn">database test</a>
+    <a href="{{ url_for('dbTest') }}" class="btn">Database test</a>
+
+    <script>
+        function getCookie(name) {
+            let cookies = document.cookie.split('; ');
+            for (let cookie of cookies) {
+                let [cookieName, cookieValue] = cookie.split('=');
+                if (cookieName === name) {
+                    return decodeURIComponent(cookieValue);
+                }
+            }
+            return null;
+        }
+
+        // Function to update the "Cookie Value" link text
+        function updateCookieLink() {
+            let cookieValue = getCookie('username'); // Replace 'username' with the actual cookie name
+            let cookieLink = document.getElementById('cookie-link');
+            if (cookieValue) {
+                cookieLink.textContent = cookieValue; // Update the link text with the cookie value
+            } else {
+                cookieLink.textContent = 'No Cookie Found'; // Default text if cookie is not found
+            }
+        }
+
+        // Call the function to update the link text when the page loads
+        window.onload = updateCookieLink;
+    </script>
 </body>
 </html>

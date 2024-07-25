@@ -8,23 +8,26 @@
 
     <style>
 
+
       
       body {
+        height:1080px;
         margin: 0;
         padding: 0;
+        background-attachment: fixed;
         background-image: url('images/game_wood_background_001.png');
-        background-size: cover; /* Ensures the image covers the entire viewport */
+        /*background-size: cover; /* Ensures the image covers the entire viewport */
         background-repeat: no-repeat; /* Prevents the image from repeating */
-    }
+      }
 
       
 
       .card {
         position: absolute;
-        top: 20px; /* Adjust top position */
-        left: 20px; /* Adjust left position */
+        top: 570px; /* Adjust top position */
+        left: 985px; /* Adjust left position */
         cursor: move; /* Optional: Add a move cursor to indicate draggable */
-        height:230px;
+        height: 225px;
         z-index: 1;
       }
       .drag {
@@ -39,6 +42,7 @@
     </style>
   </head>
 <body>
+
 <div class="background">
 
 </div>
@@ -52,18 +56,30 @@
 
 
 <script>
+  
+  
+  
+  document.addEventListener('click', function() {
+      if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {
+              console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+          });
+      }
+  });
+
+
   // Select all elements with class 'card' and make them draggable
   var cards = document.getElementsByClassName("card");
   let inPlayAreas = [
-    { topLeft: { x: 25, y: 25}, bottomRight: { x: 935, y: 265}},
-    { topLeft: { x: 25, y: 285}, bottomRight: { x: 935, y: 525}},
-    { topLeft: { x: 25, y: 555}, bottomRight: { x: 935, y: 785}},
-    { topLeft: { x: 25, y: 805}, bottomRight: { x: 935, y: 1045}},
+    { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 }},
+    { topLeft: { x: 30, y: 285}, bottomRight: { x: 930, y: 510 }},
+    { topLeft: { x: 30, y: 570}, bottomRight: { x: 930, y: 795 }},
+    { topLeft: { x: 30, y: 825}, bottomRight: { x: 930, y: 1050}},
   ];
 
   let inHandAreas = [
-    { topLeft: { x: 985, y: 285}, bottomRight: { x: 1125, y: 525}},
-    { topLeft: { x: 985, y: 555}, bottomRight: { x: 1125, y: 785}},
+    { topLeft: { x: 985, y: 285}, bottomRight: { x: 1890, y: 510}},
+    { topLeft: { x: 985, y: 570}, bottomRight: { x: 1890, y: 795}},
   ];
 
   // Loop through each card and make it draggable
