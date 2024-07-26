@@ -7,24 +7,40 @@
         ul {
             list-style-type: none;
             margin: 0;
-            padding: 0;
+            padding-left: 20px;
+            
             overflow: hidden;
             background-color: #dddddd;
+            display: flex; /* Use flexbox for better alignment */
+            align-items: center;
+            justify-content: space-between;
         }
 
         li {
             float: left;
+            margin-right: 20px;
         }
 
         li a {
+            font-size: 20px;
             display: block;
-            padding: 8px;
+            padding: 10px;
             text-decoration: none;
             color: black; /* Ensure text is visible */
+            
         }
 
         .float-right {
             float: right;
+            margin-left: auto; /* Push these items to the right */
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-pic {
+            height: 40px; /* Adjust the height as needed */
+            width: 40px; /* Adjust the width as needed */
+            /*border-radius: 50%; /* Make the image circular */
         }
 
     </style>
@@ -35,18 +51,18 @@
         <li><a href="/index">Home</a></li>
         <li><a href="/testGame">Play</a></li>
         <li><a href="">How to Play</a></li>
-        <li class="float-right" ><a href="/profile" id="cookie-link">Cookie Value</a></li>
+        <li class="float-right">
+            <a href="/profile" id="cookie-link">Cookie Value</a>
+            <a href="/profile"><img src="images/profilePics/Default.png" alt="Profile Picture" class="profile-pic"></a>
+        </li>
     </ul>
 
     <h1>Fantasy Card Fight</h1>
-    <form action="/submit" method="post">
-        <input type="text" name="user_input" placeholder="Enter something">
-        <button type="submit">Submit</button>
-    </form>
+    
     <hr>
     <a href="{{ url_for('login') }}" >Log in!</a>
     <hr>
-    <a href="{{ url_for('testGame') }}" >Go to game test</a>
+    <a href="{{ url_for('testGame2') }}" >Go to game test 2!</a>
     <br/>
     <br/>
     <a href="{{ url_for('testGame2') }}" >Go to experimental test</a>
