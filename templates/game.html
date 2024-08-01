@@ -55,6 +55,11 @@
   <img src="images/Card.png" class="card" id="card1" >
   <img src="images/Card.png" class="card" id="card2" >
   <img src="images/Card.png" class="card" id="card3" >
+  <img src="images/Card.png" class="card" id="card3" >
+  <img src="images/Card.png" class="card" id="card3" >
+  <img src="images/Card.png" class="card" id="card3" >
+  <img src="images/Card.png" class="card" id="card3" >
+
   <!-- Add more cards as needed -->
 </div>
 
@@ -86,9 +91,17 @@
     { topLeft: { x: 985, y: 570}, bottomRight: { x: 1890, y: 795}},
   ];
 
-  let cardPositions = [
-    {},{},{},{},{}
-  ]
+  let cardPositions = [ // array of arrays that keeps all the possible possitions for the cards to be in
+    [null],
+    [375],
+    [225, 525],
+    [150, 375, 600],
+    [105, 285, 485, 645],
+    [ 75, 225, 375, 525, 675],
+    [ 54, 182, 311, 439, 568, 696]
+  ];
+
+  let hitboxContents = [[],[],[],[],[],[]];
 
   // Loop through each card and make it draggable
   for (var i = 0; i < cards.length; i++) {
@@ -109,7 +122,7 @@
       document.onmouseup = closeDragElement;
       // call a function whenever the cursor moves:
       document.onmousemove = elementDrag;
-e.target.classList.add("drag");
+      e.target.classList.add("drag");
       
     }
 
@@ -127,25 +140,29 @@ e.target.classList.add("drag");
       element.style.zIndex = 10
     }
 
-    function closeDragElement(e) {
-      e.target.classList.remove("drag");
-      // stop moving when mouse button is released:
-      document.onmouseup = null;
+    function closeDragElement(e) { // handles card being let go
+      e.target.classList.remove("drag"); // removes shadow
+      document.onmouseup = null; // removes events
       document.onmousemove = null;
-      element.style.zIndex = 1;
-      let dropLocation = dropToSnap(e.clientX, e.clientY);
-      if (dropLocation){
-        snapCardY(dropLocation,e.target);
-        snapCardX(dropLocation,e.target);
+
+      element.style.zIndex = 1; // puts on top
+      let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+      let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+      if (dropLocation){ // if it has data it will snap
+        snapCardY(dropLocation,e.target); // passes the area its over and the card 
+        snapCardX(dropLocation,e.target); // passes the area its over and the card 
       }
     }
 
-    function snapCardX(dropLocation, element){
+    function snapCardX(dropLocation, element){ 
+      hitboxNum = dropLocation
+
       
     }
 
-    function snapCardY(dropLocation, element){
+    function snapCardY(dropLocation, element){ // takes snapping location and snaps the card
       element.style.top = (dropLocation.topLeft.y - 0) + "px";
+      // highlight hitbox for debugging
       let hl = document.getElementById("highl");
       hl.style.left = dropLocation.topLeft.x + "px";
       hl.style.top = dropLocation.topLeft.y + "px";
@@ -153,21 +170,26 @@ e.target.classList.add("drag");
       hl.style.height = dropLocation.bottomRight.y -dropLocation.topLeft.y + "px";
     }
 
-    function dropToSnap(x, y) {
+    function dropToSnap(x, y) { 
       let target;
-      inPlayAreas.forEach((area) => {
-        if ((x >= area.topLeft.x && x <=area.bottomRight.x) &&
-        (y >= area.topLeft.y && y <=area.bottomRight.y)) {
-          target =area;
+      for (let i=0; i++; i < inPlayAreas.length) {
+        
+      }
+      inPlayAreas.forEach((area) => { // goes through all the areas in inPlayAreas and stores in area
+        // if the mouse is inside the area
+        if ((x >= area.topLeft.x && x <= area.bottomRight.x) && 
+        (y >= area.topLeft.y && y <= area.bottomRight.y)) {
+          target = area; // stores matchng area for returning
         }
       });
+      
       inHandAreas.forEach((area) => {
-        if ((x >= area.topLeft.x && x <=area.bottomRight.x) &&
-        (y >= area.topLeft.y && y <=area.bottomRight.y)) {
-          target =area;
+        if ((x >= area.topLeft.x && x <= area.bottomRight.x) &&
+        (y >= area.topLeft.y && y <= area.bottomRight.y)) {
+          target = area;
         }
       });
-      return target;
+      return target; // returns the area to snap too
     }
   }
 </script>

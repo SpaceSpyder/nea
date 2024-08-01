@@ -22,9 +22,15 @@ cards ideas:
     splits into 2 smaller slimes on death
 
 fancy stuff for later:
+    figure out how to use log points in js
     card shadow
     highlight drop area
 
 links:
     https://www.joshwcomeau.com/css/center-a-div/
     https://www.jeffersonscher.com/res/resolution.php #resolution
+
+locations:
+hitboxes: 900 x 255
+margin: 30
+card: 150 x 255 
