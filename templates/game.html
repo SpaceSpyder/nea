@@ -92,7 +92,7 @@
   ];
 
   let cardPositions = [ // array of arrays that keeps all the possible possitions for the cards to be in
-    [null],
+    [],
     [375],
     [225, 525],
     [150, 375, 600],
@@ -150,14 +150,19 @@
       let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
       if (dropLocation){ // if it has data it will snap
         snapCardY(dropLocation,e.target); // passes the area its over and the card 
-        snapCardX(dropLocation,e.target); // passes the area its over and the card 
+        snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
       }
     }
 
-    function snapCardX(dropLocation, element){ 
-      hitboxNum = dropLocation
-
+    function snapCardX(hitboxNum, element, cardX){ 
+      numberOfCards = hitboxContents[hitboxNum].length + 1; // creates a variable to say how many cards are in the hitbox and +1 
+      hitboxContents[hitboxNum].push(element); // adds the new card to the array
+      hitboxContents[hitboxNum].sort((a, b) => a.style.left - b.style.left); // sorts the array
       
+      let currentPos = cardPositions[numberOfCards]; // gives possible positions of cards relative to num of cards
+      for (let i = 0; i < currentPos.length; i++) { // loops for as many positions
+        hitboxContents[hitboxNum][i].style.left = ( currentPos[i]) + "px"; // gives the correct x for each card
+      }
     }
 
     function snapCardY(dropLocation, element){ // takes snapping location and snaps the card
@@ -172,9 +177,6 @@
 
     function dropToSnap(x, y) { 
       let target;
-      for (let i=0; i++; i < inPlayAreas.length) {
-        
-      }
       inPlayAreas.forEach((area) => { // goes through all the areas in inPlayAreas and stores in area
         // if the mouse is inside the area
         if ((x >= area.topLeft.x && x <= area.bottomRight.x) && 
