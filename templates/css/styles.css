@@ -1,4 +1,4 @@
-/* styles.css */
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
 
 body {
     font-family: Arial, sans-serif;
@@ -15,4 +15,114 @@ body {
     display: flex;
     justify-content: space-around;
     margin-top: 20px;
+}
+
+.large-text {
+    font-size: 70px;
+    font-family: "MedievalSharp", cursive;
+    margin: 0; /* Remove default margins */
+    padding: 0; /* Remove any padding if necessary */
+}
+
+
+.medium-text{
+    font-size: 25px;
+}
+
+.error-message {
+    color: red;
+}
+
+.button {
+    font-size: 40px;     /* Increase text size */
+    font-family: "MedievalSharp", cursive;
+    font-weight: bold;
+    width: 350px;        /* Set a specific width */
+    height: 80px;        /* Set a specific height */
+    /*background-color: #595959; /* Green background color */
+    color: rgba(26, 2, 2, 0.679);        /* White text color */
+    border: none;        /* Remove borders */
+    border-radius: 5px;  /* Slightly rounded corners */
+    cursor: pointer;     /* Pointer cursor on hover */
+    background-image: url('../images/button1.png');
+}
+
+.button:hover {
+    background-color: #3c92a14c; /* Darker green on hover */
+    /*border-color: #3d6b75;*/
+    background-image: url('../images/button1.png');
+}
+
+.float-right {
+    float: right;
+    margin-left: auto; /* Push these items to the right */
+    display: flex;
+    align-items: center;
+}
+
+.float-left {
+    float: left;
+    margin-right: auto; /* Push these items to the left */
+    /*display: flex;*/
+    align-items: center;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding-left: 20px;
+    
+    overflow: hidden;
+    background-color: #dddddd;
+    display: flex; /* Use flexbox for better alignment */
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+}
+
+li {
+    float: left;
+    margin-right: 20px;
+}
+
+li a {
+    font-size: 20px;
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: black; /* Ensure text is visible */
+    
+}
+
+.nav-profile-pic {
+    height: 40px; /* Adjust the height as needed */
+    width: 40px; /* Adjust the width as needed */
+    padding: 0px;
+    /*border-radius: 50%; /* Make the image circular */
+}
+
+.tablet {
+    background-color: rgb(114, 78, 78);
+    height: 55vh;
+    width: max(30%, 40px);
+    padding: 10px; /* Add 'px' for padding value */
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Push the link to the bottom */
+    text-align: center;
+}
+
+.bottom-tablet {
+    margin-top: auto; /* Pushes the link to the bottom of the flex container */
+}
+
+.in-tablet {
+    /*idky i have this rn*/
+}
+
+hr {
+    border: 0;
+    border-top: 2px solid rgba(0, 0, 0, 0.708); /* Set the line color and thickness */
+    width: 100%; /* Stretch across the full width of its container */
 }
