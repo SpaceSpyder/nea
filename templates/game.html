@@ -39,8 +39,8 @@
       }
       #highl {
       position: absolute;
-        top: 20px; /* Adjust top position */
-        left: 20px; /* Adjust left position */
+        top: -20px; /* Adjust top position */
+        left: -20px; /* Adjust left position */
         border: red solid 2px;
       }
     </style>
@@ -91,15 +91,7 @@
     { topLeft: { x: 985, y: 570}, bottomRight: { x: 1890, y: 795}},
   ];
 
-  let cardPositions = [ // array of arrays that keeps all the possible possitions for the cards to be in
-    [],
-    [375],
-    [225, 525],
-    [150, 375, 600],
-    [105, 285, 485, 645],
-    [ 75, 225, 375, 525, 675],
-    [ 54, 182, 311, 439, 568, 696]
-  ];
+
 
   let hitboxContents = [[],[],[],[],[],[]];
 
@@ -124,6 +116,9 @@
       document.onmousemove = elementDrag;
       e.target.classList.add("drag");
       
+      let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+      let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+      //remove element from array
     }
 
     function elementDrag(e) {
@@ -140,6 +135,19 @@
       element.style.zIndex = 10
     }
 
+    function getCardPositions(numberOfCards) {
+      // total width / numofcards+1
+      // foreach card half width and minus from the bit above
+      let positionS = [];
+      let offset = (900/(numberOfCards+1));
+      for (let i = 0; i < numberOfCards; i++) {
+        positionS.push((offset * (i +1)) - 75);
+      }
+
+      return positionS;
+    }
+
+
     function closeDragElement(e) { // handles card being let go
       e.target.classList.remove("drag"); // removes shadow
       document.onmouseup = null; // removes events
@@ -154,14 +162,15 @@
       }
     }
 
-    function snapCardX(hitboxNum, element, cardX){ 
+    function snapCardX(hitboxNum, element, cardX, dropLocation){ 
       numberOfCards = hitboxContents[hitboxNum].length + 1; // creates a variable to say how many cards are in the hitbox and +1 
+      if (numberOfCards > 6) numberOfCards =6;
       hitboxContents[hitboxNum].push(element); // adds the new card to the array
       hitboxContents[hitboxNum].sort((a, b) => a.style.left - b.style.left); // sorts the array
       
-      let currentPos = cardPositions[numberOfCards]; // gives possible positions of cards relative to num of cards
+      let currentPos = getCardPositions(numberOfCards); // gives possible positions of cards relative to num of cards
       for (let i = 0; i < currentPos.length; i++) { // loops for as many positions
-        hitboxContents[hitboxNum][i].style.left = ( currentPos[i]) + "px"; // gives the correct x for each card
+        hitboxContents[hitboxNum][i].style.left = (dropLocation.topLeft.x + currentPos[i]) + "px"; // gives the correct x for each card
       }
     }
 

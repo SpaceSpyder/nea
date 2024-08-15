@@ -40,11 +40,12 @@ body {
     width: 350px;        /* Set a specific width */
     height: 80px;        /* Set a specific height */
     /*background-color: #595959; /* Green background color */
-    color: rgba(26, 2, 2, 0.679);        /* White text color */
+    color: rgba(26, 2, 2, 0.65);        /* White text color */
     border: none;        /* Remove borders */
     border-radius: 5px;  /* Slightly rounded corners */
     cursor: pointer;     /* Pointer cursor on hover */
     background-image: url('../images/button1.png');
+    /*fix text in button*/
 }
 
 .button:hover {
@@ -118,7 +119,7 @@ li a {
 }
 
 .in-tablet {
-    /*idky i have this rn*/
+    display: block; /*doesny do anything*/
 }
 
 hr {
