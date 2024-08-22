@@ -32,6 +32,7 @@
         left: 985px; /* Adjust left position */
         cursor: move; /* Optional: Add a move cursor to indicate draggable */
         height: 225px;
+        width: 150px;
         z-index: 1;
       }
       .drag {
@@ -52,13 +53,13 @@
 </div>
 <!--images and id-->
 <div id="cardContainer">
-  <img src="images/Card.png" class="card" id="card1" >
-  <img src="images/Card.png" class="card" id="card2" >
-  <img src="images/Card.png" class="card" id="card3" >
-  <img src="images/Card.png" class="card" id="card3" >
-  <img src="images/Card.png" class="card" id="card3" >
-  <img src="images/Card.png" class="card" id="card3" >
-  <img src="images/Card.png" class="card" id="card3" >
+  <img src="images/CardPictures/Baby Dragon.png" class="card" id="card1" >
+  <img src="images/CardPictures/Boar.png" class="card" id="card2" >
+  <img src="images/CardPictures/Darkknight.png" class="card" id="card3" >
+  <img src="images/CardPictures/Dragon.png" class="card" id="card3" >
+  <img src="images/CardPictures/EvilWizard.png" class="card" id="card3" >
+  <img src="images/CardPictures/Knight Captin.png" class="card" id="card3" >
+  <img src="images/CardPictures/Monk.png" class="card" id="card3" >
 
   <!-- Add more cards as needed -->
 </div>
@@ -119,6 +120,13 @@
       let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
       let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
       //remove element from array
+      let index = hitboxContents[hitboxNum].indexOf(element);
+      if (index != -1){
+        hitboxContents[hitboxNum].splice(index,1);
+        let numberOfCards = hitboxContents[hitboxNum].length;
+        redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x)
+      }
+
     }
 
     function elementDrag(e) {
@@ -167,11 +175,7 @@
       if (numberOfCards > 6) numberOfCards =6;
       hitboxContents[hitboxNum].push(element); // adds the new card to the array
       hitboxContents[hitboxNum].sort((a, b) => a.style.left - b.style.left); // sorts the array
-      
-      let currentPos = getCardPositions(numberOfCards); // gives possible positions of cards relative to num of cards
-      for (let i = 0; i < currentPos.length; i++) { // loops for as many positions
-        hitboxContents[hitboxNum][i].style.left = (dropLocation.topLeft.x + currentPos[i]) + "px"; // gives the correct x for each card
-      }
+      redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x)
     }
 
     function snapCardY(dropLocation, element){ // takes snapping location and snaps the card
@@ -182,6 +186,13 @@
       hl.style.top = dropLocation.topLeft.y + "px";
       hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
       hl.style.height = dropLocation.bottomRight.y -dropLocation.topLeft.y + "px";
+    }
+
+    function redrawCards(numberOfCards, hitboxNum, left) {
+      let currentPos = getCardPositions(numberOfCards); // gives possible positions of cards relative to num of cards
+      for (let i = 0; i < currentPos.length; i++) { // loops for as many positions
+        hitboxContents[hitboxNum][i].style.left = (left + currentPos[i]) + "px"; // gives the correct x for each card
+      }
     }
 
     function dropToSnap(x, y) { 
