@@ -24,12 +24,10 @@
         background-repeat: no-repeat; /* Prevents the image from repeating */
       }
 
-      
-
-      
       .drag {
         filter: drop-shadow(rgba(0, 0, 0, 0.5) 1rem 1rem 10px);
       }
+
       #highl {
       position: absolute;
         top: -20px; /* Adjust top position */
@@ -174,10 +172,6 @@
       element.style.top = (dropLocation.topLeft.y - 0) + "px";
       // highlight hitbox for debugging
       let hl = document.getElementById("highl");
-      hl.style.left = dropLocation.topLeft.x + "px";
-      hl.style.top = dropLocation.topLeft.y + "px";
-      hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
-      hl.style.height = dropLocation.bottomRight.y -dropLocation.topLeft.y + "px";
     }
 
     function redrawCards(numberOfCards, hitboxNum, left) {

@@ -8,7 +8,7 @@ import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, make_response
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-
+from datetime import datetime
 
 app = Flask(__name__, static_folder='templates', static_url_path='')
 app.config['SECRET_KEY'] = 't67wteq'  
@@ -77,7 +77,7 @@ def login():
         username = request.form['username'] # gets username and pw entered on webpage
         password = request.form['password']
 
-        # no idea how this part works lol
+        # no idea how this part works 
         query = text("SELECT * FROM Users WHERE username = :username AND password = :password")
         with Session() as session:
             result = session.execute(query, {'username': username, 'password': password}).fetchone()
@@ -94,13 +94,37 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/signUp')
+@app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
+    if request.method == 'POST':
+        username = request.form['username']  # Gets username, password, and email entered on webpage
+        password = request.form['password']
+        email = request.form['email']
+        date = datetime.today().strftime('%Y-%m-%d')
 
+        # Insert query with placeholders
+        query = text("""INSERT INTO Users (Username, Password, Email, DateCreated)
+                        VALUES (:username, :password, :email, :date)""")
+
+        try:
+            with Session() as session:
+                # Execute the query and commit
+                session.execute(query, {'username': username, 'password': password, 'email': email, 'date': date})
+                session.commit()  # Save the changes
+
+            # Successful insertion, log in the user
+            msg = 'Signed up successfully!'
+            response = make_response(redirect(url_for('index')))
+            response.set_cookie('username', username, max_age=3600)
+            return response
+
+        except Exception as e:
+            # Handle any errors (e.g., database issues)
+            msg = f'Error: {str(e)}'
+            return render_template('signUp.html', msg=msg)
+
+    # If not POST, render the sign-up page
     return render_template('signUp.html')
-
-
-
 
 
 

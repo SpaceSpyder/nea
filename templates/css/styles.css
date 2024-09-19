@@ -114,7 +114,7 @@ li a {
 }
 
 .tablet {
-    background-color: rgb(114, 78, 78);
+    background-color: rgb(181, 130, 103);
     height: 55vh;
     width: max(30%, 40px);
     padding: 10px; /* Add 'px' for padding value */

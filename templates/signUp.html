@@ -2,70 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>sign up</title>
+    <title>Sign up!</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {font-family: Arial, Helvetica, sans-serif;}
+
+        input[type=text], input[type=password] {
+            width: 350px;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+    </style>
+
+    <script>
+        function checkDetails() {
+            let username = document.querySelector("input[name='username']").value;
+            let password = document.querySelector("input[name='password']").value;
+            if(username === "" || password === ""){
+                //alert("Both username and password are required.");
+            } else {
+                document.querySelector("form").submit();
+            }
+        }
+    </script>
 </head>
-<h1>Sign Up</h1>
-<style>
-    body {font-family: Arial, Helvetica, sans-serif;}
-    
-    
-    input[type=text], input[type=password] {
-        width: 350px;
-        padding: 12px 20px;
-        margin: 8px 0;
-        display: inline-block;
-        border: 1px solid #ccc;
-        box-sizing: border-box;
-    }
-
-    .hidden-text {
-        display: none;
-    }
-
-    .asterisks {
-        font-size: inherit;
-        font-family: inherit;
-    }
-
-</style>
-
-
-
-    
-
-<script>
-    function checkDetails() {
-        let username = document.querySelector("input[name='username']").value;
-        let password = document.querySelector("input[name='password']").value;
-        if(username == "" || password == ""){
-            alert("bruh");
-        }
-        else{
-            document.querySelector("form").submit();
-            return "";
-        }
-
-    }
-
-    
-
-
-</script>
-
 
 <body>
-    <form method="post" action="signingIn">
-        <input type="text" name="username" placeholder="Username"> <!--asks for user name-->
-        <br/> <!--break line-->
-        <input type="text" name="password" placeholder="Password">
+    <ul>
+        <li><a href="/index">Home</a></li>
+        <li><a href="/testGame">Play</a></li>
+        <li><a href="">How to Play</a></li>
+        <li class="float-right">
+            
+            <a class="nav-profile-pic" href="/profile"></a>
+        </li>
+    </ul>
+
+    <div class="tablet">
+        <br/><br/>
+        <h1 class="large-text in-tablet" >Sign up:</h1>
         <br/>
-        <input type="text" name="password" placeholder="Re-Enter Password">
-        <br/>
-        <button type="button" onclick="checkDetails()" >Sign Up</button> <!--button type-->
-    </form>
-    
+
+        {% if msg %}
+            <p class="{% if 'Incorrect' in msg %}error-message{% endif %}">{{ msg }}</p>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('signUp') }}" class="in-tablet">
+            <input class="medium-text" required type="text" name="username" placeholder="Username"> <!-- asks for user name -->
+                <br/> <!-- break line -->
+            <input class="medium-text" required type="text" name="email" placeholder="Email"> <!-- asks for user name -->
+                <br/> <!-- break line -->
+            <input class="medium-text" required type="password" name="password" placeholder="Password">
+                <br/>
+            <button class="button" type="submit" onclick="checkDetails()">Submit</button> <!-- button type -->
+        </form>
+
+        <br/> <!-- break line -->
+        <hr color="black" class="bottom-tablet"> <!-- adds line -->
+        <a href="{{ url_for('signUp') }}" class="bottom-tablet">Don't have an account? Make one here</a>
+    </div>
 </body>
-
-
-
 </html>
