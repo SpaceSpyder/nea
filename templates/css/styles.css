@@ -1,20 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
 
+/* Root Variables for Global Use */
+:root {
+    --main-bg-color: #dddddd;
+    --text-color: rgba(26, 2, 2, 0.65);
+}
+
 body {
     font-family: Arial, sans-serif;
 }
 
+/* Card Styling */
 .card {
     position: absolute;
-    top: 570px; /* Adjust top position */
-    left: 985px; /* Adjust left position */
-    cursor: move; /* Optional: Add a move cursor to indicate draggable */
+    top: 570px;
+    left: 985px;
     height: 225px;
     width: 150px;
+    cursor: move;
     z-index: 1;
     user-select: none;
 }
 
+/* Board Layout */
 #board {
     width: 600px;
     height: 400px;
@@ -22,21 +30,22 @@ body {
     margin: 20px auto;
 }
 
+/* Hand Layout */
 .hand {
     display: flex;
     justify-content: space-around;
     margin-top: 20px;
 }
 
+/* Text Styles */
 .large-text {
     font-size: 70px;
     font-family: "MedievalSharp", cursive;
-    margin: 0; /* Remove default margins */
-    padding: 0; /* Remove any padding if necessary */
+    margin: 0;
+    padding: 0;
 }
 
-
-.medium-text{
+.medium-text {
     font-size: 25px;
 }
 
@@ -44,97 +53,99 @@ body {
     color: red;
 }
 
+/* Button Styling */
 .button {
-    font-size: 40px;     /* Increase text size */
+    font-size: 40px;
     font-family: "MedievalSharp", cursive;
     font-weight: bold;
-    width: 350px;        /* Set a specific width */
-    height: 80px;        /* Set a specific height */
-    /*background-color: #595959; /* Green background color */
-    color: rgba(26, 2, 2, 0.65);        /* White text color */
-    border: none;        /* Remove borders */
-    border-radius: 5px;  /* Slightly rounded corners */
-    cursor: pointer;     /* Pointer cursor on hover */
+    width: 350px;
+    height: 80px;
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
     background-image: url('../images/button1.png');
-    /*fix text in button*/
+    transition: background-color 0.3s ease;
 }
 
 .button:hover {
-    background-color: #3c92a14c; /* Darker green on hover */
-    /*border-color: #3d6b75;*/
+    background-color: #3c92a14c;
     background-image: url('../images/button1.png');
 }
 
-.float-right {
-    float: right;
-    margin-left: auto; /* Push these items to the right */
+/* Navbar Styling */
+.navbar {
+    list-style-type: none;
+    margin: 0;
+    padding-left: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--main-bg-color);
+    height: 60px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a slight shadow for depth */
+}
+
+.navbar-left, .navbar-right {
     display: flex;
     align-items: center;
 }
 
-.float-left {
-    float: left;
-    margin-right: auto; /* Push these items to the left */
-    /*display: flex;*/
-    align-items: center;
-}
-
-ul {
-    list-style-type: none;
-    margin: 0;
-    padding-left: 20px;
-    
-    overflow: hidden;
-    background-color: #dddddd;
-    display: flex; /* Use flexbox for better alignment */
-    align-items: center;
-    justify-content: space-between;
-    height: 60px;
-}
-
-li {
-    float: left;
-    margin-right: 20px;
-}
-
-li a {
-    font-size: 20px;
-    display: block;
-    padding: 10px;
+.navbar-left a, .navbar-right a {
     text-decoration: none;
-    color: black; /* Ensure text is visible */
-    
+    color: var(--text-color);
+    padding: 10px 20px;
+    margin-right: 10px;
+    font-family: "MedievalSharp", cursive;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #bcbcbc;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
+.navbar-left a:hover, .navbar-right a:hover {
+    background-color: #556c6842; /* Darker shade on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+/* Profile Picture Styling */
 .nav-profile-pic {
-    height: 40px; /* Adjust the height as needed */
-    width: 40px; /* Adjust the width as needed */
-    padding: 0px;
-    /*border-radius: 50%; /* Make the image circular */
+    height: 40px;
+    width: 40px;
+    border-radius: 0%;
+    /*margin-left: 10px; /* Adds space between the image and the text */
+    background-color: rgba(0, 0, 0, 0);
+    padding: 0;
+    background: none;
+    border: none;
+    transform: none; /* Prevent scaling on hover */
 }
 
+/* Tablet Styles */
 .tablet {
     background-color: rgb(181, 130, 103);
     height: 55vh;
     width: max(30%, 40px);
-    padding: 10px; /* Add 'px' for padding value */
+    padding: 10px;
     margin: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Push the link to the bottom */
+    justify-content: space-between;
     text-align: center;
 }
 
 .bottom-tablet {
-    margin-top: auto; /* Pushes the link to the bottom of the flex container */
+    margin-top: auto;
 }
 
 .in-tablet {
-    display: block; /*doesny do anything*/
+    display: block;
 }
 
+/* Horizontal Rule */
 hr {
     border: 0;
-    border-top: 2px solid rgba(0, 0, 0, 0.708); /* Set the line color and thickness */
-    width: 100%; /* Stretch across the full width of its container */
+    border-top: 2px solid rgba(0, 0, 0, 0.708);
+    width: 100%;
 }

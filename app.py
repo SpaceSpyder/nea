@@ -128,6 +128,10 @@ def signUp():
 
 
 
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
 
 
 if __name__ == '__main__':
