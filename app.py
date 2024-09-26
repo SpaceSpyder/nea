@@ -11,6 +11,10 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
+
+hashed_password = generate_password_hash('admin')  # Replace 'admin' with the actual password
+print(hashed_password)  # Copy this hashed password to your SQL command above
 
 app = Flask(__name__, static_folder='templates', static_url_path='')
 app.config['SECRET_KEY'] = 't67wtEq'
@@ -71,11 +75,13 @@ def show_decks():
     decks = get_decks_for_user(user_id)
     return render_template('decks.html', decks=decks)
 
+@app.route('/home')
 @app.route('/index')
 @app.route('/')
 def index():
-    username = session['username']
-    user_details = get_user_details_by_username(username)
+    # No session check here to allow access without logging in
+    username = session.get('username')  # Use get to avoid KeyError if not set
+    user_details = get_user_details_by_username(username) if username else None
 
     if user_details:
         user_id, profile_pic = user_details
@@ -84,6 +90,7 @@ def index():
         full_profile_pic_path = "images/profilePics/Default.png"
 
     return render_template('index.html', profile_pic=full_profile_pic_path)
+
 
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
@@ -95,7 +102,10 @@ def submit():
 
 @app.route('/testGame')
 def testGame():
+    if 'username' not in session:
+        return redirect(url_for('login'))  # Redirect to login if the user is not logged in
     return render_template('game.html')
+
 
 @app.route('/testGame2')
 def testGame2():
@@ -120,25 +130,39 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        print(f"Attempting to login with username: {username}")  # Debugging line
 
-        query = text("SELECT * FROM Users WHERE username = :username")
+        query = text("SELECT * FROM Users WHERE Username = :username")
         session_db = Session()
 
         try:
             result = session_db.execute(query, {'username': username}).fetchone()
+            print(f"Query result: {result}")  # Debugging line
 
-            if result and check_password_hash(result['Password'], password):
-                session['username'] = username
-                session.permanent = True
-                flash('Logged in successfully!', 'success')
-                return redirect(url_for('index'))
+            if result:
+                hashed_password = result[2]  # Adjust based on your actual table structure
+                print(f"Hashed password from DB: {hashed_password}")  # Debugging line
+                
+                if check_password_hash(hashed_password, password):
+                    session['username'] = username
+                    session.permanent = True
+                    flash('Logged in successfully!', 'success')
+                    return redirect(url_for('index'))
+                else:
+                    print("Password mismatch")  # Debugging line
+                    flash('Incorrect username / password!', 'error')
             else:
+                print("Username not found")  # Debugging line
                 flash('Incorrect username / password!', 'error')
-                return render_template('login.html')
+        except Exception as e:
+            print(f"Error: {e}")  # Debugging line
+            flash('An error occurred. Please try again.', 'error')
         finally:
             session_db.close()
 
     return render_template('login.html')
+
+
 
 @app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
@@ -177,7 +201,7 @@ def logout():
 @app.route('/profile')
 def profile():
     if 'username' not in session:
-        return redirect(url_for('login'))  # Redirect to login if not logged in
+        return redirect(url_for('login'))  # Redirect if not logged in
 
     username = session['username']
     user_details = get_user_details_by_username(username)
@@ -229,21 +253,22 @@ def change_profile_pic():
             # Save the file to the specified upload folder
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            # Prepare to update the user's profile picture in the database
+            # Update the user's profile picture in the database
             query = text("UPDATE Users SET ProfilePicture = :profile_pic WHERE Username = :username")
             session_db = Session()
             try:
-                # Execute the update query
+                # Ensure the filename stored is just the name, not the entire path
                 session_db.execute(query, {'profile_pic': filename, 'username': username})
-                session_db.commit()  # Commit the changes
-                flash('Profile picture updated successfully!', 'success')  # Flash success message
+                session_db.commit()
+                flash('Profile picture updated successfully!', 'success')
             except Exception as e:
-                session_db.rollback()  # Rollback on error
-                flash(f'Error: {str(e)}', 'error')  # Flash error message
+                session_db.rollback()
+                flash(f'Error: {str(e)}', 'error')
             finally:
-                session_db.close()  # Close the session
+                session_db.close()
 
             return redirect(url_for('profile'))  # Redirect to the profile page after update
+
 
     # Render the template on GET request, showing the current profile picture
     return render_template('changePfp.html', profile_pic=full_profile_pic_path)
