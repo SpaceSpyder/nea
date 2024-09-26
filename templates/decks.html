@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Decks</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
         .main {
             padding: 40px;
         }
     </style>
 </head>
-
 <body>
     <nav>
         <ul class="navbar">
@@ -25,29 +24,34 @@
                 {% else %}
                     <a href="/login" class="cookie-link">Log In</a>
                 {% endif %}
-                <a href="/profile" class="nav-pfp-container">
-                    <img src="{{ profile_pic }}" alt="Profile Picture" class="profile-pic">
+                <a href="/profile" class="nav-profile-pic">
+                    <img src="{{ url_for('static', filename='images/profilePics/Default.png') }}" alt="Profile Picture" class="nav-profile-pic">
                 </a>
             </li>
         </ul>
     </nav>
 
     <div class="sidenav">
-        <a href="/profile" class="large-pfp-container">
-            <img src="{{ profile_pic }}" alt="Profile Picture" width="220" class="profile-pic">
+        <a href="/profile">
+            <img src="images/profilePics/Default.png" alt="Profile Picture" width="220">
         </a>
-
         {% if session.username %}
             <a href="/profile" class="cookie-link">{{ session.username }}</a>
         {% else %}
             <a href="/login" class="cookie-link">Log In</a>
         {% endif %}
-
-        <a href="profile/stats">Stats</a>
-        <a href="profile/decks">Decks</a>
-        <a href="profile/changePfp">Change Profile Pic</a>
-        <a href="/logout">Log out</a>
+        <a href="/profile/stats">Stats</a>
+        <a href="/profile/decks">Decks</a>
     </div>
 
+    <form class="main" action="{{ url_for('use_deck') }}" method="POST">
+        <label for="decks">Decks:</label>
+        <select name="decks" id="decks">
+            {% for deck in decks %}
+                <option value="{{ deck[1] }}">{{ deck[0] }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Use Deck</button>
+    </form>
 </body>
 </html>

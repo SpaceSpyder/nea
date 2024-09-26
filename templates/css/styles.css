@@ -1,13 +1,57 @@
+/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
 
 /* Root Variables for Global Use */
 :root {
-    --main-bg-color: #dddddd;
+    --main-bg-color: #e4e4e4;
     --text-color: rgba(26, 2, 2, 0.65);
 }
 
+/* Body Styling */
 body {
     font-family: Arial, sans-serif;
+}
+
+/* Sidenav Styling */
+.sidenav {
+    height: 100%;
+    width: 252px;
+    position: fixed;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    background-color: #c3846b;
+    overflow-x: hidden;
+    padding-top: 80px;
+}
+
+.sidenav a {
+    padding: 5px 15px 10px 15px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #000000;
+    display: block;
+}
+
+.sidenav a:hover {
+    color: #272727;
+}
+
+/* Main Content */
+.main {
+    margin-left: 252px;
+    font-size: 28px;
+    padding: 0px 10px;
+}
+
+/* Media Query for Smaller Screens */
+@media screen and (max-height: 450px) {
+    .sidenav {
+        padding-top: 15px;
+    }
+    .sidenav a {
+        font-size: 18px;
+    }
 }
 
 /* Card Styling */
@@ -35,6 +79,11 @@ body {
     display: flex;
     justify-content: space-around;
     margin-top: 20px;
+}
+
+/* Subtitle Styling */
+.sub-title {
+    font-size: larger;
 }
 
 /* Text Styles */
@@ -83,7 +132,7 @@ body {
     align-items: center;
     background-color: var(--main-bg-color);
     height: 60px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a slight shadow for depth */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-left, .navbar-right {
@@ -105,22 +154,41 @@ body {
 }
 
 .navbar-left a:hover, .navbar-right a:hover {
-    background-color: #556c6842; /* Darker shade on hover */
-    transform: scale(1.05); /* Slight zoom effect */
+    background-color: #556c6842;
+    transform: scale(1.05);
 }
 
 /* Profile Picture Styling */
-.nav-profile-pic {
-    height: 40px;
-    width: 40px;
-    border-radius: 0%;
-    /*margin-left: 10px; /* Adds space between the image and the text */
-    background-color: rgba(0, 0, 0, 0);
+.profile-pic {
+    
+    
     padding: 0;
-    background: none;
     border: none;
-    transform: none; /* Prevent scaling on hover */
+    object-fit: cover;
+    width: 100%;                /* Full width of the container */
+    height: 100%;               /* Full height of the container */
+    object-fit: cover;          /* Crop the image while maintaining aspect ratio */
+    object-position: center;    /* Center the image */
 }
+
+.nav-pfp-container {
+    width: 40px;               /* Set the width of the square */
+    height: 40px;              /* Set the height of the square */
+    overflow: hidden;           /* Hide overflow to crop the image */
+    position: relative;         /* Positioning context for absolute child */
+    border-radius: 0 !important;
+    background-color: transparent !important;
+}
+
+.large-pfp-container {
+    width: 220px;               /* Set the width of the square */
+    height: 220px;              /* Set the height of the square */
+    overflow: hidden;           /* Hide overflow to crop the image */
+    position: relative;         /* Positioning context for absolute child */
+    border-radius: 0 !important;
+    background-color: transparent !important;
+}
+
 
 /* Tablet Styles */
 .tablet {

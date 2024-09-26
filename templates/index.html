@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <title>Home</title>
     <link rel="stylesheet" href="css/styles.css">
-    <style>
-        
-    </style>
 </head>
 
 <body>
@@ -17,10 +14,15 @@
                 <a href="/testGame">Play</a>
                 <a href="">How to Play</a>
             </li>
-
             <li class="float-right navbar-right">
-                <a href="/profile" id="cookie-link">Cookie Value</a>
-                <a href="/profile"><img src="images/profilePics/Default.png" alt="Profile Picture" class="nav-profile-pic"></a>
+                {% if session.username %}
+                    <a href="/profile" class="cookie-link">{{ session.username }}</a>
+                {% else %}
+                    <a href="/login" class="cookie-link">Log In</a>
+                {% endif %}
+                <a href="/profile" class="nav-pfp-container">
+                    <img src="{{ url_for('static', filename= profile_pic) }}" alt="Profile Picture" class="profile-pic">
+                </a>
             </li>
         </ul>
     </nav>
@@ -29,41 +31,13 @@
     <h1 class="large-text">Fantasy Card Fight</h1>
     
     <hr>
-    <a href="{{ url_for('login') }}" >Log in!</a>
+    <a href="{{ url_for('login') }}">Log in!</a>
     <hr>
     
     <br/>
-    <a href="{{ url_for('testGame2') }}" >Go to experimental test</a>
+    <a href="{{ url_for('testGame2') }}">Go to experimental test</a>
     <br/>
     <br/>
-    <a href="{{ url_for('dbTest') }}" >Database test</a>
-
-    <script>
-        function getCookie(name) {
-            let cookies = document.cookie.split('; '); // seperates the cookies into an array
-            for (let cookie of cookies) {
-                let [cookieName, cookieValue] = cookie.split('=');
-                if (cookieName === name) {
-                    return decodeURIComponent(cookieValue);
-                }
-            }
-            return null;
-        }
-
-        // Function to update the "Cookie Value" link text
-        function updateCookieLink() {
-            let cookieValue = getCookie('username'); // Replace 'username' with the actual cookie name
-            let element = document.getElementById('cookie-link');
-            if (cookieValue) {
-                element.textContent = cookieValue; // Update the link text with the cookie value
-            } else {
-                element.textContent = 'Log In'; // Default text if cookie is not found
-                element.href = '/login'
-            }
-        }
-
-        // Call the function to update the link text when the page loads
-        window.onload = updateCookieLink;
-    </script>
+    <a href="{{ url_for('dbTest') }}">Database test</a>
 </body>
 </html>

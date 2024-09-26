@@ -1,11 +1,18 @@
 MnaEvTrn = 5
 avw = 15
 max = 30
-dmg + hlth = 60
-Mna = 5
+MAX dmg + health = 60
+Mana = 1-10
 ave overall = dmg + hlth = 30 = Mna
 Mna = (dmg + hlth)/6
+deck size = 20
+row size = 6
 
+cards go:
+    Common
+    Uncommon
+    Rare
+    Epic
 
 cards ideas:
     Cuthulu:
@@ -21,10 +28,8 @@ cards ideas:
     Slime:
     splits into 2 smaller slimes on death
 
-fancy stuff for later:
-    figure out how to use log points in js
-    card shadow
-    highlight drop area
+stuff for later:
+    
 
 links:
     https://www.joshwcomeau.com/css/center-a-div/
@@ -34,3 +39,18 @@ locations:
 hitboxes: 900 x 255
 margin: 30
 card: 150 x 255 
+
+
+if user_details:
+        user_id, profile_pic = user_details
+        full_profile_pic_path = f"images/profilePics/{profile_pic}" if profile_pic else "images/profilePics/Default.png"
+    else:
+        full_profile_pic_path = "images/profilePics/Default.png"
+
+if user_details:
+            user_id, profile_pic = user_details
+            # Determine the path for the current profile picture
+            full_profile_pic_path = f"images/profilePics/{profile_pic}" if profile_pic else "images/profilePics/Default.png"
+        else:
+            # Use default picture if no user details found
+            full_profile_pic_path = "images/profilePics/Default.png"
