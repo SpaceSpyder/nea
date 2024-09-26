@@ -46,10 +46,10 @@
   <img src="images/CardPictures/BabyDragon.png" class="card" id="card1" >
   <img src="images/CardPictures/Boar.png" class="card" id="card2" >
   <img src="images/CardPictures/Darkknight.png" class="card" id="card3" >
-  <img src="images/CardPictures/Dragon.png" class="card" id="card3" >
-  <img src="images/CardPictures/EvilWizard.png" class="card" id="card3" >
-  <img src="images/CardPictures/KnightCaptin.png" class="card" id="card3" >
-  <img src="images/CardPictures/Monk.png" class="card" id="card3" >
+  <img src="images/CardPictures/Dragon.png" class="card" id="card4" >
+  <img src="images/CardPictures/EvilWizard.png" class="card" id="card5" >
+  <img src="images/CardPictures/KnightCaptin.png" class="card" id="card6" >
+  <img src="images/CardPictures/Monk.png" class="card" id="card7" >
 
   <!-- Add more cards as needed -->
 </div>
@@ -108,6 +108,7 @@
       e.target.classList.add("drag");
       
       let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+      if(!dropLocation) return;
       let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
       //remove element from array
       let index = hitboxContents[hitboxNum].indexOf(element);
@@ -137,9 +138,9 @@
       // total width / numofcards+1
       // foreach card half width and minus from the bit above
       let positionS = [];
-      let offset = (900/(numberOfCards+1));
+      let offset = (1050/(numberOfCards+1));
       for (let i = 0; i < numberOfCards; i++) {
-        positionS.push((offset * (i +1)) - 75);
+        positionS.push((offset * (i +1)) - 150);
       }
 
       return positionS;
@@ -162,9 +163,9 @@
 
     function snapCardX(hitboxNum, element, cardX, dropLocation){ 
       numberOfCards = hitboxContents[hitboxNum].length + 1; // creates a variable to say how many cards are in the hitbox and +1 
-      if (numberOfCards > 6) numberOfCards =6;
+      if (numberOfCards > 6) numberOfCards = 6;
       hitboxContents[hitboxNum].push(element); // adds the new card to the array
-      hitboxContents[hitboxNum].sort((a, b) => a.style.left - b.style.left); // sorts the array
+      hitboxContents[hitboxNum].sort((a, b) => parseInt(a.style.left) - parseInt(b.style.left)); // sorts the array
       redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x)
     }
 
@@ -172,6 +173,10 @@
       element.style.top = (dropLocation.topLeft.y - 0) + "px";
       // highlight hitbox for debugging
       let hl = document.getElementById("highl");
+      hl.style.left = dropLocation.topLeft.x + "px";
+      hl.style.top = dropLocation.topLeft.y + "px";
+      hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
+      hl.style.height = dropLocation.bottomRight.y -dropLocation.topLeft.y + "px";
     }
 
     function redrawCards(numberOfCards, hitboxNum, left) {
