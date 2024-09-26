@@ -18,13 +18,12 @@
     </style>
 
     <script>
-        function checkDetails() {
+        function checkDetails(event) {
             let username = document.querySelector("input[name='username']").value;
             let password = document.querySelector("input[name='password']").value;
             if (username === "" || password === "") {
-                // Optional: show alert or message
-            } else {
-                document.querySelector("form").submit();
+                alert("Please fill out all fields.");  // Optional: or display inline message
+                event.preventDefault();  // Prevents the form from submitting
             }
         }
     </script>
@@ -38,16 +37,22 @@
         <h1 class="large-text in-tablet">Log In:</h1>
         <br/>
 
-        {% if msg %}
-            <p class="{% if 'Incorrect' in msg %}error-message{% else %}success-message{% endif %}">{{ msg }}</p>
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
 
         <form method="post" action="{{ url_for('login') }}" class="in-tablet">
             <input class="medium-text" required type="text" name="username" placeholder="Username"> <!-- asks for user name -->
                 <br/>
             <input class="medium-text" required type="password" name="password" placeholder="Password">
                 <br/>
-            <button class="button" type="submit" onclick="checkDetails()">Submit</button> <!-- submit button -->
+                <button class="button" onclick="checkDetails(event)">Submit</button>
         </form>
 
         <br/>

@@ -1,5 +1,5 @@
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap');
 
 /* Root Variables for Global Use */
 :root {
@@ -89,7 +89,7 @@ body {
 /* Text Styles */
 .large-text {
     font-size: 70px;
-    font-family: "MedievalSharp", cursive;
+    font-family: "UnifrakturMaguntia", cursive;
     margin: 0;
     padding: 0;
 }
@@ -98,14 +98,25 @@ body {
     font-size: 25px;
 }
 
-.error-message {
+.small-text {
+    font-size: 15px;
+    color: #6f6f6f;
+}
+
+
+.success {
+    color: green;
+}
+
+.error {
     color: red;
 }
+
 
 /* Button Styling */
 .button {
     font-size: 40px;
-    font-family: "MedievalSharp", cursive;
+    font-family: "UnifrakturMaguntia", cursive;
     font-weight: bold;
     width: 350px;
     height: 80px;
@@ -145,7 +156,7 @@ body {
     color: var(--text-color);
     padding: 10px 20px;
     margin-right: 10px;
-    font-family: "MedievalSharp", cursive;
+    font-family: "UnifrakturMaguntia", cursive;
     font-size: 18px;
     font-weight: bold;
     background-color: #bcbcbc;

@@ -12,9 +12,20 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
-from templates.scripts.utils import get_profile_pic_path
+from sqlalchemy.orm import sessionmaker, Session
+from templates.scripts.utils import get_profile_pic_path,get_user_id_by_username,get_user_details_by_username,get_decks_for_user
 sys.path.append(os.path.join(os.path.dirname(__file__), 'templates', 'scripts'))
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from flask import session, render_template
+from templates.scripts.utils import get_profile_pic_path
+from sqlalchemy.orm import Session
+
+# Replace these with your actual database URI
+DATABASE_URI = 'sqlite:///your_database.db'  # Example for SQLite
+engine = create_engine(DATABASE_URI)
+
+Session = sessionmaker(bind=engine)  # Create a session factory
 
 
 
@@ -39,11 +50,7 @@ Session = sessionmaker(bind=engine)
 # Session configuration
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect('databases/database.db')  # Connecting to SQLite
-    return db
+
 
 @app.teardown_appcontext
 def close_db(error):
@@ -51,25 +58,7 @@ def close_db(error):
     if db is not None:
         db.close()
 
-'''def get_decks_for_user(user_id):
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT Deck, UserDeckNum FROM decks WHERE Owner = ?", (user_id,))
-    return cursor.fetchall()
 
-def get_user_id_by_username(username):
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT id FROM Users WHERE Username = ?", (username,))
-    result = cursor.fetchone()
-    return result[0] if result else None
-
-def get_user_details_by_username(username):
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT id, ProfilePicture FROM Users WHERE Username = ?", (username,))
-    result = cursor.fetchone()
-    return result  # Returns (id, ProfilePic) if found, else None'''
 
 @app.route('/decks')
 @app.route('/profile/decks')
@@ -82,21 +71,24 @@ def show_decks():
     decks = get_decks_for_user(user_id)
     return render_template('decks.html', decks=decks)
 
+
 @app.route('/home')
 @app.route('/index')
 @app.route('/')
 def index():
-    # No session check here to allow access without logging in
-    username = session.get('username')  # Use get to avoid KeyError if not set
-    user_details = get_user_details_by_username(username) if username else None
+    username = session.get('username')
+    
+    session_db = Session()  # Create a session bound to the engine
+    
+    # Call the function directly
+    full_profile_pic_path = get_profile_pic_path(username, session_db)
 
-    if user_details:
-        user_id, profile_pic = user_details
-        full_profile_pic_path = f"images/profilePics/{profile_pic}" if profile_pic else "images/profilePics/Default.png"
-    else:
-        full_profile_pic_path = "images/profilePics/Default.png"
+    # Close the session after usage
+    session_db.close()
 
     return render_template('index.html', profile_pic=full_profile_pic_path)
+
+
 
 
 @app.route('/submit', methods=['GET', 'POST'])
