@@ -7,26 +7,7 @@
 </head>
 
 <body>
-    <nav>
-        <ul class="navbar">
-            <li class="navbar-left">
-                <a href="/index">Home</a>
-                <a href="/testGame">Play</a>
-                <a href="">How to Play</a>
-            </li>
-            <li class="float-right navbar-right">
-                {% if session.username %}
-                    <a href="/profile" class="cookie-link">{{ session.username }}</a>
-                {% else %}
-                    <a href="/login" class="cookie-link">Log In</a>
-                {% endif %}
-
-                <a href="/profile" class="nav-pfp-container">
-                    <img src="{{ url_for('static', filename= profile_pic) }}" alt="Profile Picture" class="profile-pic">
-                </a>
-            </li>
-        </ul>
-    </nav>
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
 
     <br/>
     <h1 class="large-text">Fantasy Card Fight</h1>

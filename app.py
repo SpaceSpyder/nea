@@ -3,22 +3,29 @@
 #pip install SQLAlchemy
 #pip install Flask-SQLAlchemy
 #pip install werkzeug
+
+import sys
 import os
-import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, flash, session, g
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
+import sqlite3  # Importing sqlite3 for database interactions
+from flask import Flask, render_template, request, redirect, url_for, flash, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+from templates.scripts.utils import get_profile_pic_path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'templates', 'scripts'))
+
+
+
 
 hashed_password = generate_password_hash('admin')  # Replace 'admin' with the actual password
 print(hashed_password)  # Copy this hashed password to your SQL command above
 
 app = Flask(__name__, static_folder='templates', static_url_path='')
 app.config['SECRET_KEY'] = 't67wtEq'
-app.config['UPLOAD_FOLDER'] = 'templates/images/profilePics/'  # Directory for uploaded profile pictures
+app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')  # Using os.path.join for path compatability
+
 
 # Create the upload directory if it doesn't exist
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
@@ -44,7 +51,7 @@ def close_db(error):
     if db is not None:
         db.close()
 
-def get_decks_for_user(user_id):
+'''def get_decks_for_user(user_id):
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT Deck, UserDeckNum FROM decks WHERE Owner = ?", (user_id,))
@@ -62,7 +69,7 @@ def get_user_details_by_username(username):
     cursor = db.cursor()
     cursor.execute("SELECT id, ProfilePicture FROM Users WHERE Username = ?", (username,))
     result = cursor.fetchone()
-    return result  # Returns (id, ProfilePic) if found, else None
+    return result  # Returns (id, ProfilePic) if found, else None'''
 
 @app.route('/decks')
 @app.route('/profile/decks')
@@ -201,23 +208,24 @@ def logout():
 @app.route('/profile')
 def profile():
     if 'username' not in session:
-        return redirect(url_for('login'))  # Redirect if not logged in
+        return redirect(url_for('login'))
 
     username = session['username']
-    user_details = get_user_details_by_username(username)
+    
+    # Get the current database session
+    session_db = Session()
 
-    if user_details:
-        user_id, profile_pic = user_details
-        full_profile_pic_path = f"images/profilePics/{profile_pic}" if profile_pic else "images/profilePics/Default.png"
-    else:
-        full_profile_pic_path = "images/profilePics/Default.png"
+    # Call the function with both parameters
+    full_profile_pic_path = get_profile_pic_path(username, session_db)
+
+    session_db.close()  # Close the session after use
 
     return render_template('profile.html', profile_pic=full_profile_pic_path)
 
 @app.route('/profile/changePfp', methods=['GET', 'POST'])
 def change_profile_pic():
     # Initialize the variable
-    full_profile_pic_path = "images/profilePics/Default.png"  # Default picture
+    full_profile_pic_path = url_for('static', filename='images/profilePics/Default.png')  # Default picture
 
     # Retrieve the logged-in user's username
     if 'username' not in session:
@@ -231,8 +239,11 @@ def change_profile_pic():
     # Check if user details are found
     if user_details:
         user_id, profile_pic = user_details
-        # Determine the path for the current profile picture
-        full_profile_pic_path = f"images/profilePics/{profile_pic}" if profile_pic else "images/profilePics/Default.png"
+        full_profile_pic_path = url_for('static', filename=f'images/profilePics/{profile_pic}') if profile_pic else url_for('static', filename='images/profilePics/Default.png')
+    else:
+        full_profile_pic_path = url_for('static', filename='images/profilePics/Default.png')
+
+    print("Change Profile Picture Path: ", full_profile_pic_path)  # Debug statement
 
     # Check if the request method is POST
     if request.method == 'POST':
@@ -251,6 +262,13 @@ def change_profile_pic():
             # Use secure_filename to prevent issues with filename
             filename = secure_filename(file.filename)
             # Save the file to the specified upload folder
+            app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')
+
+            # Create the upload directory if it doesn't exist
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+
+            # When saving a file
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
             # Update the user's profile picture in the database
@@ -269,9 +287,9 @@ def change_profile_pic():
 
             return redirect(url_for('profile'))  # Redirect to the profile page after update
 
-
     # Render the template on GET request, showing the current profile picture
     return render_template('changePfp.html', profile_pic=full_profile_pic_path)
+
 
 @app.route('/use_deck', methods=['POST'])
 def use_deck():

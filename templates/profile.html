@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
         .main {
             padding: 40px;
@@ -12,25 +13,12 @@
 </head>
 
 <body>
-    <nav>
-        <ul class="navbar">
-            <li class="navbar-left">
-                <a href="/index">Home</a>
-                <a href="/testGame">Play</a>
-                <a href="">How to Play</a>
-            </li>
-            <li class="float-right navbar-right">
-                {% if session.username %}
-                    <a href="/profile" class="cookie-link">{{ session.username }}</a>
-                {% else %}
-                    <a href="/login" class="cookie-link">Log In</a>
-                {% endif %}
-                <a href="/profile" class="nav-pfp-container">
-                    <img src="{{ profile_pic }}" alt="Profile Picture" class="profile-pic">
-                </a>
-            </li>
-        </ul>
-    </nav>
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
+    
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
 
     <div class="sidenav">
         <a href="/profile" class="large-pfp-container">
@@ -43,9 +31,9 @@
             <a href="/login" class="cookie-link">Log In</a>
         {% endif %}
 
-        <a href="profile/stats">Stats</a>
-        <a href="profile/decks">Decks</a>
-        <a href="profile/changePfp">Change Profile Pic</a>
+        <a href="/profile/stats">Stats</a>
+        <a href="/profile/decks">Decks</a>
+        <a href="/profile/changePfp">Change Profile Pic</a>
         <a href="/logout">Log out</a>
     </div>
 
