@@ -63,6 +63,11 @@ def close_db(error):
 @app.route('/decks')
 @app.route('/profile/decks')
 def show_decks():
+    username = session.get('username')
+    session_db = Session()  # Create a session bound to the engine
+    full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
+    session_db.close()
+
     if 'username' not in session:
         return redirect(url_for('login'))  # Redirect to login if the user is not logged in
 
@@ -76,14 +81,10 @@ def show_decks():
 @app.route('/index')
 @app.route('/')
 def index():
-    username = session.get('username')
-    
-    session_db = Session()  # Create a session bound to the engine
-    
-    # Call the function directly
-    full_profile_pic_path = get_profile_pic_path(username, session_db)
 
-    # Close the session after usage
+    username = session.get('username')
+    session_db = Session()  # Create a session bound to the engine
+    full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
     session_db.close()
 
     return render_template('index.html', profile_pic=full_profile_pic_path)

@@ -1,0 +1,16 @@
+<div class="sidenav">
+    <a href="/profile" class="large-pfp-container">
+        <img src="{{ profile_pic }}" alt="Profile Picture" width="220" class="profile-pic">
+    </a>
+
+    {% if session.username %}
+        <a href="/profile" class="cookie-link">{{ session.username }}</a>
+    {% else %}
+        <a href="/login" class="cookie-link">Log In</a>
+    {% endif %}
+
+    <a href="/profile/stats">Stats</a>
+    <a href="/profile/decks">Decks</a>
+    <a href="/profile/changePfp">Change Profile Pic</a>
+    <a href="/logout">Log out</a>
+</div>
