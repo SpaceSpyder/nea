@@ -7,74 +7,42 @@
 import sys
 import os
 from datetime import datetime, timedelta
-import sqlite3  # Importing sqlite3 for database interactions
+import sqlite3  # For database interactions
 from flask import Flask, render_template, request, redirect, url_for, flash, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
-from templates.scripts.utils import get_profile_pic_path,get_user_id_by_username,get_user_details_by_username,get_decks_for_user
-sys.path.append(os.path.join(os.path.dirname(__file__), 'templates', 'scripts'))
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from flask import session, render_template
-from templates.scripts.utils import get_profile_pic_path
-from sqlalchemy.orm import Session
+from templates.scripts.utils import get_profile_pic_path, get_user_id_by_username, get_user_details_by_username, get_decks_for_user
 
-# Replace these with your actual database URI
-DATABASE_URI = 'sqlite:///your_database.db'  # Example for SQLite
+
+# Database setup
+DATABASE_URI = 'sqlite:///databases/database.db'  # SQLite database URI
 engine = create_engine(DATABASE_URI)
-
-Session = sessionmaker(bind=engine)  # Create a session factory
-
-
-
-
-hashed_password = generate_password_hash('admin')  # Replace 'admin' with the actual password
-print(hashed_password)  # Copy this hashed password to your SQL command above
-
-app = Flask(__name__, static_folder='templates', static_url_path='')
-app.config['SECRET_KEY'] = 't67wtEq'
-app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')  # Using os.path.join for path compatability
-
-
-# Create the upload directory if it doesn't exist
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
-
-# Define your database connection
-DATABASE_URL = 'sqlite:///databases/database.db'
-engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
-# Session configuration
+# Flask app setup
+app = Flask(__name__, static_folder='templates', static_url_path='')
+app.config['SECRET_KEY'] = 't67wtEq'
+app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
-
-
-
-@app.teardown_appcontext
-def close_db(error):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
-
 
 
 @app.route('/decks')
 @app.route('/profile/decks')
 def show_decks():
-    username = session.get('username')
-    session_db = Session()  # Create a session bound to the engine
-    full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
-    session_db.close()
-
     if 'username' not in session:
         return redirect(url_for('login'))  # Redirect to login if the user is not logged in
 
     username = session['username']
+    session_db = Session()  # Create a session bound to the engine
+    full_profile_pic_path = get_profile_pic_path(username, session_db)  # Call profile pic function
+    session_db.close()
+
     user_id = get_user_id_by_username(username)
     decks = get_decks_for_user(user_id)
-    return render_template('decks.html', decks=decks)
+    return render_template('decks.html', decks=decks, profile_pic=full_profile_pic_path)
+
 
 
 @app.route('/home')
@@ -82,14 +50,13 @@ def show_decks():
 @app.route('/')
 def index():
 
+    # get username and pfp
     username = session.get('username')
     session_db = Session()  # Create a session bound to the engine
     full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
     session_db.close()
 
     return render_template('index.html', profile_pic=full_profile_pic_path)
-
-
 
 
 @app.route('/submit', methods=['GET', 'POST'])
@@ -99,6 +66,7 @@ def submit():
         return f'You entered: {user_input}'
     else:
         return 'ERROR Method Not Allowed'
+
 
 @app.route('/testGame')
 def testGame():
@@ -111,9 +79,11 @@ def testGame():
 def testGame2():
     return render_template('game2.html')
 
+
 @app.route('/temp')
 def temp():
     return render_template('temp.html')
+
 
 @app.route('/dbTest')
 def dbTest():
@@ -125,8 +95,15 @@ def dbTest():
     conn.close()
     return render_template('record.html', name=result)
 
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    # get username and pfp
+    username = session.get('username')
+    session_db = Session()  # Create a session bound to the engine
+    full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
+    session_db.close()
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -160,12 +137,18 @@ def login():
         finally:
             session_db.close()
 
-    return render_template('login.html')
+    return render_template('login.html',profile_pic=full_profile_pic_path)
 
 
 
 @app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
+    # get username and pfp
+    username = session.get('username')
+    session_db = Session()  # Create a session bound to the engine
+    full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
+    session_db.close()
+
     if request.method == 'POST':
         username = request.form['username']
         password = generate_password_hash(request.form['password'])  # Hash the password
@@ -190,7 +173,8 @@ def signUp():
         finally:
             session_db.close()
 
-    return render_template('signUp.html')
+    return render_template('signUp.html',profile_pic=full_profile_pic_path)
+
 
 @app.route('/logout')
 def logout():
@@ -198,22 +182,27 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
+
 @app.route('/profile')
 def profile():
+    # Check if the user is logged in
     if 'username' not in session:
         return redirect(url_for('login'))
 
+    # Get the username from the session
     username = session['username']
     
     # Get the current database session
     session_db = Session()
 
-    # Call the function with both parameters
+    # Call the function to get the profile picture path
     full_profile_pic_path = get_profile_pic_path(username, session_db)
 
-    session_db.close()  # Close the session after use
+    # Close the session after use
+    session_db.close()
 
     return render_template('profile.html', profile_pic=full_profile_pic_path)
+
 
 @app.route('/profile/changePfp', methods=['GET', 'POST'])
 def change_profile_pic():
@@ -293,5 +282,18 @@ def use_deck():
     flash(f'You are now using the deck: {selected_deck}', 'success')
     return redirect(url_for('testGame'))  # Redirect to the game
 
+@app.route('/profile/stats', methods=['GET'])
+@app.route('/stats', methods=['GET'])
+def stats():
+
+    username = session['username']
+    session_db = Session()  # Create a session bound to the engine
+    full_profile_pic_path = get_profile_pic_path(username, session_db)  # Call profile pic function
+    session_db.close()
+
+
+    return render_template('stats.html', profile_pic=full_profile_pic_path)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
+
