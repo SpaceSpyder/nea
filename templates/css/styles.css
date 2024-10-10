@@ -4,7 +4,7 @@
 /* Root Variables for Global Use */
 :root {
     --main-bg-color: #e4e4e4;
-    --text-color: rgba(26, 2, 2, 0.65);
+    --text-color: rgba(0, 0, 0, 0.65);
 }
 
 /* Body Styling */
@@ -28,13 +28,13 @@ body {
 .sidenav a {
     padding: 5px 15px 10px 15px;
     text-decoration: none;
-    font-size: 25px;
-    color: #000000;
+    /*font-size: 25px;*/
+    /*color: #000000;*/
     display: block;
 }
 
 .sidenav a:hover {
-    color: #272727;
+    color: #222222;
 }
 
 /* Main Content */
@@ -81,9 +81,20 @@ body {
     margin-top: 20px;
 }
 
+.title {
+    font-size: 30px;
+    color: #000000;
+}
+
 /* Subtitle Styling */
 .sub-title {
-    font-size: larger;
+    font-size: large;
+}
+
+
+.sidenav-options {
+    font-size: 25px;
+    color: #2e2e2e;
 }
 
 /* Text Styles */
@@ -178,6 +189,7 @@ body {
     height: 100%;               /* Full height of the container */
     object-fit: cover;          /* Crop the image while maintaining aspect ratio */
     object-position: center;    /* Center the image */
+    border-radius: 10%;
 }
 
 .nav-pfp-container {
