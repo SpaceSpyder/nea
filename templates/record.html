@@ -1,5 +1,15 @@
-{% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Page Title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> <!--for navbar-->
+</head>
+<body>
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
 
-details<br />
-<div>{{name}}</div>
-end 
+    details<br />
+    <div>{{name}}</div>
+</body>
+</html>

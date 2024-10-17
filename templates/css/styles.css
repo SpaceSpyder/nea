@@ -12,12 +12,19 @@ body {
     font-family: Arial, sans-serif;
 }
 
+/* Main Content */
+.main {
+    margin-left: 252px;
+    font-size: 28px;
+    padding: 0px 10px;
+}
+
 /* Sidenav Styling */
 .sidenav {
     height: 100%;
     width: 252px;
     position: fixed;
-    z-index: -1;
+    z-index: 2;
     top: 0;
     left: 0;
     background-color: #c3846b;
@@ -37,12 +44,11 @@ body {
     color: #222222;
 }
 
-/* Main Content */
-.main {
-    margin-left: 252px;
-    font-size: 28px;
-    padding: 0px 10px;
+.sidenav-options {
+    font-size: 25px;
+    color: #2e2e2e;
 }
+
 
 /* Media Query for Smaller Screens */
 @media screen and (max-height: 450px) {
@@ -53,6 +59,81 @@ body {
         font-size: 18px;
     }
 }
+
+/* Navbar Styling */
+.navbar {
+    list-style-type: none;
+    margin: 0;
+    padding-left: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--main-bg-color);
+    height: 60px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 4;
+    position: relative;
+    border-radius: 5px;
+}
+
+.navbar-left, .navbar-right {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    z-index: 4;
+}
+
+.navbar-left a, .navbar-right a {
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 10px 20px;
+    margin-right: 10px;
+    font-family: "UnifrakturMaguntia", cursive;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #bcbcbc;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    z-index: 5;
+}
+
+.navbar-left a:hover, .navbar-right a:hover {
+    background-color: #556c6842;
+    transform: scale(1.05);
+}
+
+/* Profile Picture Styling */
+.profile-pic {
+    padding: 0;
+    border: none;
+    object-fit: cover;
+    width: 100%;                /* Full width of the container */
+    height: 100%;               /* Full height of the container */
+    object-fit: cover;          /* Crop the image while maintaining aspect ratio */
+    object-position: center;    /* Center the image */
+    border-radius: 10%;
+    padding: 0%;
+}
+
+.nav-pfp-container {
+    width: 40px;               /* Set the width of the square */
+    height: 40px;              /* Set the height of the square */
+    overflow: hidden;           /* Hide overflow to crop the image */
+    position: relative;         /* Positioning context for absolute child */
+    border-radius: 0 !important;
+    background-color: transparent !important;
+    padding: 0%;
+}
+
+.large-pfp-container {
+    width: 220px;               /* Set the width of the square */
+    height: 220px;              /* Set the height of the square */
+    overflow: hidden;           /* Hide overflow to crop the image */
+    position: relative;         /* Positioning context for absolute child */
+    border-radius: 0 !important;
+    background-color: transparent !important;
+}
+
 
 /* Card Styling */
 .card {
@@ -92,10 +173,7 @@ body {
 }
 
 
-.sidenav-options {
-    font-size: 25px;
-    color: #2e2e2e;
-}
+
 
 /* Text Styles */
 .large-text {
@@ -111,7 +189,7 @@ body {
 
 .small-text {
     font-size: 15px;
-    color: #6f6f6f;
+    color: #969696;
 }
 
 
@@ -142,72 +220,6 @@ body {
 .button:hover {
     background-color: #3c92a14c;
     background-image: url('../images/button1.png');
-}
-
-/* Navbar Styling */
-.navbar {
-    list-style-type: none;
-    margin: 0;
-    padding-left: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--main-bg-color);
-    height: 60px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left, .navbar-right {
-    display: flex;
-    align-items: center;
-}
-
-.navbar-left a, .navbar-right a {
-    text-decoration: none;
-    color: var(--text-color);
-    padding: 10px 20px;
-    margin-right: 10px;
-    font-family: "UnifrakturMaguntia", cursive;
-    font-size: 18px;
-    font-weight: bold;
-    background-color: #bcbcbc;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.navbar-left a:hover, .navbar-right a:hover {
-    background-color: #556c6842;
-    transform: scale(1.05);
-}
-
-/* Profile Picture Styling */
-.profile-pic {
-    padding: 0;
-    border: none;
-    object-fit: cover;
-    width: 100%;                /* Full width of the container */
-    height: 100%;               /* Full height of the container */
-    object-fit: cover;          /* Crop the image while maintaining aspect ratio */
-    object-position: center;    /* Center the image */
-    border-radius: 10%;
-}
-
-.nav-pfp-container {
-    width: 40px;               /* Set the width of the square */
-    height: 40px;              /* Set the height of the square */
-    overflow: hidden;           /* Hide overflow to crop the image */
-    position: relative;         /* Positioning context for absolute child */
-    border-radius: 0 !important;
-    background-color: transparent !important;
-}
-
-.large-pfp-container {
-    width: 220px;               /* Set the width of the square */
-    height: 220px;              /* Set the height of the square */
-    overflow: hidden;           /* Hide overflow to crop the image */
-    position: relative;         /* Positioning context for absolute child */
-    border-radius: 0 !important;
-    background-color: transparent !important;
 }
 
 

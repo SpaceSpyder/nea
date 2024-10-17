@@ -1,25 +1,23 @@
-#pip install -U Flask
-#pip install Jinja2
-#pip install SQLAlchemy
-#pip install Flask-SQLAlchemy
-#pip install werkzeug
-
-import sys
+# Required Libraries
 import os
 from datetime import datetime, timedelta
-import sqlite3  # For database interactions
-from flask import Flask, render_template, request, redirect, url_for, flash, session, g
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, Session
-from templates.scripts.utils import get_profile_pic_path, get_user_id_by_username, get_user_details_by_username, get_decks_for_user
-
+from sqlalchemy.orm import sessionmaker
+from templates.scripts.models import Users, Decks  # Import your models
+from templates.scripts.utils import (
+    get_profile_pic_path,
+    get_user_id_by_username,
+    get_user_details_by_username,
+    get_decks_for_user,
+)
 
 # Database setup
 DATABASE_URI = 'sqlite:///databases/database.db'  # SQLite database URI
 engine = create_engine(DATABASE_URI)
-Session = sessionmaker(bind=engine)
+SessionLocal = sessionmaker(bind=engine)
 
 # Flask app setup
 app = Flask(__name__, static_folder='templates', static_url_path='')
@@ -27,20 +25,31 @@ app.config['SECRET_KEY'] = 't67wtEq'
 app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 
+# Helper function to create a new session
+def get_session():
+    return SessionLocal()
 
-@app.route('/decks')
-@app.route('/profile/decks')
+@app.route('/decks', methods=['GET', 'POST'])
+@app.route('/profile/decks', methods=['GET', 'POST'])
 def show_decks():
     if 'username' not in session:
-        return redirect(url_for('login'))  # Redirect to login if the user is not logged in
+        return redirect(url_for('login'))
 
     username = session['username']
-    session_db = Session()  # Create a session bound to the engine
-    full_profile_pic_path = get_profile_pic_path(username, session_db)  # Call profile pic function
-    session_db.close()
+    session_db = get_session()  # Create a session bound to the engine
+    try:
+        full_profile_pic_path = get_profile_pic_path(username, session_db)
+        user_id = get_user_id_by_username(username)
+        decks = get_decks_for_user(user_id, session_db)
 
-    user_id = get_user_id_by_username(username)
-    decks = get_decks_for_user(user_id)
+        if request.method == 'POST':
+            selected_deck = request.form['options']
+            flash(f'You selected: {selected_deck}', 'success')
+            # Handle the selected deck as needed (e.g., redirect or process further)
+
+    finally:
+        session_db.close()  # Ensure the session is closed
+
     return render_template('decks.html', decks=decks, profile_pic=full_profile_pic_path)
 
 
@@ -49,15 +58,11 @@ def show_decks():
 @app.route('/index')
 @app.route('/')
 def index():
-
-    # get username and pfp
     username = session.get('username')
-    session_db = Session()  # Create a session bound to the engine
-    full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
+    session_db = get_session()
+    full_profile_pic_path = get_profile_pic_path(username, session_db)
     session_db.close()
-
     return render_template('index.html', profile_pic=full_profile_pic_path)
-
 
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
@@ -67,98 +72,78 @@ def submit():
     else:
         return 'ERROR Method Not Allowed'
 
-
 @app.route('/testGame')
 def testGame():
     if 'username' not in session:
-        return redirect(url_for('login'))  # Redirect to login if the user is not logged in
+        return redirect(url_for('login'))
     return render_template('game.html')
-
 
 @app.route('/testGame2')
 def testGame2():
     return render_template('game2.html')
 
-
 @app.route('/temp')
 def temp():
     return render_template('temp.html')
 
-
-@app.route('/dbTest')
+@app.route('/dbTest', methods=['GET'])
 def dbTest():
-    conn = sqlite3.connect('databases/database.db')
+    username = session.get('username')
+    session_db = get_session()
+    full_profile_pic_path = get_profile_pic_path(username, session_db)
+    session_db.close()
+
+    conn = get_session().bind.raw_connection()  # Use SQLAlchemy's connection
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM Users')
     rows = cursor.fetchall()
     result = ", ".join(str(row) for row in rows)
     conn.close()
-    return render_template('record.html', name=result)
-
+    return render_template('record.html', name=result, profile_pic=full_profile_pic_path)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    # get username and pfp
     username = session.get('username')
-    session_db = Session()  # Create a session bound to the engine
-    full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
-    session_db.close()
+    session_db = get_session()
+    full_profile_pic_path = get_profile_pic_path(username, session_db)
 
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        print(f"Attempting to login with username: {username}")  # Debugging line
 
         query = text("SELECT * FROM Users WHERE Username = :username")
-        session_db = Session()
-
         try:
             result = session_db.execute(query, {'username': username}).fetchone()
-            print(f"Query result: {result}")  # Debugging line
-
-            if result:
-                hashed_password = result[2]  # Adjust based on your actual table structure
-                print(f"Hashed password from DB: {hashed_password}")  # Debugging line
-                
-                if check_password_hash(hashed_password, password):
-                    session['username'] = username
-                    session.permanent = True
-                    flash('Logged in successfully!', 'success')
-                    return redirect(url_for('index'))
-                else:
-                    print("Password mismatch")  # Debugging line
-                    flash('Incorrect username / password!', 'error')
+            if result and check_password_hash(result[2], password):  # Adjust based on your actual table structure
+                session['username'] = username
+                session.permanent = True
+                flash('Logged in successfully!', 'success')
+                return redirect(url_for('index'))
             else:
-                print("Username not found")  # Debugging line
                 flash('Incorrect username / password!', 'error')
         except Exception as e:
-            print(f"Error: {e}")  # Debugging line
-            flash('An error occurred. Please try again.', 'error')
+            flash(f'An error occurred: {str(e)}', 'error')
         finally:
             session_db.close()
 
-    return render_template('login.html',profile_pic=full_profile_pic_path)
-
-
+    return render_template('login.html', profile_pic=full_profile_pic_path)
 
 @app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
-    # get username and pfp
     username = session.get('username')
-    session_db = Session()  # Create a session bound to the engine
-    full_profile_pic_path = get_profile_pic_path(username, session_db)# Call profile pic function
-    session_db.close()
+    session_db = get_session()
+    full_profile_pic_path = get_profile_pic_path(username, session_db)
 
     if request.method == 'POST':
         username = request.form['username']
-        password = generate_password_hash(request.form['password'])  # Hash the password
+        password = generate_password_hash(request.form['password'])
         email = request.form['email']
         date = datetime.today().strftime('%Y-%m-%d')
 
         query = text("""INSERT INTO Users (Username, Password, Email, DateCreated)
                         VALUES (:username, :password, :email, :date)""")
-        
-        session_db = Session()
+
+        session_db = get_session()
         try:
             session_db.execute(query, {'username': username, 'password': password, 'email': email, 'date': date})
             session_db.commit()
@@ -173,8 +158,7 @@ def signUp():
         finally:
             session_db.close()
 
-    return render_template('signUp.html',profile_pic=full_profile_pic_path)
-
+    return render_template('signUp.html', profile_pic=full_profile_pic_path)
 
 @app.route('/logout')
 def logout():
@@ -182,82 +166,54 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
-
 @app.route('/profile')
 def profile():
-    # Check if the user is logged in
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    # Get the username from the session
     username = session['username']
-    
-    # Get the current database session
-    session_db = Session()
-
-    # Call the function to get the profile picture path
+    session_db = get_session()
     full_profile_pic_path = get_profile_pic_path(username, session_db)
-
-    # Close the session after use
     session_db.close()
 
     return render_template('profile.html', profile_pic=full_profile_pic_path)
 
-
 @app.route('/profile/changePfp', methods=['GET', 'POST'])
 def change_profile_pic():
-    # Initialize the variable
-    full_profile_pic_path = url_for('static', filename='images/profilePics/Default.png')  # Default picture
+    full_profile_pic_path = url_for('static', filename='images/profilePics/Default.png')
 
-    # Retrieve the logged-in user's username
     if 'username' not in session:
-        return redirect(url_for('login'))  # Redirect if not logged in
+        return redirect(url_for('login'))
 
     username = session['username']
-    
-    # Get user details from the database
     user_details = get_user_details_by_username(username)
 
-    # Check if user details are found
     if user_details:
         user_id, profile_pic = user_details
-        full_profile_pic_path = url_for('static', filename=f'images/profilePics/{profile_pic}') if profile_pic else url_for('static', filename='images/profilePics/Default.png')
-    else:
-        full_profile_pic_path = url_for('static', filename='images/profilePics/Default.png')
+        full_profile_pic_path = url_for('static', filename=f'images/profilePics/{profile_pic}') if profile_pic else full_profile_pic_path
 
-    print("Change Profile Picture Path: ", full_profile_pic_path)  # Debug statement
-
-    # Check if the request method is POST
     if request.method == 'POST':
-        # Check if a file was uploaded
         if 'profile_pic' not in request.files:
-            flash('No file part', 'error')  # Flash an error message if no file
+            flash('No file part', 'error')
             return redirect(url_for('profile'))
 
         file = request.files['profile_pic']
-        # Ensure a file was selected
         if file.filename == '':
-            flash('No selected file', 'error')  # Flash an error message if no file selected
+            flash('No selected file', 'error')
             return redirect(url_for('profile'))
 
         if file:
-            # Use secure_filename to prevent issues with filename
             filename = secure_filename(file.filename)
-            # Save the file to the specified upload folder
             app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')
 
-            # Create the upload directory if it doesn't exist
             if not os.path.exists(app.config['UPLOAD_FOLDER']):
                 os.makedirs(app.config['UPLOAD_FOLDER'])
 
-            # When saving a file
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            # Update the user's profile picture in the database
             query = text("UPDATE Users SET ProfilePicture = :profile_pic WHERE Username = :username")
-            session_db = Session()
+            session_db = get_session()
             try:
-                # Ensure the filename stored is just the name, not the entire path
                 session_db.execute(query, {'profile_pic': filename, 'username': username})
                 session_db.commit()
                 flash('Profile picture updated successfully!', 'success')
@@ -267,33 +223,57 @@ def change_profile_pic():
             finally:
                 session_db.close()
 
-            return redirect(url_for('profile'))  # Redirect to the profile page after update
+            return redirect(url_for('profile'))
 
-    # Render the template on GET request, showing the current profile picture
     return render_template('changePfp.html', profile_pic=full_profile_pic_path)
-
 
 @app.route('/use_deck', methods=['POST'])
 def use_deck():
     if 'username' not in session:
-        return redirect(url_for('login'))  # Redirect to login if the user is not logged in
+        return redirect(url_for('login'))
 
-    selected_deck = request.form.get('decks')  # Changed to 'decks' to match the select name in HTML
+    selected_deck = request.form.get('decks')
     flash(f'You are now using the deck: {selected_deck}', 'success')
-    return redirect(url_for('testGame'))  # Redirect to the game
+    return redirect(url_for('testGame'))
 
 @app.route('/profile/stats', methods=['GET'])
 @app.route('/stats', methods=['GET'])
 def stats():
+    username = session.get('username')
 
-    username = session['username']
-    session_db = Session()  # Create a session bound to the engine
-    full_profile_pic_path = get_profile_pic_path(username, session_db)  # Call profile pic function
+    if not username:
+        return "User not logged in", 403
+
+    session_db = get_session()
+    full_profile_pic_path = get_profile_pic_path(username, session_db)
     session_db.close()
 
+    conn = get_session().bind.raw_connection()  # Use SQLAlchemy's connection
+    cursor = conn.cursor()
 
-    return render_template('stats.html', profile_pic=full_profile_pic_path)
+    cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
+    result = cursor.fetchone()
+
+    if result:
+        user_id = result[0]
+        cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated FROM UserStats WHERE UserId = ?", (user_id,))
+        user_stats = cursor.fetchone()
+
+        if user_stats:
+            stats_data = {
+                "GamesPlayed": user_stats[0],
+                "GamesWon": user_stats[1],
+                "DateCreated": user_stats[2]
+            }
+        else:
+            stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
+    else:
+        stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
+
+    cursor.close()
+    conn.close()
+
+    return render_template('stats.html', profile_pic=full_profile_pic_path, stats=stats_data)
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
-
+    app.run(debug=True)
