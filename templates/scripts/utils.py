@@ -33,12 +33,14 @@ def get_user_details_by_username(username):
 def get_decks_for_user(username):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username))
-    deckNumbers = cursor.fetchall()
-    return deckNumbers
+    cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username,))
+    decks = cursor.fetchall()
+    return decks
 
 def get_profile_pic_path(username):
     user = get_user_details_by_username(username)
-    if user and user[7]:  # Assuming ProfilePicture is the 8th column
-        return url_for('static', filename=f'images/profilePics/{user[7]}')
+    if user and len(user) > 5:  # Ensure the tuple has enough elements
+        profile_pic = user[5]  # Assuming ProfilePicture is the 6th column
+        if profile_pic:
+            return url_for('static', filename=f'images/profilePics/{profile_pic}')
     return url_for('static', filename='images/profilePics/Default.png')

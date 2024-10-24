@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Your Decks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decks</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
         .deck-card:hover {
@@ -32,17 +33,22 @@
     {% include 'htmlChildren/sideNav.html' %}
 
     <div class="main">
-        <h2>Your Decks</h2>
-        <form action="{{ url_for('show_decks') }}" method="POST">
-            <label for="options">Select an option:</label>
-            <select name="options" id="options" required>
-                <option value="" disabled selected>Select an option</option>
-                {% for deck in decks %}
-                    <option value="{{ deck.Deck }}">{{ deck.Deck }}</option>
+        <h1>Decks for {{ username }}</h1>
+        <form action="{{ url_for('show_decks', username=username) }}" method="POST">
+            <label for="deck">Choose a deck:</label>
+            <select name="deck" id="deck">
+                {% for i in range(1, decks|length + 1) %}
+                    <option value="{{ i }}">Deck {{ i }}</option>
                 {% endfor %}
             </select>
             <button type="submit">Submit</button>
         </form>
+        
+        <ul>
+            {% for deck in decks %}
+                <li>{{ deck }}</li>
+            {% endfor %}
+        </ul>
         
         <div class="deck-grid">
             <!-- You can display deck cards or any additional content here -->

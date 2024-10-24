@@ -40,13 +40,13 @@ def show_decks(username):
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    username = get_user_id_by_username(username)
-    if not username:
+    user_id = get_user_id_by_username(username)
+    if not user_id:
         flash('User not found', 'error')
         return redirect(url_for('index'))
 
-    deckNumbers = get_decks_for_user(username)
-    return render_template('decks.html', username=username, decks=deckNumbers)
+    decks = get_decks_for_user(username)
+    return render_template('decks.html', username=username, decks=decks)
 
 @app.route('/home')
 @app.route('/index')
@@ -165,7 +165,7 @@ def change_profile_pic():
     user_details = get_user_details_by_username(username)
 
     if user_details:
-        user_Id, ProfilePicture = user_details
+        Id, ProfilePicture = user_details[0], user_details[5]  # Correct index for ProfilePicture
         full_profile_pic_path = url_for('static', filename=f'images/profilePics/{ProfilePicture}') if ProfilePicture else full_profile_pic_path
 
     if request.method == 'POST':
