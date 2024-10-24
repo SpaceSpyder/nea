@@ -68,8 +68,17 @@
   });
 
 
+  let cardData = [];
   // Select all elements with class 'card' and make them draggable
   var cards = document.getElementsByClassName("card");
+  cards.forEach(card => {
+    cardData.push({
+      element: card,
+      hitbox: -1,
+      index: -1,
+      owner: "me"
+    });
+  });
   let inPlayAreas = [
     { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 }},
     { topLeft: { x: 30, y: 285}, bottomRight: { x: 930, y: 510 }},
@@ -154,19 +163,25 @@
 
       element.style.zIndex = 1; // puts on top
       let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
-      let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+
       if (dropLocation){ // if it has data it will snap
+        let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+
         snapCardY(dropLocation,e.target); // passes the area its over and the card 
         snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
+        numberOfCards = hitboxContents[hitboxNum].length + 1; // creates a variable to say how many cards are in the hitbox and +1 
+        if (numberOfCards > 6) numberOfCards = 6;
+        redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
+      } 
+      else { // if it doesnt have data it will snap back to the hand
+        element.style.left = "0px";
+        element.style.top = "5px";
       }
     }
 
     function snapCardX(hitboxNum, element, cardX, dropLocation){ 
-      numberOfCards = hitboxContents[hitboxNum].length + 1; // creates a variable to say how many cards are in the hitbox and +1 
-      if (numberOfCards > 6) numberOfCards = 6;
       hitboxContents[hitboxNum].push(element); // adds the new card to the array
       hitboxContents[hitboxNum].sort((a, b) => parseInt(a.style.left) - parseInt(b.style.left)); // sorts the array
-      redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x)
     }
 
     function snapCardY(dropLocation, element){ // takes snapping location and snaps the card
@@ -183,6 +198,8 @@
       let currentPos = getCardPositions(numberOfCards); // gives possible positions of cards relative to num of cards
       for (let i = 0; i < currentPos.length; i++) { // loops for as many positions
         hitboxContents[hitboxNum][i].style.left = (left + currentPos[i]) + "px"; // gives the correct x for each card
+        // get the cardData item for this hitboxContents[hitboxNum][i].id
+        // then update the index to i and the hitbox to hitboxNum
       }
     }
 
