@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log in</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {font-family: Arial, Helvetica, sans-serif;}
+
+        input[type=text], input[type=password] {
+            width: 350px;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+    </style>
+
+    <script>
+        function checkDetails(event) {
+            let username = document.querySelector("input[name='username']").value;
+            let password = document.querySelector("input[name='password']").value;
+            if (username === "" || password === "") {
+                alert("Please fill out all fields.");  // Optional: or display inline message
+                event.preventDefault();  // Prevents the form from submitting
+            }
+        }
+    </script>
+</head>
+
+<body>
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
+
+    <div class="tablet">
+        <br/><br/>
+        <h1 class="large-text in-tablet">Log In:</h1>
+        <br/>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+
+        <form method="post" action="{{ url_for('login') }}" class="in-tablet">
+            <input class="medium-text" required type="text" name="username" placeholder="Username"> <!-- asks for user name -->
+                <br/>
+            <input class="medium-text" required type="password" name="password" placeholder="Password">
+                <br/>
+                <button class="button" onclick="checkDetails(event)">Submit</button>
+        </form>
+
+        <br/>
+        <hr color="black" class="bottom-tablet">
+        <a href="{{ url_for('signUp') }}" class="bottom-tablet">Don't have an account? Make one here</a>
+    </div>
+</body>
+</html>

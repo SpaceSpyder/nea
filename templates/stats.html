@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Game Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar outside body -->
+    {% include 'htmlChildren/sideNav.html' %} <!-- side navigation outside body -->
+    
+    <style>
+
+        .stats {
+            /*margin: auto;*/
+            height: 200px;
+        }
+
+        .main1 {
+            /*width: 500px;      /* Set width to 500px */
+            /*height: 500px;     /* Set height to 500px */
+            margin: 20px, 300px;  /* Corrected margin syntax */
+            overflow: unset;     /* Add scrollbars if content overflows */
+            padding-left: 300px;
+            padding-top: 20px;
+            z-index: -1;        /* Ensure it is above background elements */
+            pointer-events: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="main1">
+        <img class="stats" src="{{ profile_pic }}" alt="Profile Picture">
+        
+        <h2>{{ username }}'s Statistics</h2>
+        <table border="1">
+            <tr>
+                <th>Games Played</th>
+                <td>{{ stats.GamesPlayed }}</td>
+            </tr>
+            <tr>
+                <th>Games Won</th>
+                <td>{{ stats.GamesWon }}</td>
+            </tr>
+            <tr>
+                <th>Date Created</th>
+                <td>{{ stats.DateCreated }}</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Game Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <style>
+
+      @media (-webkit-device-pixel-ratio: 1.25) {
+        * {
+          zoom: 1;
+        }
+      }
+      
+      body {
+        height:1080px;
+        margin: 0;
+        padding: 0;
+        background-attachment: fixed;
+        background-image: url('images/game_wood_background_001.png');
+        /*background-size: cover; /* Ensures the image covers the entire viewport */
+        background-repeat: no-repeat; /* Prevents the image from repeating */
+      }
+
+      .drag {
+        filter: drop-shadow(rgba(0, 0, 0, 0.5) 1rem 1rem 10px);
+      }
+
+      #highl {
+      position: absolute;
+        top: -20px; /* Adjust top position */
+        left: -20px; /* Adjust left position */
+        border: red solid 2px;
+      }
+    </style>
+  </head>
+<body>
+
+<div class="background">
+
+</div>
+<!--images and id-->
+<div id="cardContainer">
+  <img src="images/CardPictures/BabyDragon.png" class="card" id="card1" >
+  <img src="images/CardPictures/Boar.png" class="card" id="card2" >
+  <img src="images/CardPictures/Darkknight.png" class="card" id="card3" >
+  <img src="images/CardPictures/Dragon.png" class="card" id="card4" >
+  <img src="images/CardPictures/EvilWizard.png" class="card" id="card5" >
+  <img src="images/CardPictures/KnightCaptin.png" class="card" id="card6" >
+  <img src="images/CardPictures/Monk.png" class="card" id="card7" >
+
+  <!-- Add more cards as needed -->
+</div>
+
+
+<script>
+  
+  
+  
+  document.addEventListener('click', function() {
+      if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {
+              console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+          });
+      }
+  });
+
+
+  // Select all elements with class 'card' and make them draggable
+  var cards = document.getElementsByClassName("card");
+  let inPlayAreas = [
+    { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 }},
+    { topLeft: { x: 30, y: 285}, bottomRight: { x: 930, y: 510 }},
+    { topLeft: { x: 30, y: 570}, bottomRight: { x: 930, y: 795 }},
+    { topLeft: { x: 30, y: 825}, bottomRight: { x: 930, y: 1050}},
+  ];
+
+  let inHandAreas = [
+    { topLeft: { x: 985, y: 285}, bottomRight: { x: 1890, y: 510}},
+    { topLeft: { x: 985, y: 570}, bottomRight: { x: 1890, y: 795}},
+  ];
+
+
+
+  let hitboxContents = [[],[],[],[],[],[]];
+
+  // Loop through each card and make it draggable
+  for (var i = 0; i < cards.length; i++) {
+    dragElement(cards[i]);
+  }
+
+  function dragElement(element) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    
+    element.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+      e.target.classList.add("drag");
+      
+      let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+      if(!dropLocation) return;
+      let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+      //remove element from array
+      let index = hitboxContents[hitboxNum].indexOf(element);
+      if (index != -1){
+        hitboxContents[hitboxNum].splice(index,1);
+        let numberOfCards = hitboxContents[hitboxNum].length;
+        redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x)
+      }
+
+    }
+
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      element.style.top = (element.offsetTop - pos2) + "px";
+      element.style.left = (element.offsetLeft - pos1) + "px";
+      element.style.zIndex = 10
+    }
+
+    function getCardPositions(numberOfCards) {
+      // total width / numofcards+1
+      // foreach card half width and minus from the bit above
+      let positionS = [];
+      let offset = (1050/(numberOfCards+1));
+      for (let i = 0; i < numberOfCards; i++) {
+        positionS.push((offset * (i +1)) - 150);
+      }
+
+      return positionS;
+    }
+
+
+    function closeDragElement(e) { // handles card being let go
+      e.target.classList.remove("drag"); // removes shadow
+      document.onmouseup = null; // removes events
+      document.onmousemove = null;
+
+      element.style.zIndex = 1; // puts on top
+      let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+      let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+      if (dropLocation){ // if it has data it will snap
+        snapCardY(dropLocation,e.target); // passes the area its over and the card 
+        snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
+      }
+    }
+
+    function snapCardX(hitboxNum, element, cardX, dropLocation){ 
+      numberOfCards = hitboxContents[hitboxNum].length + 1; // creates a variable to say how many cards are in the hitbox and +1 
+      if (numberOfCards > 6) numberOfCards = 6;
+      hitboxContents[hitboxNum].push(element); // adds the new card to the array
+      hitboxContents[hitboxNum].sort((a, b) => parseInt(a.style.left) - parseInt(b.style.left)); // sorts the array
+      redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x)
+    }
+
+    function snapCardY(dropLocation, element){ // takes snapping location and snaps the card
+      element.style.top = (dropLocation.topLeft.y - 0) + "px";
+      // highlight hitbox for debugging
+      let hl = document.getElementById("highl");
+      hl.style.left = dropLocation.topLeft.x + "px";
+      hl.style.top = dropLocation.topLeft.y + "px";
+      hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
+      hl.style.height = dropLocation.bottomRight.y -dropLocation.topLeft.y + "px";
+    }
+
+    function redrawCards(numberOfCards, hitboxNum, left) {
+      let currentPos = getCardPositions(numberOfCards); // gives possible positions of cards relative to num of cards
+      for (let i = 0; i < currentPos.length; i++) { // loops for as many positions
+        hitboxContents[hitboxNum][i].style.left = (left + currentPos[i]) + "px"; // gives the correct x for each card
+      }
+    }
+
+    function dropToSnap(x, y) { 
+      let target;
+      inPlayAreas.forEach((area) => { // goes through all the areas in inPlayAreas and stores in area
+        // if the mouse is inside the area
+        if ((x >= area.topLeft.x && x <= area.bottomRight.x) && 
+        (y >= area.topLeft.y && y <= area.bottomRight.y)) {
+          target = area; // stores matchng area for returning
+        }
+      });
+      
+      inHandAreas.forEach((area) => {
+        if ((x >= area.topLeft.x && x <= area.bottomRight.x) &&
+        (y >= area.topLeft.y && y <= area.bottomRight.y)) {
+          target = area;
+        }
+      });
+      return target; // returns the area to snap too
+    }
+  }
+</script>
+<div id="highl"></div>
+</body>
+</html>

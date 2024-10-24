@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Decks</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .deck-card:hover {
+            transform: scale(1.05); /* Scale up on hover */
+        }
+
+        /* Button styling */
+        button {
+            margin-top: 10px; /* Space above button */
+            padding: 7px 10px; /* Padding for button */
+            font-size: 16px; /* Font size */
+            cursor: pointer; /* Pointer cursor */
+            border: none; /* Remove default border */
+            background-color: #c3846b; /* Button color */
+            color: white; /* Text color */
+            border-radius: 5px; /* Rounded corners */
+            transition: background-color 0.3s ease; /* Transition effect */
+        }
+
+        button:hover {
+            background-color: #b57054; /* Darker shade on hover */
+        }
+    </style>
+</head>
+<body>
+    {% include 'htmlChildren/navbar.html' %}
+    {% include 'htmlChildren/sideNav.html' %}
+
+    <div class="main">
+        <h2>Your Decks</h2>
+        <form action="{{ url_for('show_decks') }}" method="POST">
+            <label for="options">Select an option:</label>
+            <select name="options" id="options" required>
+                <option value="" disabled selected>Select an option</option>
+                {% for deck in decks %}
+                    <option value="{{ deck.Deck }}">{{ deck.Deck }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+        
+        <div class="deck-grid">
+            <!-- You can display deck cards or any additional content here -->
+        </div>
+    </div>
+</body>
+</html>

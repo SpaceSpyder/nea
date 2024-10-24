@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .main {
+            padding: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar  -->
+    
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'htmlChildren/sideNav.html' %}
+</body>
+</html>
