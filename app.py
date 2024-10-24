@@ -1,5 +1,3 @@
-# Required Libraries
-import os
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +5,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from templates.scripts.utils import get_db
+import os  # Import os module
 
 from templates.scripts.models import Users, Decks  # Import your models
 from templates.scripts.utils import (
@@ -34,26 +33,21 @@ def get_session():
 @app.route('/decks/<username>', methods=['GET', 'POST'])
 @app.route('/profile/decks/<username>', methods=['GET', 'POST'])
 def show_decks(username):
-    session_db = get_session()  # Create a new session
-    full_profile_pic_path = get_profile_pic_path(username, session_db)
-
-    # Initialize decks variable
-    decks = []
-
+    session = get_session()
     try:
-        user_id = get_user_id_by_username(username, session_db)  # Pass both parameters
-        if user_id is not None:
-            decks = get_decks_for_user(user_id, session_db)
-        else:
-            print("User ID not found for username:", username)  # Logging for debugging
-    except Exception as e:
-        print(f"Error fetching decks: {e}")  # Log the error
-    finally:
-        session_db.close()  # Always close the session
+        user_id = get_user_id_by_username(session, username)
+        if not user_id:
+            flash('User not found', 'error')
+            return redirect(url_for('index'))
 
-    # Return the template with the decks, profile picture, and username
-    return render_template('decks.html', decks=decks, profile_pic=full_profile_pic_path, username=username)
-=======
+        decks = get_decks_for_user(session, user_id)
+        return render_template('decks.html', username=username, decks=decks)
+    except Exception as e:
+        flash(str(e), 'error')
+        return redirect(url_for('index'))
+    finally:
+        session.close()
+
 @app.route('/decks', methods=['GET', 'POST'])
 @app.route('/profile/decks', methods=['GET', 'POST'])
 def show_decks():
@@ -76,10 +70,6 @@ def show_decks():
         session_db.close()  # Ensure the session is closed
 
     return render_template('decks.html', decks=decks, profile_pic=full_profile_pic_path)
-
->>>>>>> 791c6f989ac15bb4aa31d7d861b24360b4ec6995
-
-
 
 @app.route('/home')
 @app.route('/index')
@@ -273,7 +263,6 @@ def stats():
 
     session_db = get_session()
     full_profile_pic_path = get_profile_pic_path(username, session_db)
-<<<<<<< HEAD
 
     conn = session_db.bind.raw_connection()  # Use the same session_db
     cursor = conn.cursor()  # Create the cursor
@@ -302,38 +291,6 @@ def stats():
         conn.close()    # Close the connection
 
     return render_template('stats.html', profile_pic=full_profile_pic_path, stats=stats_data, username=username)
-
-
-=======
-    session_db.close()
-
-    conn = get_session().bind.raw_connection()  # Use SQLAlchemy's connection
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
-    result = cursor.fetchone()
-
-    if result:
-        user_id = result[0]
-        cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated FROM UserStats WHERE UserId = ?", (user_id,))
-        user_stats = cursor.fetchone()
-
-        if user_stats:
-            stats_data = {
-                "GamesPlayed": user_stats[0],
-                "GamesWon": user_stats[1],
-                "DateCreated": user_stats[2]
-            }
-        else:
-            stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
-    else:
-        stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
-
-    cursor.close()
-    conn.close()
-
-    return render_template('stats.html', profile_pic=full_profile_pic_path, stats=stats_data)
->>>>>>> 791c6f989ac15bb4aa31d7d861b24360b4ec6995
 
 if __name__ == '__main__':
     app.run(debug=True)
