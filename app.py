@@ -6,11 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-<<<<<<< HEAD
 from templates.scripts.utils import get_db
 
-=======
->>>>>>> 791c6f989ac15bb4aa31d7d861b24360b4ec6995
 from templates.scripts.models import Users, Decks  # Import your models
 from templates.scripts.utils import (
     get_profile_pic_path,
@@ -34,7 +31,6 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 def get_session():
     return SessionLocal()
 
-<<<<<<< HEAD
 @app.route('/decks/<username>', methods=['GET', 'POST'])
 @app.route('/profile/decks/<username>', methods=['GET', 'POST'])
 def show_decks(username):
