@@ -38,6 +38,8 @@ def close_connection(exception):
 @app.route('/decks/<username>', methods=['GET', 'POST'])
 @app.route('/profile/decks/<username>', methods=['GET', 'POST'])
 def show_decks(username):
+    # save the username to a var
+    # 
     # Get the path of the profile picture for html
     username = session.get('Username')
     full_profile_pic_path = get_profile_pic_path(username)
@@ -50,7 +52,7 @@ def show_decks(username):
         flash('User not found', 'error')
         return redirect(url_for('index'))
 
-    deck_id = request.form.get('deck')
+    deck_id = request.args.get('deck')
     if deck_id:
         pass
     else:
