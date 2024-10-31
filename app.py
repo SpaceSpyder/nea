@@ -10,6 +10,7 @@ from templates.scripts.utils import (
     get_user_id_by_username,
     get_user_details_by_username,
     get_decks_for_user,
+    get_deck_for_user,
 )
 
 # Database setup
@@ -19,7 +20,7 @@ DATABASE_URI = 'databases/database.db'  # SQLite database file path
 app = Flask(__name__, static_folder='templates', static_url_path='')
 app.config['SECRET_KEY'] = 't67wtEq'
 app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) # session timeout after 1 hour
 
 # Helper function to get a database connection
 def get_db():
@@ -37,7 +38,11 @@ def close_connection(exception):
 @app.route('/decks/<username>', methods=['GET', 'POST'])
 @app.route('/profile/decks/<username>', methods=['GET', 'POST'])
 def show_decks(username):
-    if 'username' not in session:
+    # Get the path of the profile picture for html
+    username = session.get('Username')
+    full_profile_pic_path = get_profile_pic_path(username)
+
+    if 'Username' not in session:
         return redirect(url_for('login'))
 
     user_id = get_user_id_by_username(username)
@@ -45,14 +50,21 @@ def show_decks(username):
         flash('User not found', 'error')
         return redirect(url_for('index'))
 
+    deck_id = request.form.get('deck')
+    if deck_id:
+        pass
+    else:
+        deck_id = session.get('CurrentDeck')
     decks = get_decks_for_user(username)
-    return render_template('decks.html', username=username, decks=decks)
+    deck = get_deck_for_user(username, deck_id)
+
+    return render_template('decks.html', username=username, decks=decks, deck=deck, profile_pic=full_profile_pic_path)
 
 @app.route('/home')
 @app.route('/index')
 @app.route('/')
 def index():
-    username = session.get('username')
+    username = session.get('Username')
     full_profile_pic_path = get_profile_pic_path(username)
     return render_template('index.html', profile_pic=full_profile_pic_path)
 
@@ -66,7 +78,7 @@ def submit():
 
 @app.route('/testGame')
 def testGame():
-    if 'username' not in session:
+    if 'Username' not in session:
         return redirect(url_for('login'))
     return render_template('game.html')
 
@@ -80,7 +92,7 @@ def temp():
 
 @app.route('/dbTest', methods=['GET'])
 def dbTest():
-    username = session.get('username')
+    username = session.get('Username')
     full_profile_pic_path = get_profile_pic_path(username)
 
     conn = get_db()
@@ -101,8 +113,7 @@ def login():
         cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
         result = cursor.fetchone()
         if result and check_password_hash(result[2], password):  # Adjust based on your actual table structure
-            session['username'] = username
-            session.permanent = True
+            get_user_details_by_username(username)
             flash('Logged in successfully!', 'success')
             return redirect(url_for('index'))
         else:
@@ -112,7 +123,7 @@ def login():
 
 @app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
-    username = session.get('username')
+    username = session.get('Username')
     full_profile_pic_path = get_profile_pic_path(username)
 
     if request.method == 'POST':
@@ -128,7 +139,7 @@ def signUp():
                               VALUES (?, ?, ?, ?, 'Default.png')""",
                            (username, password, email, date))
             conn.commit()
-            session['username'] = username
+            session['Username'] = username
             session.permanent = True
             flash('Signed up successfully!', 'success')
             return redirect(url_for('index'))
@@ -141,16 +152,16 @@ def signUp():
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
+    session.pop('Username', None)
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
 @app.route('/profile')
 def profile():
-    if 'username' not in session:
+    if 'Username' not in session:
         return redirect(url_for('login'))
 
-    username = session['username']
+    username = session['Username']
     full_profile_pic_path = get_profile_pic_path(username)
     return render_template('profile.html', profile_pic=full_profile_pic_path)
 
@@ -158,10 +169,10 @@ def profile():
 def change_profile_pic():
     full_profile_pic_path = url_for('static', filename='images/profilePics/Default.png')
 
-    if 'username' not in session:
+    if 'Username' not in session:
         return redirect(url_for('login'))
 
-    username = session['username']
+    username = session['Username']
     user_details = get_user_details_by_username(username)
 
     if user_details:
@@ -203,7 +214,7 @@ def change_profile_pic():
 
 @app.route('/use_deck', methods=['POST'])
 def use_deck():
-    if 'username' not in session:
+    if 'Username' not in session:
         return redirect(url_for('login'))
 
     selected_deck = request.form.get('decks')
@@ -213,7 +224,7 @@ def use_deck():
 @app.route('/profile/stats', methods=['GET'])
 @app.route('/stats', methods=['GET'])
 def stats():
-    username = session.get('username')
+    username = session.get('Username')
 
     if not username:
         return "User not logged in", 403
