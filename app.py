@@ -11,6 +11,8 @@ from templates.scripts.utils import (
     get_user_details_by_username,
     get_decks_for_user,
     get_deck_for_user,
+    get_db,
+    close_db,
 )
 
 # Database setup
@@ -22,18 +24,6 @@ app.config['SECRET_KEY'] = 't67wtEq'
 app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) # session timeout after 1 hour
 
-# Helper function to get a database connection
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE_URI)
-    return db
-
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
 
 @app.route('/decks/<username>', methods=['GET', 'POST'])
 @app.route('/profile/decks/<username>', methods=['GET', 'POST'])
@@ -41,26 +31,40 @@ def show_decks(username):
     # save the username to a var
     # 
     # Get the path of the profile picture for html
-    username = session.get('Username')
-    full_profile_pic_path = get_profile_pic_path(username)
+    sessionUsername = session.get('Username')
+    full_profile_pic_path = get_profile_pic_path(sessionUsername)
 
     if 'Username' not in session:
         return redirect(url_for('login'))
 
-    user_id = get_user_id_by_username(username)
-    if not user_id:
-        flash('User not found', 'error')
-        return redirect(url_for('index'))
+    if sessionUsername == username:
+        user_id = get_user_id_by_username(sessionUsername)
+        if not user_id:
+            flash('User not found', 'error')
+            return redirect(url_for('index'))
 
-    deck_id = request.args.get('deck')
-    if deck_id:
-        pass
+        deck_id = request.args.get('deck')
+        if deck_id:
+            pass
+        else:
+            deck_id = session.get('CurrentDeck')
+        decks = get_decks_for_user(sessionUsername)
+        deck = get_deck_for_user(sessionUsername, deck_id)
     else:
-        deck_id = session.get('CurrentDeck')
-    decks = get_decks_for_user(username)
-    deck = get_deck_for_user(username, deck_id)
+        user_id = get_user_id_by_username(username)
+        if not user_id:
+            flash('User not found', 'error')
+            return redirect(url_for('index'))
 
-    return render_template('decks.html', username=username, decks=decks, deck=deck, profile_pic=full_profile_pic_path)
+        deck_id = request.args.get('deck')
+        if deck_id:
+            pass
+        else:
+            deck_id = session.get('CurrentDeck')
+        decks = get_decks_for_user(username)
+        deck = get_deck_for_user(username, deck_id)
+
+    return render_template('decks.html', username=sessionUsername, decks=decks, deck=deck, profile_pic=full_profile_pic_path)
 
 @app.route('/home')
 @app.route('/index')
@@ -109,7 +113,6 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
@@ -132,29 +135,34 @@ def signUp():
         username = request.form['username']
         password = generate_password_hash(request.form['password'])
         email = request.form['email']
-        date = datetime.today().strftime('%Y-%m-%d')
 
-        conn = get_db()
-        cursor = conn.cursor()
         try:
-            cursor.execute("""INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
-                              VALUES (?, ?, ?, ?, 'Default.png')""",
-                           (username, password, email, date))
-            conn.commit()
-            session['Username'] = username
-            session.permanent = True
+            sign_up(username, password, email)
             flash('Signed up successfully!', 'success')
             return redirect(url_for('index'))
         except sqlite3.IntegrityError as e:
-            conn.rollback()
             flash(f'Error: {str(e)}', 'error')
             return render_template('signUp.html')
 
     return render_template('signUp.html', profile_pic=full_profile_pic_path)
 
+def sign_up(username, password, email):
+    date = datetime.today().strftime('%Y-%m-%d')
+    conn = get_db()
+    try:
+        with conn:
+            conn.execute("""INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
+                            VALUES (?, ?, ?, ?, 'Default.png')""",
+                         (username, password, email, date))
+            session['Username'] = username
+            session.permanent = True
+    except sqlite3.OperationalError as e:
+        print(f"Error: {e}")
+        # Handle the error appropriately
+
 @app.route('/logout')
 def logout():
-    session.pop('Username', None)
+    session.clear()
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 

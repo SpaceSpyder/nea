@@ -9,40 +9,58 @@ DATABASE_URI = 'databases/database.db'  # SQLite database file path
 
 # Helper function to get a database connection
 def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE_URI)
-    return db
+    if 'db' not in g:
+        g.db = sqlite3.connect(
+            DATABASE_URI,
+            detect_types=sqlite3.PARSE_DECLTYPES,
+            timeout=10  # Increase the timeout to 10 seconds
+        )
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+def close_db(exception):
+    db = g.pop('db', None)
+
+    if db is not None:
+        db.close()
 
 def get_user_id_by_username(username):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
-    user = cursor.fetchone()
-    if user:
-        return user[0]
-    return None
+    try:
+        cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
+        user = cursor.fetchone()
+        if user:
+            return user[0]
+        return None
+    finally:
+        cursor.close()
 
 def get_user_details_by_username(username):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
-    user = cursor.fetchone()
-    if user:
-        session['Id'] = user[0]
-        session['username'] = user[1]
-        session['Email'] = user[3]
-        session['DateCreated'] = user[4]
-        session['ProfilePicture'] = user[5]
-        session['CurrentDeck'] = user[6]
-    return user
+    try:
+        cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
+        user = cursor.fetchone()
+        if user:
+            session['Id'] = user[0]
+            session['Username'] = user[1]
+            session['Email'] = user[3]
+            session['DateCreated'] = user[4]
+            session['ProfilePicture'] = user[5]
+            session['CurrentDeck'] = user[6]
+        return user
+    finally:
+        cursor.close()
 
 def get_decks_for_user(username):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username,))
-    decks = cursor.fetchall()
-    return decks
+    try:
+        cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username,))
+        return cursor.fetchall()
+    finally:
+        cursor.close()
 
 def get_deck_for_user(username, deck_id):
     conn = get_db()
