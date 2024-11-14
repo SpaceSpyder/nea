@@ -38,9 +38,9 @@
   </head>
 <body>
 
-<div class="background">
+<!--<div class="background">-->
+<!--</div>-->
 
-</div>
 <!--images and id-->
 <div id="cardContainer">
   <img src="images/CardPictures/BabyDragon.png" class="card" id="card1" >
@@ -70,7 +70,7 @@
 
   let cardData = [];
   // Select all elements with class 'card' and make them draggable
-  var cards = document.getElementsByClassName("card");
+  var cards = [...document.getElementsByClassName("card")];
   cards.forEach(card => {
     cardData.push({
       element: card,
@@ -79,6 +79,7 @@
       owner: "me"
     });
   });
+
   let inPlayAreas = [
     { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 }},
     { topLeft: { x: 30, y: 285}, bottomRight: { x: 930, y: 510 }},
@@ -90,7 +91,6 @@
     { topLeft: { x: 985, y: 285}, bottomRight: { x: 1890, y: 510}},
     { topLeft: { x: 985, y: 570}, bottomRight: { x: 1890, y: 795}},
   ];
-
 
 
   let hitboxContents = [[],[],[],[],[],[]];
