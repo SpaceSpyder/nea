@@ -80,7 +80,9 @@ def get_deck_for_user(username, deck_id):
 def get_profile_pic_path(username=None):
     # Default profile picture path
     default_pic_path = url_for('static', filename='images/profilePics/Default.png')
-
+    print()
+    print(username)
+    print()
     if not username:
         # Return default profile picture path if no username is provided
         return default_pic_path

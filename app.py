@@ -94,8 +94,9 @@ def logout():
 
 @app.route('/profile')
 def profile():
-    username = check_username()  # Check if the user is logged in
-    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+    if not session.get('Username'):
+        return redirect(url_for('login'))
+    profile_pic_path = get_profile_pic_path(session['Username'])
 
     return render_template('profile.html', profile_pic=profile_pic_path)
 
@@ -103,8 +104,10 @@ def profile():
 @app.route('/profile/stats', methods=['GET'])
 @app.route('/stats', methods=['GET'])
 def stats():
-    username = check_username()  # Check if the user is logged in
-    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+    if not session.get('Username'): # check if the user is logged in
+        return redirect(url_for('login'))
+    profile_pic_path = get_profile_pic_path(session['Username']) # get pfp
+    username = session['Username'] # get username
 
     conn = get_db()
     cursor = conn.cursor()
@@ -136,8 +139,10 @@ def stats():
 
 @app.route('/profile/changePfp', methods=['GET', 'POST'])
 def change_profile_pic():
-    username = check_username()  # Check if the user is logged in
-    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+    if not session.get('Username'): # check if the user is logged in
+        return redirect(url_for('login'))
+    profile_pic_path = get_profile_pic_path(session['Username']) # get pfp
+    username = session['Username'] # get username
 
     # Handle the POST request to change the profile picture
     if request.method == 'POST':
@@ -183,8 +188,10 @@ def change_profile_pic():
 
 @app.route('/use_deck', methods=['POST'])
 def use_deck():
-    username = check_username()  # Check if the user is logged in
-    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+    if not session.get('Username'): # check if the user is logged in
+        return redirect(url_for('login'))
+    profile_pic_path = get_profile_pic_path(session['Username']) # get pfp
+    username = session['Username'] # get username
 
     selected_deck = request.form.get('decks')
     flash(f'You are now using the deck: {selected_deck}', 'success')
@@ -238,8 +245,10 @@ def insert_user(username, password, email):
 
 @app.route('/template')
 def temp():
-    username = check_username()  # Check if the user is logged in
-    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+    if not session.get('Username'): # check if the user is logged in
+        return redirect(url_for('login'))
+    profile_pic_path = get_profile_pic_path(session['Username']) # get pfp
+    username = session['Username'] # get username
 
     return render_template('template.html', profile_pic=profile_pic_path)
 

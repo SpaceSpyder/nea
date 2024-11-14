@@ -23,11 +23,25 @@
 
     <br/>
     <h1 class="large-text">Fantasy Card Fight</h1>
-    
 
+    <!-- Navigation Links -->
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('signUp') }}">Sign Up</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            <li><a href="{{ url_for('profile') }}">Profile</a></li>
+            <li><a href="{{ url_for('stats') }}">Stats</a></li>
+            <li><a href="{{ url_for('change_profile_pic') }}">Change Profile Picture</a></li>
+            <li><a href="{{ url_for('use_deck') }}">Use Deck</a></li>
+            <li><a href="{{ url_for('submit') }}">Submit</a></li>
+            <li><a href="{{ url_for('testGame') }}">Test Game</a></li>
+            <li><a href="{{ url_for('dbTest') }}">Database Test</a></li>
+            <li><a href="{{ url_for('temp') }}">Template</a></li>
+        </ul>
+    </nav>
 
-    
-    <script src="{{ url_for('static', filename='js/alert.js') }}">
-    </script>
+    <script src="{{ url_for('static', filename='js/alert.js') }}"></script>
 </body>
 </html>
