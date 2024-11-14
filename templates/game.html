@@ -70,7 +70,7 @@
 
   let cardData = [];
   // Select all elements with class 'card' and make them draggable
-  var cards = [...document.getElementsByClassName("card")];
+  var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
   cards.forEach(card => {
     cardData.push({
       element: card,
@@ -169,7 +169,7 @@
 
         snapCardY(dropLocation,e.target); // passes the area its over and the card 
         snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
-        numberOfCards = hitboxContents[hitboxNum].length + 1; // creates a variable to say how many cards are in the hitbox and +1 
+        numberOfCards = hitboxContents[hitboxNum].length; // creates a variable to say how many cards are in the hitbox and +1 
         if (numberOfCards > 6) numberOfCards = 6;
         redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
       } 
