@@ -17,7 +17,7 @@
         }
     </style>
 
-    <script>
+    <script src="{{ url_for('static', filename='js/alert.js') }}">
         function checkDetails(event) {
             let username = document.querySelector("input[name='username']").value;
             let password = document.querySelector("input[name='password']").value;
@@ -26,18 +26,6 @@
                 event.preventDefault();  // Prevents the form from submitting
             }
         }
-
-        // Fade out flash messages after 3 seconds
-        setTimeout(function() {
-            var flashes = document.querySelectorAll('.flashes li');
-            flashes.forEach(function(flash) {
-                flash.style.transition = 'opacity 1s ease-out';
-                flash.style.opacity = '0';
-                setTimeout(function() {
-                    flash.style.display = 'none';
-                }, 1000); // Wait for the transition to complete before hiding the element
-            });
-        }, 3000); // 3 seconds delay before starting the fade out
     </script>
 </head>
 
