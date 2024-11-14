@@ -7,8 +7,8 @@
             <a href="">How to Play</a>
         </li>
         <li class="float-right navbar-right">
-            {% if session.username %}
-                <a href="/profile" class="cookie-link">{{ session.username }}</a>
+            {% if session.Username %}
+                <a href="/profile" class="cookie-link">{{ session.Username }}</a>
             {% else %}
                 <a href="/login" class="cookie-link">Log In</a>
             {% endif %}

@@ -1,9 +1,6 @@
 import os
 import sqlite3
 from flask import g, url_for, session
-#from sqlalchemy import text
-#from sqlalchemy.orm import Session as SqlAlchemySession
-from templates.scripts.models import Decks
 
 DATABASE_URI = 'databases/database.db'  # SQLite database file path
 
@@ -20,26 +17,26 @@ def get_db():
 
 def close_db(exception):
     db = g.pop('db', None)
-
     if db is not None:
         db.close()
 
 def get_user_id_by_username(username):
-    conn = get_db()
-    cursor = conn.cursor()
     try:
+        conn = get_db()
+        cursor = conn.cursor()
         cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
-        if user:
-            return user[0]
+        return user[0] if user else None
+    except sqlite3.DatabaseError as e:
+        print(f"Database error: {e}")
         return None
     finally:
         cursor.close()
 
 def get_user_details_by_username(username):
-    conn = get_db()
-    cursor = conn.cursor()
     try:
+        conn = get_db()
+        cursor = conn.cursor()
         cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
         if user:
@@ -50,35 +47,51 @@ def get_user_details_by_username(username):
             session['ProfilePicture'] = user[5]
             session['CurrentDeck'] = user[6]
         return user
+    except sqlite3.DatabaseError as e:
+        print(f"Database error: {e}")
+        return None
     finally:
         cursor.close()
 
 def get_decks_for_user(username):
-    conn = get_db()
-    cursor = conn.cursor()
     try:
+        conn = get_db()
+        cursor = conn.cursor()
         cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username,))
         return cursor.fetchall()
+    except sqlite3.DatabaseError as e:
+        print(f"Database error: {e}")
+        return []
     finally:
         cursor.close()
 
 def get_deck_for_user(username, deck_id):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Decks WHERE Owner = ? AND DeckId = ?", (username,deck_id))
-    decks = cursor.fetchall()
-    return decks
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Decks WHERE Owner = ? AND DeckId = ?", (username, deck_id))
+        return cursor.fetchall()
+    except sqlite3.DatabaseError as e:
+        print(f"Database error: {e}")
+        return []
+    finally:
+        cursor.close()
 
-def get_profile_pic_path(username):
-    profile_pic = session.get('ProfilePicture')
-    return url_for('static', filename=f'images/profilePics/{profile_pic}')
+def get_profile_pic_path(username=None):
+    if username:
+        # Retrieve the profile picture for the specific user from the database (like in /decks)
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,))
+        result = cursor.fetchone()
+        cursor.close()
+        
+        if result and result[0]:
+            return url_for('static', filename=f'images/profilePics/{result[0]}')
+        else:
+            return url_for('static', filename='images/profilePics/Default.png')
+    else:
+        # Default behavior for the logged-in user
+        return url_for('static', filename='images/profilePics/Default.png')
 
 
-
-# def get_profile_pic_path(username):
-#     user = get_user_details_by_username(username)
-#     if user and len(user) > 5:  # Ensure the tuple has enough elements
-#         profile_pic = user[5]  # Assuming ProfilePicture is the 6th column
-#         if profile_pic:
-#             return url_for('static', filename=f'images/profilePics/{profile_pic}')
-#     return url_for('static', filename='images/profilePics/Default.png')
