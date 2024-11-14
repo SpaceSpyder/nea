@@ -23,85 +23,16 @@ DATABASE_URI = 'databases/database.db'  # SQLite database file path
 app = Flask(__name__, static_folder='templates', static_url_path='')
 app.config['SECRET_KEY'] = 't67wtEq'
 app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) # session timeout after 1 hour
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)  # session timeout after 1 hour
 
-
-@app.route('/decks/<username>', methods=['GET', 'POST'])
-@app.route('/profile/decks/<username>', methods=['GET', 'POST'])
-def show_decks(username):
-    # Get the profile picture path for the specified username
-    full_profile_pic_path = get_profile_pic_path(username)
-    
-    # Check if the user exists
-    user_id = get_user_id_by_username(username)
-    if not user_id:
-        flash('User not found', 'error')
-        return redirect(url_for('index'))
-
-    # Get deck ID from URL parameters, if any
-    deck_id = request.args.get('deck', session.get('CurrentDeck'))
-
-    # Retrieve decks for the specified username
-    decks = get_decks_for_user(username)
-    deck = get_deck_for_user(username, deck_id)
-
-    return render_template(
-        'decks.html', 
-        username=username, 
-        decks=decks, 
-        deck=deck, 
-        profile_pic=full_profile_pic_path
-    )
 
 @app.route('/home')
 @app.route('/index')
 @app.route('/')
 def index():
-    profile_pic_path = get_profile_pic_path()
-
-    return render_template('index.html', profile_pic=profile_pic_path)
-
-
-@app.route('/submit', methods=['GET', 'POST'])
-def submit():
-    if request.method == 'POST':
-        user_input = request.form['user_input']
-        return f'You entered: {user_input}'
-    else:
-        return 'ERROR Method Not Allowed'
-
-
-@app.route('/testGame')
-def testGame():
-    if 'Username' not in session:
-        return redirect(url_for('login'))
-    return render_template('game.html')
-
-
-@app.route('/testGame2')
-def testGame2():
-    return render_template('game2.html')
-
-
-@app.route('/template')
-def temp():
-    username = check_username()  # Check if the user is logged in
-    profile_pic_path = get_profile_pic_path(username)# get profile picture path from the user details
-    
-    return render_template('template.html', profile_pic=profile_pic_path)
-
-
-@app.route('/dbTest', methods=['GET'])
-def dbTest():
     username = session.get('Username')
-    full_profile_pic_path = get_profile_pic_path()
-
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM Users')
-    rows = cursor.fetchall()
-    result = ", ".join(str(row) for row in rows)
-    return render_template('record.html', name=result, profile_pic=full_profile_pic_path)
+    profile_pic_path = get_profile_pic_path(username) if username else get_profile_pic_path()  # get profile picture path from the user details
+    return render_template('index.html', profile_pic=profile_pic_path)
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -130,8 +61,11 @@ def login():
 
 @app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
-    username = session.get('Username')
-    full_profile_pic_path = get_profile_pic_path()
+    if 'Username' in session:
+        flash('You are already signed up!', 'info')
+        return redirect(url_for('index'))
+
+    profile_pic_path = get_profile_pic_path()  # Default profile picture path
 
     if request.method == 'POST':
         username = request.form['username']
@@ -139,29 +73,16 @@ def signUp():
         email = request.form['email']
 
         try:
-            sign_up(username, password, email)
+            insert_user(username, password, email)
+            session['Username'] = username
+            session.permanent = True
             flash('Signed up successfully!', 'success')
             return redirect(url_for('index'))
         except sqlite3.IntegrityError as e:
             flash(f'Error: {str(e)}', 'error')
-            return render_template('signUp.html')
+            return render_template('signUp.html', profile_pic=profile_pic_path)
 
-    return render_template('signUp.html', profile_pic=full_profile_pic_path)
-
-
-def sign_up(username, password, email):
-    date = datetime.today().strftime('%Y-%m-%d')
-    conn = get_db()
-    try:
-        with conn:
-            conn.execute("""INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
-                            VALUES (?, ?, ?, ?, 'Default.png')""",
-                         (username, password, email, date))
-            session['Username'] = username
-            session.permanent = True
-    except sqlite3.OperationalError as e:
-        print(f"Error: {e}")
-        # Handle the error appropriately
+    return render_template('signUp.html', profile_pic=profile_pic_path)
 
 
 @app.route('/logout')
@@ -173,25 +94,50 @@ def logout():
 
 @app.route('/profile')
 def profile():
-    if 'Username' not in session:
-        return redirect(url_for('login'))
+    username = check_username()  # Check if the user is logged in
+    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
 
-    #username = session['Username']
-    full_profile_pic_path = get_profile_pic_path()
-    return render_template('profile.html', profile_pic=full_profile_pic_path)
+    return render_template('profile.html', profile_pic=profile_pic_path)
+
+
+@app.route('/profile/stats', methods=['GET'])
+@app.route('/stats', methods=['GET'])
+def stats():
+    username = check_username()  # Check if the user is logged in
+    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
+        result = cursor.fetchone()
+
+        if result:
+            user_id = result[0]
+            cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated FROM UserStats WHERE UserId = ?", (user_id,))
+            user_stats = cursor.fetchone()
+
+            if user_stats:
+                stats_data = {
+                    "GamesPlayed": user_stats[0],
+                    "GamesWon": user_stats[1],
+                    "DateCreated": user_stats[2]
+                }
+            else:
+                stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
+        else:
+            stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
+    finally:
+        cursor.close()
+
+    return render_template('stats.html', profile_pic=profile_pic_path, stats=stats_data, username=username)
 
 
 @app.route('/profile/changePfp', methods=['GET', 'POST'])
 def change_profile_pic():
-
-    # Check if the user is logged in
-    if 'Username' not in session:
-        return redirect(url_for('login'))
-    else:
-        username = session['Username'] # Get the username from the session
-    
-    # get profile picture path from the user details
-    profile_pic_path = get_profile_pic_path(username)
+    username = check_username()  # Check if the user is logged in
+    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
 
     # Handle the POST request to change the profile picture
     if request.method == 'POST':
@@ -234,51 +180,69 @@ def change_profile_pic():
     # Render the change profile picture template
     return render_template('changePfp.html', profile_pic=profile_pic_path)
 
+
 @app.route('/use_deck', methods=['POST'])
 def use_deck():
-    if 'Username' not in session:
-        return redirect(url_for('login'))
+    username = check_username()  # Check if the user is logged in
+    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
 
     selected_deck = request.form.get('decks')
     flash(f'You are now using the deck: {selected_deck}', 'success')
     return redirect(url_for('testGame'))
 
-@app.route('/profile/stats', methods=['GET'])
-@app.route('/stats', methods=['GET'])
-def stats():
+
+@app.route('/submit', methods=['GET', 'POST'])
+def submit():
+    if request.method == 'POST':
+        user_input = request.form['user_input']
+        return f'You entered: {user_input}'
+    else:
+        return 'ERROR Method Not Allowed'
+
+
+@app.route('/testGame')
+def testGame():
+    username = check_username()  # Check if the user is logged in
+    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+
+    return render_template('game.html')
+
+
+@app.route('/dbTest', methods=['GET'])
+def dbTest():
     username = session.get('Username')
-
-    if not username:
-        return "User not logged in", 403
-
     full_profile_pic_path = get_profile_pic_path()
 
     conn = get_db()
     cursor = conn.cursor()
+    cursor.execute('SELECT * FROM Users')
+    rows = cursor.fetchall()
+    result = ", ".join(str(row) for row in rows)
+    return render_template('record.html', name=result, profile_pic=full_profile_pic_path)
 
+
+def insert_user(username, password, email):
+    date = datetime.today().strftime('%Y-%m-%d')
+    conn = get_db()
     try:
-        cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
-        result = cursor.fetchone()
-
-        if result:
-            user_id = result[0]
-            cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated FROM UserStats WHERE UserId = ?", (user_id,))
-            user_stats = cursor.fetchone()
-
-            if user_stats:
-                stats_data = {
-                    "GamesPlayed": user_stats[0],
-                    "GamesWon": user_stats[1],
-                    "DateCreated": user_stats[2]
-                }
-            else:
-                stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
-        else:
-            stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
+        with conn:
+            conn.execute("""INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
+                            VALUES (?, ?, ?, ?, 'Default.png')""",
+                         (username, password, email, date))
+    except sqlite3.OperationalError as e:
+        print(f"Error: {e}")  # Error handling
+        raise
     finally:
-        cursor.close()
+        close_db(conn)  # Close the database connection
 
-    return render_template('stats.html', profile_pic=full_profile_pic_path, stats=stats_data, username=username)
+
+@app.route('/template')
+def temp():
+    username = check_username()  # Check if the user is logged in
+    profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+
+    return render_template('template.html', profile_pic=profile_pic_path)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
