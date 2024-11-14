@@ -137,6 +137,37 @@ def stats():
     return render_template('stats.html', profile_pic=profile_pic_path, stats=stats_data, username=username)
 
 
+@app.route('/decks/<username>', methods=['GET', 'POST'])
+@app.route('/profile/decks/<username>', methods=['GET', 'POST'])
+def show_decks(username):
+    if not session.get('Username'): # check if the user is logged in
+        return redirect(url_for('login'))
+    profile_pic_path = get_profile_pic_path(session['Username']) # get pfp
+    username = session['Username'] # get username
+
+    
+    # Check if the user exists
+    user_id = get_user_id_by_username(username)
+    if not user_id:
+        flash('User not found', 'error')
+        return redirect(url_for('index'))
+
+    # Get deck ID from URL parameters, if any
+    deck_id = request.args.get('deck', session.get('CurrentDeck'))
+
+    # Retrieve decks for the specified username
+    decks = get_decks_for_user(username)
+    deck = get_deck_for_user(username, deck_id)
+
+    return render_template(
+        'decks.html', 
+        username=username, 
+        decks=decks, 
+        deck=deck, 
+        profile_pic=profile_pic_path
+    )
+
+
 @app.route('/profile/changePfp', methods=['GET', 'POST'])
 def change_profile_pic():
     if not session.get('Username'): # check if the user is logged in
