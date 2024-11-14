@@ -13,6 +13,7 @@ from templates.scripts.utils import (
     get_deck_for_user,
     get_db,
     close_db,
+    check_username,
 )
 
 # Database setup
@@ -56,8 +57,9 @@ def show_decks(username):
 @app.route('/index')
 @app.route('/')
 def index():
-    full_profile_pic_path = get_profile_pic_path()
-    return render_template('index.html', profile_pic=full_profile_pic_path)
+    profile_pic_path = get_profile_pic_path()
+
+    return render_template('index.html', profile_pic=profile_pic_path)
 
 
 @app.route('/submit', methods=['GET', 'POST'])
@@ -81,9 +83,12 @@ def testGame2():
     return render_template('game2.html')
 
 
-@app.route('/temp')
+@app.route('/template')
 def temp():
-    return render_template('temp.html')
+    username = check_username()  # Check if the user is logged in
+    profile_pic_path = get_profile_pic_path(username)# get profile picture path from the user details
+    
+    return render_template('template.html', profile_pic=profile_pic_path)
 
 
 @app.route('/dbTest', methods=['GET'])
@@ -101,6 +106,11 @@ def dbTest():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    # Check if the user is already logged in
+    if 'Username' in session:
+        flash('You are already logged in!', 'info')
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -173,37 +183,42 @@ def profile():
 
 @app.route('/profile/changePfp', methods=['GET', 'POST'])
 def change_profile_pic():
-    full_profile_pic_path = url_for('static', filename='images/profilePics/Default.png')
 
+    # Check if the user is logged in
     if 'Username' not in session:
         return redirect(url_for('login'))
+    else:
+        username = session['Username'] # Get the username from the session
+    
+    # get profile picture path from the user details
+    profile_pic_path = get_profile_pic_path(username)
 
-    username = session['Username']
-    user_details = get_user_details_by_username(username)
-
-    if user_details:
-        Id, ProfilePicture = user_details[0], user_details[5]  # Correct index for ProfilePicture
-        full_profile_pic_path = url_for('static', filename=f'images/profilePics/{ProfilePicture}') if ProfilePicture else full_profile_pic_path
-
+    # Handle the POST request to change the profile picture
     if request.method == 'POST':
+        # Check if the profile picture file is in the request
         if 'profile_pic' not in request.files:
             flash('No file part', 'error')
             return redirect(url_for('profile'))
 
         file = request.files['profile_pic']
+        # Check if a file is selected
         if file.filename == '':
             flash('No selected file', 'error')
             return redirect(url_for('profile'))
 
         if file:
+            # Secure the filename and set the upload folder
             filename = secure_filename(file.filename)
             app.config['UPLOAD_FOLDER'] = os.path.join('templates', 'images', 'profilePics')
 
+            # Create the upload folder if it doesn't exist
             if not os.path.exists(app.config['UPLOAD_FOLDER']):
                 os.makedirs(app.config['UPLOAD_FOLDER'])
 
+            # Save the file to the upload folder
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
+            # Update the user's profile picture in the database
             conn = get_db()
             cursor = conn.cursor()
             try:
@@ -216,7 +231,8 @@ def change_profile_pic():
 
             return redirect(url_for('profile'))
 
-    return render_template('changePfp.html', profile_pic=full_profile_pic_path)
+    # Render the change profile picture template
+    return render_template('changePfp.html', profile_pic=profile_pic_path)
 
 @app.route('/use_deck', methods=['POST'])
 def use_deck():

@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from flask import g, url_for, session
+from flask import g, url_for, session, redirect
 
 DATABASE_URI = 'databases/database.db'  # SQLite database file path
 
@@ -78,20 +78,30 @@ def get_deck_for_user(username, deck_id):
         cursor.close()
 
 def get_profile_pic_path(username=None):
-    if username:
-        # Retrieve the profile picture for the specific user from the database (like in /decks)
-        conn = get_db()
+    # Default profile picture path
+    default_pic_path = url_for('static', filename='images/profilePics/Default.png')
+
+    if not username:
+        # Return default profile picture path if no username is provided
+        return default_pic_path
+
+    # Retrieve the profile picture for the specific user from the database
+    with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,))
-        result = cursor.fetchone()
-        cursor.close()
-        
-        if result and result[0]:
-            return url_for('static', filename=f'images/profilePics/{result[0]}')
-        else:
-            return url_for('static', filename='images/profilePics/Default.png')
+        try:
+            cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,))
+            result = cursor.fetchone()
+        finally:
+            cursor.close()
+
+    # Return the user's profile picture path if it exists, otherwise return the default path
+    if result and result[0]:
+        return url_for('static', filename=f'images/profilePics/{result[0]}')
     else:
-        # Default behavior for the logged-in user
-        return url_for('static', filename='images/profilePics/Default.png')
+        return default_pic_path
 
-
+def check_username():
+    if 'Username' not in session:  # Check if the user is logged in
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+    else:
+        return session['Username']  # Get the username from the session

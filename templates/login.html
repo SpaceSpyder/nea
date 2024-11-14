@@ -26,26 +26,39 @@
                 event.preventDefault();  // Prevents the form from submitting
             }
         }
+
+        // Fade out flash messages after 3 seconds
+        setTimeout(function() {
+            var flashes = document.querySelectorAll('.flashes li');
+            flashes.forEach(function(flash) {
+                flash.style.transition = 'opacity 1s ease-out';
+                flash.style.opacity = '0';
+                setTimeout(function() {
+                    flash.style.display = 'none';
+                }, 1000); // Wait for the transition to complete before hiding the element
+            });
+        }, 3000); // 3 seconds delay before starting the fade out
     </script>
 </head>
 
 <body>
     {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
 
+    <!-- Flash messages block -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     <div class="tablet">
         <br/><br/>
         <h1 class="large-text in-tablet">Log In:</h1>
         <br/>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <p class="{{ category }}">{{ message }}</p>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-
 
         <form method="post" action="{{ url_for('login') }}" class="in-tablet">
             <input class="medium-text" required type="text" name="username" placeholder="Username"> <!-- asks for user name -->

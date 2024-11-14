@@ -250,3 +250,29 @@ hr {
     border-top: 2px solid rgba(0, 0, 0, 0.708);
     width: 100%;
 }
+
+.flashes {
+    list-style-type: none;
+    padding: 0;
+}
+
+.flashes li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.flashes .info {
+    background-color: #d9edf7;
+    color: #31708f;
+}
+
+.flashes .success {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+.flashes .error {
+    background-color: #f2dede;
+    color: #a94442;
+}
