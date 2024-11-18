@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Change Profile Picture</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="shortcut icon" type="image/png" href="images/SheildLogo.png">
     <style>
         .main {
             padding: 40px;
@@ -14,6 +15,17 @@
 <body>
     {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
 
+    <!-- Flash messages block -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    
     {% include 'htmlChildren/sideNav.html' %}
 
     <div class="main">

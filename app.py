@@ -79,7 +79,10 @@ def signUp():
             flash('Signed up successfully!', 'success')
             return redirect(url_for('index'))
         except sqlite3.IntegrityError as e:
-            flash(f'Error: {str(e)}', 'error')
+            if 'UNIQUE constraint failed: Users.Username' in str(e):
+                flash('Username already exists. Please choose a different username.', 'error')
+            else:
+                flash(f'Error: {str(e)}', 'error')
             return render_template('signUp.html', profile_pic=profile_pic_path)
 
     return render_template('signUp.html', profile_pic=profile_pic_path)

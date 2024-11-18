@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="shortcut icon" type="image/png" href="images/SheildLogo.png">
     <style>
         
     </style>
@@ -12,6 +13,17 @@
 
 <body>
     {% include 'htmlChildren/navbar.html' %} <!-- navbar  -->
+    
+    <!-- Flash messages block -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
     
     <main>
 

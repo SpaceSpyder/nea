@@ -254,6 +254,7 @@ hr {
 .flashes {
     list-style-type: none;
     padding: 0;
+    z-index: 5;
 }
 
 .flashes li {
