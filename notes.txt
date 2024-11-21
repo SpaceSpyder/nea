@@ -42,8 +42,5 @@ card: 150 x 255
 card img: 900 x 
 
 ai img gen:
-gothic, dark, medieval, realistic
+gothic, dark, medieval, realism
 
- 
-
-fav icon
