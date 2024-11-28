@@ -151,7 +151,7 @@ def show_decks(username):
     if not session.get('Username'):  # check if the user is logged in
         return redirect(url_for('login'))
     profile_pic_path = get_profile_pic_path(session['Username'])  # get pfp
-    username = session['Username']  # get username
+    session_username = session['Username']  # get username
 
     # Check if the user exists
     user_id = get_user_id_by_username(username)
@@ -174,12 +174,30 @@ def show_decks(username):
     decks = get_decks_for_user(username)
     deck = get_deck_for_user(username, deck_id)
 
+    # Fetch the current deck from the database
+    try:
+        conn = sqlite3.connect('databases/database.db')
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT Deck FROM Decks
+            WHERE Owner = ?
+        """, (username,))
+        deck_row = cursor.fetchone()
+        current_deck = deck_row[0].split(', ') if deck_row else []
+    except sqlite3.Error as e:
+        flash(f'Error: {str(e)}', 'error')
+        current_deck = []
+    finally:
+        cursor.close()
+        conn.close()
+
     return render_template(
         'decks.html',
-        username=username,
+        profile_pic=profile_pic_path,
+        username=session_username,
         decks=decks,
         deck=deck,
-        profile_pic=profile_pic_path
+        current_deck=current_deck
     )
 
 

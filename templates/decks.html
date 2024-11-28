@@ -39,6 +39,17 @@
         .column img.selected {
             filter: grayscale(0); /* Apply greyscale filter when selected */
         }
+
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .deck-grid .card img {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
@@ -58,6 +69,17 @@
     <div class="main">
         <h1>Decks for {{ username }}</h1>
         
+        <!-- Display the current deck -->
+        <h2>Current Deck</h2>
+        <div class="deck-grid">
+            {% for card in current_deck %}
+            <div class="card">
+                <img src="/images/CardPictures/{{ card }}.png" alt="{{ card }}">
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Deck editor section -->
         {% include 'htmlChildren/deckSelection.html' %}
     </div>
 </body>
