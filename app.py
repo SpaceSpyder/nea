@@ -147,12 +147,11 @@ def stats():
 @app.route('/decks/<username>', methods=['GET', 'POST'])
 @app.route('/profile/decks/<username>', methods=['GET', 'POST'])
 def show_decks(username):
-    if not session.get('Username'): # check if the user is logged in
+    if not session.get('Username'):  # check if the user is logged in
         return redirect(url_for('login'))
-    profile_pic_path = get_profile_pic_path(session['Username']) # get pfp
-    username = session['Username'] # get username
+    profile_pic_path = get_profile_pic_path(session['Username'])  # get pfp
+    username = session['Username']  # get username
 
-    
     # Check if the user exists
     user_id = get_user_id_by_username(username)
     if not user_id:
@@ -162,15 +161,21 @@ def show_decks(username):
     # Get deck ID from URL parameters, if any
     deck_id = request.args.get('deck', session.get('CurrentDeck'))
 
+    if deck_id == "create":
+        # Handle the creation of a new deck
+        # Add your logic for creating a new deck here
+        flash('New deck created successfully!', 'success')
+        return redirect(url_for('show_decks', username=username))
+
     # Retrieve decks for the specified username
     decks = get_decks_for_user(username)
     deck = get_deck_for_user(username, deck_id)
 
     return render_template(
-        'decks.html', 
-        username=username, 
-        decks=decks, 
-        deck=deck, 
+        'decks.html',
+        username=username,
+        decks=decks,
+        deck=deck,
         profile_pic=profile_pic_path
     )
 
@@ -269,15 +274,29 @@ def dbTest():
 def insert_user(username, password, email):
     date = datetime.today().strftime('%Y-%m-%d')
     conn = get_db()
+    cursor = conn.cursor()
     try:
         with conn:
-            conn.execute("""INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
-                            VALUES (?, ?, ?, ?, 'Default.png')""",
-                         (username, password, email, date))
+            # Insert the new user into the Users table
+            cursor.execute("""
+                INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
+                VALUES (?, ?, ?, ?, 'Default.png')
+            """, (username, password, email, date))
+            
+            # Get the user ID of the newly inserted user
+            cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
+            user_id = cursor.fetchone()[0]
+            
+            # Insert a new record into the UserStats table
+            cursor.execute("""
+                INSERT INTO UserStats (UserId, GamesPlayed, GamesWon, DateCreated, FavouriteCard)
+                VALUES (?, 0, 0, ?, '/images/CardPictures/Knight.png')
+            """, (user_id, date))
     except sqlite3.OperationalError as e:
         print(f"Error: {e}")  # Error handling
         raise
     finally:
+        cursor.close()
         close_db(conn)  # Close the database connection
 
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Decks</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="shortcut icon" type="image/png" href="images/SheildLogo.png">
+    <link rel="shortcut icon" type="image/png" href="/images/SheildLogo.png">
     <style>
         .deck-card:hover {
             transform: scale(1.05); /* Scale up on hover */
@@ -27,6 +27,18 @@
         button:hover {
             background-color: #b57054; /* Darker shade on hover */
         }
+
+        .column img {
+            width: 200px;
+            height: 300px;
+            cursor: pointer; /* Change cursor to pointer */
+            transition: filter 0.3s ease; /* Smooth transition for filter effect */
+            filter: brightness(0.8);
+        }
+
+        .column img.clicked {
+            filter: brightness(1.2); /* Apply brightness filter when clicked */
+        }
     </style>
 </head>
 <body>
@@ -42,16 +54,62 @@
                 {% for i in range(1, decks|length + 1) %}
                     <option value="{{ i }}">Deck {{ i }}</option>
                 {% endfor %}
+                <option value="create">Create a new deck</option> <!-- Option to create a new deck -->
             </select>
             <button type="submit">Submit</button>
         </form>
         
-      <p>your deck = {{deck}}</p>
+        <p>Your deck = {{ deck }}</p>
         
         <div class="deck-grid">
-            <!-- You can display deck cards picture -->
+            <!-- Deck grid content goes here -->
         </div>
 
+        <div class="deck-grid">
+            <div class="row">
+                <div class="column">
+                    <img src="/images/CardPictures/Knight.png" class="deck-card">
+                    <img src="/images/CardPictures/Dragon.png" class="deck-card">
+                    <img src="/images/CardPictures/Cavalry.png" class="deck-card">
+                    <img src="/images/CardPictures/boar.png" class="deck-card">
+                    <img src="/images/CardPictures/Wizard.png" class="deck-card">
+                    <img src="/images/CardPictures/SwampMonster.png" class="deck-card">
+                    <img src="/images/CardPictures/StrongMan.png" class="deck-card">
+                </div>
+                <div class="column">
+                    <img src="/images/CardPictures/Stranger.png" class="deck-card">
+                    <img src="/images/CardPictures/Skeleton.png" class="deck-card">
+                    <img src="/images/CardPictures/Rot.png" class="deck-card">
+                    <img src="/images/CardPictures/PossessedArmour.png" class="deck-card">
+                    <img src="/images/CardPictures/Orc.png" class="deck-card">
+                    <img src="/images/CardPictures/Monk.png" class="deck-card">
+                    <img src="/images/CardPictures/Medusa.png" class="deck-card">
+                </div>
+                <div class="column">
+                    <img src="/images/CardPictures/KnightCaptain.png" class="deck-card">
+                    <img src="/images/CardPictures/IceSpirit.png" class="deck-card">
+                    <img src="/images/CardPictures/Harpy.png" class="deck-card">
+                    <img src="/images/CardPictures/GiiantLizard.png" class="deck-card">
+                    <img src="/images/CardPictures/FireSpirit.png" class="deck-card">
+                    <img src="/images/CardPictures/Farmer.png" class="deck-card">
+                    <img src="/images/CardPictures/Executioner.png" class="deck-card">
+                </div>
+                <div class="column">
+                    <img src="/images/CardPictures/CaveMonster.png" class="deck-card">
+                    <img src="/images/CardPictures/Bear.png" class="deck-card">
+                    <img src="/images/CardPictures/BabyDragon.png" class="deck-card">
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Add event listeners to all deck cards
+        document.querySelectorAll('.deck-card').forEach(card => {
+            card.addEventListener('click', () => {
+                card.classList.toggle('clicked'); // Toggle the 'clicked' class on click
+            });
+        });
+    </script>
 </body>
 </html>
