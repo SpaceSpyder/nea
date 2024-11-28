@@ -1,0 +1,86 @@
+<div class="deck-selection">
+    <form id="deckForm" action="{{ url_for('create_deck', username=username) }}" method="POST">
+        <label for="deck">Choose a deck:</label>
+        <select name="deck" id="deck">
+            {% for i in range(1, decks|length + 1) %}
+                <option value="{{ i }}">Deck {{ i }}</option>
+            {% endfor %}
+            <option value="create">Create a new deck</option> <!-- Option to create a new deck -->
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+    
+    <p>Your deck = {{ deck }}</p>
+    
+    <div class="deck-grid">
+        <div class="row">
+            <div class="column">
+                <img src="/images/CardPictures/Knight.png" class="deck-card" data-name="Knight">
+                <img src="/images/CardPictures/Dragon.png" class="deck-card" data-name="Dragon">
+                <img src="/images/CardPictures/Cavalry.png" class="deck-card" data-name="Cavalry">
+                <img src="/images/CardPictures/boar.png" class="deck-card" data-name="Boar">
+                <img src="/images/CardPictures/Wizard.png" class="deck-card" data-name="Wizard">
+                <img src="/images/CardPictures/SwampMonster.png" class="deck-card" data-name="SwampMonster">
+                <img src="/images/CardPictures/StrongMan.png" class="deck-card" data-name="StrongMan">
+            </div>
+            <div class="column">
+                <img src="/images/CardPictures/Stranger.png" class="deck-card" data-name="Stranger">
+                <img src="/images/CardPictures/Skeleton.png" class="deck-card" data-name="Skeleton">
+                <img src="/images/CardPictures/Rot.png" class="deck-card" data-name="Rot">
+                <img src="/images/CardPictures/PossessedArmour.png" class="deck-card" data-name="PossessedArmour">
+                <img src="/images/CardPictures/Orc.png" class="deck-card" data-name="Orc">
+                <img src="/images/CardPictures/Monk.png" class="deck-card" data-name="Monk">
+                <img src="/images/CardPictures/Medusa.png" class="deck-card" data-name="Medusa">
+            </div>
+            <div class="column">
+                <img src="/images/CardPictures/KnightCaptain.png" class="deck-card" data-name="KnightCaptain">
+                <img src="/images/CardPictures/IceSpirit.png" class="deck-card" data-name="IceSpirit">
+                <img src="/images/CardPictures/Harpy.png" class="deck-card" data-name="Harpy">
+                <img src="/images/CardPictures/GiiantLizard.png" class="deck-card" data-name="GiiantLizard">
+                <img src="/images/CardPictures/FireSpirit.png" class="deck-card" data-name="FireSpirit">
+                <img src="/images/CardPictures/Farmer.png" class="deck-card" data-name="Farmer">
+                <img src="/images/CardPictures/Executioner.png" class="deck-card" data-name="Executioner">
+            </div>
+            <div class="column">
+                <img src="/images/CardPictures/CaveMonster.png" class="deck-card" data-name="CaveMonster">
+                <img src="/images/CardPictures/Bear.png" class="deck-card" data-name="Bear">
+                <img src="/images/CardPictures/BabyDragon.png" class="deck-card" data-name="BabyDragon">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const maxSelection = 20;
+    let selectedCards = [];
+
+    document.querySelectorAll('.deck-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const cardName = card.getAttribute('data-name');
+            if (selectedCards.includes(cardName)) {
+                card.classList.remove('selected');
+                selectedCards = selectedCards.filter(c => c !== cardName);
+            } else {
+                if (selectedCards.length < maxSelection) {
+                    card.classList.add('selected');
+                    selectedCards.push(cardName);
+                } else {
+                    alert('You can only select up to 20 cards.');
+                }
+            }
+        });
+    });
+
+    document.getElementById('deckForm').addEventListener('submit', (event) => {
+        if (selectedCards.length !== maxSelection) {
+            event.preventDefault();
+            alert('You must select exactly 20 cards.');
+        } else {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'selectedCards';
+            input.value = selectedCards.join(', '); // Create a comma-separated string
+            document.getElementById('deckForm').appendChild(input);
+        }
+    });
+</script>

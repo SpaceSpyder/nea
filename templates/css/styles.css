@@ -21,22 +21,27 @@ body {
 
 /* Sidenav Styling */
 .sidenav {
-    height: 100%;
+    min-height: 100%;
     width: 252px;
-    position: fixed;
+    position: absolute;
     z-index: 2;
     top: 0;
     left: 0;
-    background-color: #c3846b;
-    overflow-x: hidden;
     padding-top: 80px;
+}
+
+.sidenav-background {
+    min-height: 100%;
+    width: 252px;
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    top: 0;
+    left: 0;
+    background-color: #c3846b;
 }
 
 .sidenav a {
     padding: 5px 15px 10px 15px;
     text-decoration: none;
-    /*font-size: 25px;*/
-    /*color: #000000;*/
     display: block;
 }
 
@@ -47,6 +52,7 @@ body {
 .sidenav-options {
     font-size: 25px;
     color: #2e2e2e;
+    
 }
 
 

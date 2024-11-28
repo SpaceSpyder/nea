@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import sqlite3
 import os  # Import os module
+import json  # Import json module
 
 from templates.scripts.utils import (
     get_profile_pic_path,
@@ -158,14 +159,16 @@ def show_decks(username):
         flash('User not found', 'error')
         return redirect(url_for('index'))
 
+    if request.method == 'POST':
+        selected_cards = request.form.get('selectedCards')
+        if selected_cards:
+            selected_cards = json.loads(selected_cards)
+            # Add your logic for creating a new deck with the selected cards here
+            flash('New deck created successfully!', 'success')
+            return redirect(url_for('show_decks', username=username))
+
     # Get deck ID from URL parameters, if any
     deck_id = request.args.get('deck', session.get('CurrentDeck'))
-
-    if deck_id == "create":
-        # Handle the creation of a new deck
-        # Add your logic for creating a new deck here
-        flash('New deck created successfully!', 'success')
-        return redirect(url_for('show_decks', username=username))
 
     # Retrieve decks for the specified username
     decks = get_decks_for_user(username)
@@ -298,6 +301,41 @@ def insert_user(username, password, email):
     finally:
         cursor.close()
         close_db(conn)  # Close the database connection
+
+
+@app.route('/create_deck/<username>', methods=['POST'])
+def create_deck(username):
+    if not session.get('Username'):  # check if the user is logged in
+        return redirect(url_for('login'))
+
+    selected_cards = request.form.get('selectedCards')
+    if selected_cards:
+        # Add your logic for creating a new deck with the selected cards here
+        # For example, insert the selected cards into the database
+        conn = get_db()
+        cursor = conn.cursor()
+        try:
+            with conn:
+                # Determine the next UserDeckNum for the user
+                cursor.execute("""
+                    SELECT COALESCE(MAX(UserDeckNum), 0) + 1
+                    FROM Decks
+                    WHERE Owner = ?
+                """, (username,))
+                user_deck_num = cursor.fetchone()[0]
+
+                # Insert the new deck into the Decks table
+                cursor.execute("""
+                    INSERT INTO Decks (Owner, UserDeckNum, Deck)
+                    VALUES (?, ?, ?)
+                """, (username, user_deck_num, selected_cards))
+                flash('New deck created successfully!', 'success')
+        except sqlite3.Error as e:
+            flash(f'Error: {str(e)}', 'error')
+        finally:
+            cursor.close()
+
+    return redirect(url_for('show_decks', username=username))
 
 
 @app.route('/template')
