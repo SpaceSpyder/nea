@@ -348,5 +348,16 @@ def temp():
     return render_template('template.html', profile_pic=profile_pic_path)
 
 
+@app.route('/test_alert/<alert_type>', methods=['POST'])
+def test_alert(alert_type):
+    if alert_type == 'info':
+        flash('This is an info alert!', 'info')
+    elif alert_type == 'success':
+        flash('This is a success alert!', 'success')
+    elif alert_type == 'error':
+        flash('This is an error alert!', 'error')
+    return redirect(url_for('index'))
+
+
 if __name__ == '__main__':
     app.run(debug=True)

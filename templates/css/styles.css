@@ -260,13 +260,32 @@ hr {
 .flashes {
     list-style-type: none;
     padding: 0;
-    z-index: 5;
+    margin: 0; /* Remove any default margin */
+    position: fixed;
+    top: 60px; /* Adjust to be below the navbar */
+    left: 0;
+    width: 100%; /* Span the full width of the viewport */
+    z-index: 1000; /* Ensure the alert messages are on top */
+    display: flex;
+    flex-direction: column; /* Stack the flash messages vertically */
+    align-items: center; /* Center the flash messages horizontally */
 }
 
 .flashes li {
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 5px;
+    background-color: #f2dede;
+    color: #a94442;
+    opacity: 1;
+    animation: fadeOut 3s 3s forwards; /* Apply the fadeOut animation */
+    /*max-width: 90%; /* Ensure the flash messages do not exceed the screen width */
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
 }
 
 .flashes .info {

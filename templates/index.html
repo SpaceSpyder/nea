@@ -34,14 +34,22 @@
             <li><a href="{{ url_for('profile') }}">Profile</a></li>
             <li><a href="{{ url_for('stats') }}">Stats</a></li>
             <li><a href="{{ url_for('change_profile_pic') }}">Change Profile Picture</a></li>
-            <li><a href="{{ url_for('use_deck') }}">Use Deck</a></li>
-            <li><a href="{{ url_for('submit') }}">Submit</a></li>
-            <li><a href="{{ url_for('testGame') }}">Test Game</a></li>
-            <li><a href="{{ url_for('dbTest') }}">Database Test</a></li>
-            <li><a href="{{ url_for('temp') }}">Template</a></li>
         </ul>
     </nav>
 
+    <!-- Test Alert Buttons -->
+    <div class="alert-buttons">
+        <form action="{{ url_for('test_alert', alert_type='info') }}" method="POST">
+            <button type="submit">Test Info Alert</button>
+        </form>
+        <form action="{{ url_for('test_alert', alert_type='success') }}" method="POST">
+            <button type="submit">Test Success Alert</button>
+        </form>
+        <form action="{{ url_for('test_alert', alert_type='error') }}" method="POST">
+            <button type="submit">Test Error Alert</button>
+        </form>
+    </div>
+    
     <script src="{{ url_for('static', filename='js/alert.js') }}"></script>
 </body>
 </html>
