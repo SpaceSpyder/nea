@@ -3,24 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Game Board</title>
+    <title>Stats</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="shortcut icon" type="image/png" href="images/SheildLogo.png">
-
-    {% include 'htmlChildren/navbar.html' %} <!-- navbar outside body -->
-    {% include 'htmlChildren/sideNav.html' %} <!-- side navigation outside body -->
-    
     <style>
 
-        .stats {
-            /*margin: auto;*/
-            height: 200px;
+
+
+        .favourite-card img {
+            max-width: 100%; /* Ensure the image does not overflow */
+            height: auto; /* Maintain aspect ratio */
+            width: 100px; /* Set a fixed width */
+            height: 150px; /* Set a fixed height */
         }
 
         .main1 {
-            /*width: 500px;      /* Set width to 500px */
-            /*height: 500px;     /* Set height to 500px */
-            margin: 20px, 300px;  /* Corrected margin syntax */
             overflow: unset;     /* Add scrollbars if content overflows */
             padding-left: 300px;
             padding-top: 20px;
@@ -31,24 +28,40 @@
     </style>
 </head>
 <body>
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
+    {% include 'htmlChildren/sideNav.html' %} <!-- side navigation here -->
+
     <div class="main1">
         <img class="stats" src="{{ profile_pic }}" alt="Profile Picture">
         
         <h2>{{ username }}'s Statistics</h2>
-        <table border="1">
-            <tr>
-                <th>Games Played</th>
-                <td>{{ stats.GamesPlayed }}</td>
-            </tr>
-            <tr>
-                <th>Games Won</th>
-                <td>{{ stats.GamesWon }}</td>
-            </tr>
-            <tr>
-                <th>Date Created</th>
-                <td>{{ stats.DateCreated }}</td>
-            </tr>
-        </table>
+        <div class="stats-container">
+            <div class="stats-table">
+                <table border="1">
+                    <tr>
+                        <th>Rank</th>
+                        <td>{{ stats.Rank }}</td>
+                    </tr>
+                    <tr>
+                        <th>Games Played</th>
+                        <td>{{ stats.GamesPlayed }}</td>
+                    </tr>
+                    <tr>
+                        <th>Games Won</th>
+                        <td>{{ stats.GamesWon }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date Created</th>
+                        <td>{{ stats.DateCreated }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="favourite-card">
+                <h3>Favourite Card:</h3>
+                <img src="{{ stats.FavouriteCard }}" alt="Favourite Card">
+            </div>
+        </div>
     </div>
 </body>
 </html>

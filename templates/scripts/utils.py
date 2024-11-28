@@ -107,3 +107,25 @@ def check_username():
         return redirect(url_for('login'))  # Redirect to login if not logged in
     else:
         return session['Username']  # Get the username from the session
+
+def calculate_rank(username):
+    # Calculate the rank of the user based on the number of wins they have
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # Get the number of wins for the current user
+        cursor.execute("SELECT COUNT(*) FROM UserStats WHERE GamesWon = ?", (username,))
+        user_wins = cursor.fetchone()[0]
+
+        # Count how many users have more wins than the current user
+        cursor.execute("""
+            SELECT COUNT(DISTINCT GamesWon) 
+            FROM UserStats 
+            GROUP BY GamesWon 
+            HAVING COUNT(*) > ?
+        """, (user_wins,))
+        rank = cursor.fetchone()[0] + 1  # Rank is the count of users with more wins + 1
+
+        return rank
+    finally:
+        cursor.close()

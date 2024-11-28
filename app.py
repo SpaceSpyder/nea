@@ -14,6 +14,7 @@ from templates.scripts.utils import (
     get_db,
     close_db,
     check_username,
+    calculate_rank,
 )
 
 # Database setup
@@ -107,10 +108,10 @@ def profile():
 @app.route('/profile/stats', methods=['GET'])
 @app.route('/stats', methods=['GET'])
 def stats():
-    if not session.get('Username'): # check if the user is logged in
+    if not session.get('Username'):  # check if the user is logged in
         return redirect(url_for('login'))
-    profile_pic_path = get_profile_pic_path(session['Username']) # get pfp
-    username = session['Username'] # get username
+    profile_pic_path = get_profile_pic_path(session['Username'])  # get pfp
+    username = session['Username']  # get username
 
     conn = get_db()
     cursor = conn.cursor()
@@ -121,19 +122,22 @@ def stats():
 
         if result:
             user_id = result[0]
-            cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated FROM UserStats WHERE UserId = ?", (user_id,))
+            cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated, FavouriteCard FROM UserStats WHERE UserId = ?", (user_id,))
             user_stats = cursor.fetchone()
 
             if user_stats:
+                rank = calculate_rank(username)  # Calculate the rank
                 stats_data = {
+                    "Rank": rank,
                     "GamesPlayed": user_stats[0],
                     "GamesWon": user_stats[1],
-                    "DateCreated": user_stats[2]
+                    "DateCreated": user_stats[2],
+                    "FavouriteCard": user_stats[3]
                 }
             else:
-                stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
+                stats_data = {"Rank": "N/A", "GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A", "FavouriteCard": "N/A"}
         else:
-            stats_data = {"GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A"}
+            stats_data = {"Rank": "N/A", "GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A", "FavouriteCard": "N/A"}
     finally:
         cursor.close()
 
