@@ -20,7 +20,7 @@ body {
 }
 
 /* Sidenav Styling */
-/*.sidenav {
+.sidenav {
     min-height: 100%;
     width: 252px;
     position: absolute;
@@ -33,7 +33,7 @@ body {
 .sidenav-background {
     min-height: 100%;
     width: 252px;
-    position: fixed;  Fixed Sidebar (stay in place on scroll) 
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
     top: 0;
     left: 0;
     background-color: #c3846b;
@@ -53,7 +53,7 @@ body {
     font-size: 25px;
     color: #2e2e2e;
     
-}*/
+}
 
 
 /* Media Query for Smaller Screens */
@@ -140,159 +140,7 @@ body {
     background-color: transparent !important;
 }
 
-
-/* Card Styling */
-.card {
-    /*position: absolute;         broke / decks */
-    top: 570px;
-    left: 985px;
-    height: 225px;
-    width: 150px;
-    cursor: move;
-    z-index: 1;
-    user-select: none;
-}
-
-/* Board Layout */
-#board {
-    width: 600px;
-    height: 400px;
-    position: relative;
-    margin: 20px auto;
-}
-
-/* Hand Layout */
-.hand {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
-}
-
-.title {
+.title { /* for username i sidenav*/
     font-size: 30px;
     color: #000000;
 }
-
-/* Subtitle Styling */
-.sub-title {
-    font-size: large;
-}
-
-
-
-
-/* Text Styles */
-.large-text {
-    font-size: 70px;
-    font-family: "UnifrakturMaguntia", cursive;
-    margin: 0;
-    padding: 0;
-}
-
-.medium-text {
-    font-size: 25px;
-}
-
-.small-text {
-    font-size: 15px;
-    color: #969696;
-}
-
-
-.success {
-    color: green;
-}
-
-.error {
-    color: red;
-}
-
-
-/* Button Styling */
-.button {
-    font-size: 40px;
-    font-family: "UnifrakturMaguntia", cursive;
-    font-weight: bold;
-    width: 350px;
-    height: 80px;
-    color: var(--text-color);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    background-image: url('../images/button1.png');
-    transition: background-color 0.3s ease;
-}
-
-.button:hover {
-    background-color: #3c92a14c;
-    background-image: url('../images/button1.png');
-}
-
-
-/* Tablet Styles */
-.tablet {
-    background-color: rgb(181, 130, 103);
-    height: 55vh;
-    width: max(30%, 40px);
-    padding: 10px;
-    margin: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    text-align: center;
-}
-
-.bottom-tablet {
-    margin-top: auto;
-}
-
-.in-tablet {
-    display: block;
-}
-
-/* Horizontal Rule */
-hr {
-    border: 0;
-    border-top: 2px solid rgba(0, 0, 0, 0.708);
-    width: 100%;
-}
-
-.flashes {
-    list-style-type: none;
-    padding: 0;
-    width: 80%; /* Make the container wider */
-    margin: 0 auto; /* Center the container */
-    /*display: flex;*/
-    align-items: center; /* Center the flash messages horizontally */
-}
-
-.flashes li {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    opacity: 1;
-    animation: fadeOut 3s 3s forwards; /* Apply the fadeOut animation */
-    /* max-width: 90%; */ /* Ensure the flash messages do not exceed the screen width */
-}
-
-@keyframes fadeOut {
-    to {
-        opacity: 0;
-    }
-}
-
-.flashes .info {
-    background-color: #d9edf7;
-    color: #31708f;
-}
-
-.flashes .success {
-    background-color: #dff0d8;
-    color: #3c763d;
-}
-
-.flashes .error {
-    background-color: #f2dede;
-    color: #a94442;
-}
-
