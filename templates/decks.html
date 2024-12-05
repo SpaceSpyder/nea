@@ -42,6 +42,10 @@
             z-index: 10;
         }
 
+        #deckCreation {
+            display: none;
+        }
+        
     </style>
 </head>
 <body>
@@ -49,7 +53,7 @@
     <!-- Flash messages block -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-    <ul class="flashes">
+    <ul class="flashes" style="z-index: 10;">
         {% for category, message in messages %}
         <li class="{{ category }}">{{ message }}</li>
         {% endfor %}
@@ -65,7 +69,7 @@
         <div class="deck-selection">
             <form id="deckForm" action="{{ url_for('create_deck', username=username) }}" method="POST">
                 <label for="deck">Choose a deck:</label>
-                <select name="deck" id="deck">
+                <select name="deck" id="deck" onchange="changeDeckDisplay()">
                     {% for i in range(1, decks|length + 1) %}
                         <option value="{{ i }}">Deck {{ i }}</option>
                     {% endfor %}
@@ -75,21 +79,39 @@
             </form>
             
             <!-- Display the current deck -->
-                    <!-- Display the current deck -->
-                    <h2>Current Deck:</h2>
-                    {% include 'htmlChildren/deckDisplay.html' %}
-                    
-                    <br/>
-                    <h2>Edit Deck:</h2>
-                    {% include 'htmlChildren/deckCreation.html' %}
+            <div>
+                <div id = "deckDisplay">
+                <!-- Display the current deck -->
+                <h2>Current Deck:</h2>
+                {% include 'htmlChildren/deckDisplay.html' %}
                 </div>
+
+                <div id = "deckCreation">
+                <br/>
+                <h2>Edit Deck:</h2>
+                {% include 'htmlChildren/deckCreation.html' %}
+                </div>
+            </div>
         </div>
         
         </div>
 
+
+
         <script>
         const maxSelection = 20;
         let selectedCards = [];
+
+        function changeDeckDisplay(){
+            if (document.getElementById('deck').value == "create"){
+                document.getElementById('deckDisplay').style.display = "none";
+                document.getElementById('deckCreation').style.display = "block";
+            }
+            else{
+                document.getElementById('deckDisplay').style.display = "block";
+                document.getElementById('deckCreation').style.display = "none";
+            }
+        }
 
         document.querySelectorAll('.deck-card').forEach(card => {
             card.addEventListener('click', () => {
