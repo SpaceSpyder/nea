@@ -141,32 +141,7 @@ body {
 }
 
 
-/* Card Styling */
-.card {
-    /*position: absolute;         broke / decks */
-    top: 570px;
-    left: 985px;
-    height: 225px;
-    width: 150px;
-    cursor: move;
-    z-index: 1;
-    user-select: none;
-}
 
-/* Board Layout */
-#board {
-    width: 600px;
-    height: 400px;
-    position: relative;
-    margin: 20px auto;
-}
-
-/* Hand Layout */
-.hand {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
-}
 
 .title {
     font-size: 30px;

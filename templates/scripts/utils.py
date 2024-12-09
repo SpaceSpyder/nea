@@ -1,12 +1,14 @@
 import os
 import sqlite3
-from flask import g, url_for, session, redirect
+from flask import g, url_for, session
 
-DATABASE_URI = 'databases/database.db'  # SQLite database file path
+DATABASE_URI = "databases/database.db"  # SQLite database file path
+DEFAULT_PIC_PATH = "images/profilePics/Default.png"
+
 
 # Helper function to get a database connection
 def get_db():
-    if 'db' not in g:
+    if "db" not in g:
         g.db = sqlite3.connect(
             DATABASE_URI,
             detect_types=sqlite3.PARSE_DECLTYPES,
@@ -15,10 +17,12 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
+
 def close_db(exception):
-    db = g.pop('db', None)
+    db = g.pop("db", None)
     if db is not None:
         db.close()
+
 
 def get_user_id_by_username(username):
     try:
@@ -33,6 +37,7 @@ def get_user_id_by_username(username):
     finally:
         cursor.close()
 
+
 def get_user_details_by_username(username):
     try:
         conn = get_db()
@@ -40,18 +45,19 @@ def get_user_details_by_username(username):
         cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
         if user:
-            session['Id'] = user[0]
-            session['Username'] = user[1]
-            session['Email'] = user[3]
-            session['DateCreated'] = user[4]
-            session['ProfilePicture'] = user[5]
-            session['CurrentDeck'] = user[6]
+            session["Id"] = user[0]
+            session["Username"] = user[1]
+            session["Email"] = user[3]
+            session["DateCreated"] = user[4]
+            session["ProfilePicture"] = user[5]
+            session["CurrentDeck"] = user[6]
         return user
     except sqlite3.DatabaseError as e:
         print(f"Database error: {e}")
         return None
     finally:
         cursor.close()
+
 
 def get_decks_for_user(username):
     try:
@@ -65,6 +71,7 @@ def get_decks_for_user(username):
     finally:
         cursor.close()
 
+
 def get_deck_for_user(username, deck_id):
     try:
         conn = get_db()
@@ -77,15 +84,11 @@ def get_deck_for_user(username, deck_id):
     finally:
         cursor.close()
 
+
 def get_profile_pic_path(username=None):
-    # Default profile picture path
-    default_pic_path = url_for('static', filename='images/profilePics/Default.png')
-    print()
-    print(username)
-    print()
     if not username:
         # Return default profile picture path if no username is provided
-        return default_pic_path
+        return DEFAULT_PIC_PATH
 
     # Retrieve the profile picture for the specific user from the database
     with get_db() as conn:
@@ -100,13 +103,15 @@ def get_profile_pic_path(username=None):
     if result and result[0]:
         return url_for('static', filename=f'images/profilePics/{result[0]}')
     else:
-        return default_pic_path
+        return DEFAULT_PIC_PATH
+
 
 def check_username():
     if 'Username' not in session:  # Check if the user is logged in
-        return redirect(url_for('login'))  # Redirect to login if not logged in
+        return None
     else:
         return session['Username']  # Get the username from the session
+
 
 def calculate_rank(username):
     # Calculate the rank of the user based on the number of wins they have
