@@ -16,6 +16,48 @@
             border: 1px solid #ccc;
             box-sizing: border-box;
         }
+
+        .tablet a {
+            color: black;
+            display: block; 
+            text-align: center;
+        }
+
+        .tablet {
+            color: rgba(0, 0, 0, 0.743);
+            mix-blend-mode: multiply;
+        }
+
+        /* Button Styling */
+        .button {
+            font-family: "UnifrakturMaguntia", cursive;
+            font-weight: bold;
+            width: 350px;
+            height: 60px;
+            background-color: #00000000;
+            border: solid 4px #0000003c;
+            border-radius: 0px;
+            cursor: pointer;
+            /*background-image: url('../images/button1.png');*/
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #0000001f;
+            mix-blend-mode: multiply;
+            /*background-image: url('../images/button1.png');*/
+        }
+
+        .tablet input{
+            font-family: "UnifrakturMaguntia", cursive;
+            font-weight: bold;
+            width: 350px;
+            height: 60px;
+            background-color: #00000000;
+            border: solid 4px #0000003c;
+            color: rgba(0, 0, 0, 0.743);
+            mix-blend-mode: multiply;
+        }
     </style>
 
     <script src="{{ url_for('static', filename='js/alert.js') }}">
@@ -46,8 +88,8 @@
 
     <div class="tablet" style="background-image: url('images/Tablet.png');">
         
-        <h1 class="large-text in-tablet" style="padding-top: 60px;">Log In:</h1>
-        <br/>
+        <h1 class="large-text in-tablet" style="padding-top: 70px; padding-bottom: 20px;">Log In:</h1>
+        
         <form method="post" action="{{ url_for('login') }}" class="in-tablet" >
             <input class="medium-text" required type="text" name="username" placeholder="Username"> <!-- asks for user name -->
                 <br/>
@@ -56,6 +98,6 @@
                 <button class="button" onclick="checkDetails(event)">Submit</button>
         </form>
         <br/><br/>
-        <a href="{{ url_for('signUp') }}" class="bottom-tablet" style="text-shadow: 0px 0px 5px black; display: block; text-align: center; color: white;">Don't have an account? Make one here</a>        </div>
+        <a href="{{ url_for('signUp') }}" class="bottom-tablet">Don't have an account? Make one here!</a>        </div>
 </body>
 </html>

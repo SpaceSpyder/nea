@@ -194,13 +194,13 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    background-image: url('../images/button1.png');
+    /*background-image: url('../images/button1.png');*/
     transition: background-color 0.3s ease;
 }
 
 .button:hover {
     background-color: #3c92a14c;
-    background-image: url('../images/button1.png');
+    /*background-image: url('../images/button1.png');*/
 }
 
 
