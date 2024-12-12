@@ -31,6 +31,7 @@
         }
 
         #p1Mana {
+            font-family: "Overpass Mono", monospace;
             right: 10px;
             top: 909px;
             height: 118px;
@@ -59,10 +60,11 @@
         <img src="images/CardPictures/Darkknight.png" class="card" id="card3">
         <img src="images/CardPictures/Dragon.png" class="card" id="card4">
         <img src="images/CardPictures/Wizard.png" class="card" id="card5">
-        <img src="images/CardPictures/KnightCaptin.png" class="card" id="card6">
+        <img src="images/CardPictures/KnightCaptain.png" class="card" id="card6">
         <img src="images/CardPictures/Monk.png" class="card" id="card7">
     </div>
 
+    <div id="highl"></div>
     <div id="p1Mana">00</div>
     <script>
         document.addEventListener('click', function () {
@@ -146,17 +148,7 @@
                 element.style.zIndex = 10;
             }
 
-            function getCardPositions(numberOfCards) {
-                // total width / numofcards+1
-                // foreach card half width and minus from the bit above
-                let positionS = [];
-                let offset = (1050 / (numberOfCards + 1));
-                for (let i = 0; i < numberOfCards; i++) {
-                    positionS.push((offset * (i + 1)) - 150);
-                }
 
-                return positionS;
-            }
         }
 
         function closeDragElement(e) { // handles card being let go
@@ -212,6 +204,17 @@
             }
             return null;
         }
+        function getCardPositions(numberOfCards) {
+                // total width / numofcards+1
+                // foreach card half width and minus from the bit above
+                let positionS = [];
+                let offset = (1050 / (numberOfCards + 1));
+                for (let i = 0; i < numberOfCards; i++) {
+                    positionS.push((offset * (i + 1)) - 150);
+                }
+
+                return positionS;
+            }
     </script>
 </body>
 </html>

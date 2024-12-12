@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300..700&family=UnifrakturMaguntia&display=swap');
+
 /* Card Styling */
 .card {
-    /*position: absolute;         broke / decks */
+    position: absolute;
     top: 570px;
     left: 985px;
     height: 225px;
