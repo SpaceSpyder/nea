@@ -40,6 +40,8 @@ def index():
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
+    profile_pic_path = get_profile_pic_path()  # get pfp
+
     # Check if the user is already logged in
     if "Username" in session:
         flash("You are already logged in!", "info")
@@ -59,7 +61,7 @@ def login():
         else:
             flash("Incorrect username / password!", "error")
 
-    return render_template("login.html")
+    return render_template("login.html",profile_pic=profile_pic_path)
 
 
 @app.route("/signUp", methods=["GET", "POST"])
@@ -109,11 +111,19 @@ def profile():
 
 @app.route("/profile/stats", methods=["GET"])
 @app.route("/stats", methods=["GET"])
-def stats():
+@app.route("/profile/stats/<username>", methods=["GET"])
+@app.route("/stats/<username>", methods=["GET"])
+def stats(username=None):
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
-    profile_pic_path = get_profile_pic_path(session["Username"])  # get pfp
-    username = session["Username"]  # get username
+    
+    # If username is not provided in the URL, use the logged-in user's username
+    if username is None:
+        username = session["Username"]
+
+    account_pic_path = get_profile_pic_path(username)
+    profile_pic_path = get_profile_pic_path(session["Username"])  # get pfp for the username (either from URL or session)
+    session_username = session["Username"]  # get logged-in user's username
 
     conn = get_db()
     cursor = conn.cursor()
@@ -143,7 +153,8 @@ def stats():
     finally:
         cursor.close()
 
-    return render_template("stats.html", profile_pic=profile_pic_path, stats=stats_data, username=username)
+    return render_template("stats.html", profile_pic=profile_pic_path, stats=stats_data, username=session_username, account_pic=account_pic_path)
+
 
 
 @app.route("/decks/<username>", methods=["GET", "POST"])

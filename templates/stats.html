@@ -28,6 +28,11 @@
             pointer-events: none;
             display: inline-block;
         }
+
+        .Account-pic {
+            max-width: 150px; /* Set a maximum width */
+            height: auto; /* Maintain aspect ratio */
+        }
     </style>
 </head>
 <body>
@@ -35,7 +40,7 @@
     {% include 'htmlChildren/sideNav.html' %} <!-- side navigation here -->
 
     <div class="main1">
-        <img class="profile-pic2" src="{{ profile_pic }}" alt="Profile Picture">
+        <img class="Account-pic" src="{{ account_pic }}" alt="Account Picture">
         
         <h2>{{ username }}'s Statistics</h2>
         <div class="stats-container">
