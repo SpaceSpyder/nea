@@ -164,7 +164,7 @@
             document.onmouseup = null; // removes events
             document.onmousemove = null;
 
-            element.style.zIndex = 1; // puts on top
+            e.target.style.zIndex = 1; // puts on top
             let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
 
             if (dropLocation) { // if it has data it will snap
@@ -177,8 +177,8 @@
                 redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
             }
             else { // if it doesnt have data it will snap back to the hand
-                element.style.left = "0px";
-                element.style.top = "5px";
+                e.target.style.left = "0px";
+                e.target.style.top = "5px";
             }
         }
 

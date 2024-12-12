@@ -213,7 +213,8 @@ body {
     margin: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+
+    align-items: center;  /* Center the text horizontally */
     text-align: center;
 }
 

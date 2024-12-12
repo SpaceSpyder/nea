@@ -45,19 +45,17 @@
     {% endwith %}
 
     <div class="tablet" style="background-image: url('images/Tablet.png');">
-        <br/><br/>
-        <h1 class="large-text in-tablet">Log In:</h1>
+        
+        <h1 class="large-text in-tablet" style="padding-top: 60px;">Log In:</h1>
         <br/>
-
-        <form method="post" action="{{ url_for('login') }}" class="in-tablet">
+        <form method="post" action="{{ url_for('login') }}" class="in-tablet" >
             <input class="medium-text" required type="text" name="username" placeholder="Username"> <!-- asks for user name -->
                 <br/>
             <input class="medium-text" required type="password" name="password" placeholder="Password">
                 <br/>
                 <button class="button" onclick="checkDetails(event)">Submit</button>
         </form>
-        
-        <a href="{{ url_for('signUp') }}" class="bottom-tablet">Don't have an account? Make one here</a>
-    </div>
+        <br/><br/>
+        <a href="{{ url_for('signUp') }}" class="bottom-tablet" style="text-shadow: 0px 0px 5px black; display: block; text-align: center; color: white;">Don't have an account? Make one here</a>        </div>
 </body>
 </html>
