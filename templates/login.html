@@ -44,7 +44,7 @@
         {% endif %}
     {% endwith %}
 
-    <div class="tablet">
+    <div class="tablet" style="background-image: url('images/Tablet.png');">
         <br/><br/>
         <h1 class="large-text in-tablet">Log In:</h1>
         <br/>
@@ -56,9 +56,7 @@
                 <br/>
                 <button class="button" onclick="checkDetails(event)">Submit</button>
         </form>
-
-        <br/>
-        <hr color="black" class="bottom-tablet">
+        
         <a href="{{ url_for('signUp') }}" class="bottom-tablet">Don't have an account? Make one here</a>
     </div>
 </body>

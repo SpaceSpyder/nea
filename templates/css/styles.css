@@ -209,16 +209,12 @@ body {
     background-color: rgb(181, 130, 103);
     height: 480px;
     width: 570px;
-    padding: 10px;
+    
     margin: 10px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     text-align: center;
-}
-
-.bottom-tablet {
-    margin-top: auto;
 }
 
 .in-tablet {
@@ -235,7 +231,7 @@ hr {
 .flashes {
     list-style-type: none;
     padding: 0;
-    width: 80%; /* Make the container wider */
+    width: 100%; /* Make the container wider */
     margin: 0 auto; /* Center the container */
     /*display: flex;*/
     align-items: center; /* Center the flash messages horizontally */
