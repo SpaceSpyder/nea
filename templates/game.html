@@ -30,10 +30,9 @@
             border: red solid 2px;
         }
 
-        #p1Mana {
+        .values {
             font-family: "Overpass Mono", monospace;
-            right: 10px;
-            top: 909px;
+            
             height: 118px;
             width: 130px;
             position: absolute;
@@ -65,7 +64,12 @@
     </div>
 
     <div id="highl"></div>
-    <div id="p1Mana">00</div>
+
+    <div id="p1Mana" class="values" style="right: 43px;top: 909px;">00</div>
+    <div id="p2Mana" class="values" style="right: 43px;top: 52px;">00</div>
+    <div id="p1Health" class="values" style="right: 203px;top: 909px;">00</div>
+    <div id="p2Health" class="values" style="right: 203px;top: 52px;">00</div>
+
     <script>
         document.addEventListener('click', function () {
             if (!document.fullscreenElement) {
