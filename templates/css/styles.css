@@ -10,6 +10,7 @@
 /* Body Styling */
 body {
     font-family: Arial, sans-serif;
+
 }
 
 /* Main Content */
@@ -18,42 +19,6 @@ body {
     font-size: 28px;
     padding: 0px 10px;
 }
-
-/* Sidenav Styling */
-/*.sidenav {
-    min-height: 100%;
-    width: 252px;
-    position: absolute;
-    z-index: 2;
-    top: 0;
-    left: 0;
-    padding-top: 80px;
-}
-
-.sidenav-background {
-    min-height: 100%;
-    width: 252px;
-    position: fixed;  Fixed Sidebar (stay in place on scroll) 
-    top: 0;
-    left: 0;
-    background-color: #c3846b;
-}
-
-.sidenav a {
-    padding: 5px 15px 10px 15px;
-    text-decoration: none;
-    display: block;
-}
-
-.sidenav a:hover {
-    color: #222222;
-}
-
-.sidenav-options {
-    font-size: 25px;
-    color: #2e2e2e;
-    
-}*/
 
 
 /* Media Query for Smaller Screens */
@@ -80,6 +45,8 @@ body {
     z-index: 4;
     position: relative;
     border-radius: 5px;
+    background-color: #bebebe8e;
+    /*opacity: 0.9;*/
 }
 
 .navbar-left, .navbar-right {
@@ -97,7 +64,7 @@ body {
     font-family: "UnifrakturMaguntia", cursive;
     font-size: 18px;
     font-weight: bold;
-    background-color: #bcbcbc;
+    background-color: #737373;
     border-radius: 5px;
     transition: background-color 0.3s ease, transform 0.3s ease;
     z-index: 5;

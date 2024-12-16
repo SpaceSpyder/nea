@@ -10,6 +10,10 @@
 /* Body Styling */
 body {
     font-family: Arial, sans-serif;
+    background-attachment: fixed;  
+    background-size: cover;
+    background-position: center;
+    background-image: url('/images/WoodTexture.png');
 }
 
 /* Main Content */
@@ -17,7 +21,10 @@ body {
     margin-left: 252px;
     font-size: 28px;
     padding: 0px 10px;
+
+
 }
+
 
 /* Sidenav Styling */
 .sidenav {
@@ -28,6 +35,7 @@ body {
     top: 0;
     left: 0;
     padding-top: 80px;
+    box-shadow: #00000098 0px 0px 10px;
 }
 
 .sidenav-background {

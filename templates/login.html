@@ -6,7 +6,10 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="shortcut icon" type="image/png" href="images/SheildLogo.png">
     <style>
-        body {font-family: Arial, Helvetica, sans-serif;}
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: url('images/Backgrounds/LibraryBackground.png');
+        }
 
         input[type=text], input[type=password] {
             width: 350px;
@@ -25,7 +28,8 @@
 
         .tablet {
             color: rgba(0, 0, 0, 0.743);
-            mix-blend-mode: multiply;
+            border-radius: 1%;
+            background-image: url('images/Tablet.png');
         }
 
         /* Button Styling */
@@ -86,7 +90,7 @@
         {% endif %}
     {% endwith %}
 
-    <div class="tablet" style="background-image: url('images/Tablet.png');">
+    <div class="tablet">
         
         <h1 class="large-text in-tablet" style="padding-top: 70px; padding-bottom: 20px;">Log In:</h1>
         

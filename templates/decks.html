@@ -21,7 +21,7 @@
         .make-deck-grid img, .card-div {
             width: 200px; /*do not change*/
             height: 300px; /*do not change*/
-            /*object-fit: cover;*/
+            box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
         }
 
         /* Default: Cards are grey */
@@ -46,9 +46,11 @@
             display: none;
         }
         
+        
     </style>
 </head>
 <body>
+
     {% include 'htmlChildren/navbar.html' %}
     <!-- Flash messages block -->
     {% with messages = get_flashed_messages(with_categories=true) %}
