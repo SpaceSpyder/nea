@@ -7,15 +7,15 @@ import os  # Import os module
 import json  # Import json module
 
 from templates.scripts.utils import (
-    get_profile_pic_path,
-    get_user_id_by_username,
-    get_user_details_by_username,
-    get_decks_for_user,
-    get_deck_for_user,
-    get_db,
-    close_db,
-    check_username,
-    calculate_rank,
+    getProfilePicPath,
+    getUserIdByUsername,
+    getUserDetailsByUsername,
+    getDecksForUser,
+    getDeckForUser,
+    getDb,
+    closeDb,
+    checkUsername,
+    calculateRank,
 )
 
 # Database setup
@@ -34,13 +34,13 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)  # session timeout
 @app.route("/")
 def index():
     username = session.get("Username")
-    profile_pic_path = get_profile_pic_path(username) if username else get_profile_pic_path()
+    profile_pic_path = getProfilePicPath(username) if username else getProfilePicPath()
     return render_template("index.html", profile_pic=profile_pic_path)
 
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    profile_pic_path = get_profile_pic_path()  # get pfp
+    profile_pic_path = getProfilePicPath()  # get pfp
 
     # Check if the user is already logged in
     if "Username" in session:
@@ -50,12 +50,12 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        conn = get_db()
+        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
         result = cursor.fetchone()
         if result and check_password_hash(result[2], password):  # Adjust based on your actual table structure
-            get_user_details_by_username(username)
+            getUserDetailsByUsername(username)
             flash("Logged in successfully!", "success")
             return redirect(url_for("index"))
         else:
@@ -70,7 +70,7 @@ def signUp():
         flash("You are already signed up!", "info")
         return redirect(url_for("index"))
 
-    profile_pic_path = get_profile_pic_path()  # Default profile picture path
+    profile_pic_path = getProfilePicPath()  # Default profile picture path
 
     if request.method == "POST":
         username = request.form["username"]
@@ -104,7 +104,7 @@ def logout():
 def profile():
     if not session.get("Username"):
         return redirect(url_for("login"))
-    profile_pic_path = get_profile_pic_path(session["Username"])
+    profile_pic_path = getProfilePicPath(session["Username"])
 
     return render_template("profile.html", profile_pic=profile_pic_path)
 
@@ -121,11 +121,11 @@ def stats(username=None):
     if username is None:
         username = session["Username"]
 
-    account_pic_path = get_profile_pic_path(username)
-    profile_pic_path = get_profile_pic_path(session["Username"])  # get pfp for the username (either from URL or session)
+    account_pic_path = getProfilePicPath(username)
+    profile_pic_path = getProfilePicPath(session["Username"])  # get pfp for the username (either from URL or session)
     session_username = session["Username"]  # get logged-in user's username
 
-    conn = get_db()
+    conn = getDb()
     cursor = conn.cursor()
 
     try:
@@ -138,7 +138,7 @@ def stats(username=None):
             user_stats = cursor.fetchone()
 
             if user_stats:
-                rank = calculate_rank(username)  # Calculate the rank
+                rank = calculateRank(username)  # Calculate the rank
                 stats_data = {
                     "Rank": rank,
                     "GamesPlayed": user_stats[0],
@@ -162,11 +162,11 @@ def stats(username=None):
 def show_decks(username):
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
-    profile_pic_path = get_profile_pic_path(session["Username"])  # get pfp
+    profile_pic_path = getProfilePicPath(session["Username"])  # get pfp
     session_username = session["Username"]  # get username
 
     # Check if the user exists
-    user_id = get_user_id_by_username(username)
+    user_id = getUserIdByUsername(username)
     if not user_id:
         flash("User not found", "error")
         return redirect(url_for("index"))
@@ -183,8 +183,8 @@ def show_decks(username):
     deck_id = request.args.get("deck", session.get("CurrentDeck"))
 
     # Retrieve decks for the specified username
-    decks = get_decks_for_user(username)
-    deck = get_deck_for_user(username, deck_id)
+    decks = getDecksForUser(username)
+    deck = getDeckForUser(username, deck_id)
 
     # Fetch the current deck from the database
     try:
@@ -217,7 +217,7 @@ def show_decks(username):
 def change_profile_pic():
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
-    profile_pic_path = get_profile_pic_path(session["Username"])  # get pfp
+    profile_pic_path = getProfilePicPath(session["Username"])  # get pfp
     username = session["Username"]  # get username
 
     # Handle the POST request to change the profile picture
@@ -246,7 +246,7 @@ def change_profile_pic():
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
             # Update the user's profile picture in the database
-            conn = get_db()
+            conn = getDb()
             cursor = conn.cursor()
             try:
                 cursor.execute("UPDATE Users SET ProfilePicture = ? WHERE Username = ?", (filename, username))
@@ -266,7 +266,7 @@ def change_profile_pic():
 def use_deck():
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
-    profile_pic_path = get_profile_pic_path(session["Username"])  # get pfp
+    profile_pic_path = getProfilePicPath(session["Username"])  # get pfp
     username = session["Username"]  # get username
 
     selected_deck = request.form.get("decks")
@@ -277,8 +277,8 @@ def use_deck():
 @app.route("/submit", methods=["GET", "POST"])
 def submit():
     if request.method == "POST":
-        user_input = request.form["user_input"]
-        return f"You entered: {user_input}"
+        userinput = request.form["user_input"]
+        return f"You entered: {userinput}"
     else:
         return "ERROR Method Not Allowed"
 
@@ -286,9 +286,9 @@ def submit():
 @app.route("/testGame")
 def testGame():
     # Check if the user is logged in
-    username = check_username()
+    username = checkUsername()
     if username:
-        profile_pic_path = get_profile_pic_path(username)  # get profile picture path from the user details
+        profile_pic_path = getProfilePicPath(username)  # get profile picture path from the user details
         return render_template("game.html", profile_pic=profile_pic_path)
     else:
         return redirect(url_for("login"))  # Redirect response if the user is not logged in
@@ -297,9 +297,9 @@ def testGame():
 @app.route("/dbTest", methods=["GET"])
 def dbTest():
     username = session.get("Username")
-    full_profile_pic_path = get_profile_pic_path()
+    full_profile_pic_path = getProfilePicPath()
 
-    conn = get_db()
+    conn = getDb()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Users")
     rows = cursor.fetchall()
@@ -309,7 +309,7 @@ def dbTest():
 
 def insert_user(username, password, email):
     date = datetime.today().strftime("%Y-%m-%d")
-    conn = get_db()
+    conn = getDb()
     cursor = conn.cursor()
     try:
         with conn:
@@ -333,7 +333,7 @@ def insert_user(username, password, email):
         raise
     finally:
         cursor.close()
-        close_db(conn)  # Close the database connection
+        closeDb(conn)  # Close the database connection
 
 
 @app.route("/create_deck/<username>", methods=["POST"])
@@ -345,7 +345,7 @@ def create_deck(username):
     if selected_cards:
         # Add your logic for creating a new deck with the selected cards here
         # For example, insert the selected cards into the database
-        conn = get_db()
+        conn = getDb()
         cursor = conn.cursor()
         try:
             with conn:
@@ -375,7 +375,7 @@ def create_deck(username):
 def temp():
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
-    profile_pic_path = get_profile_pic_path(session["Username"])  # get pfp
+    profile_pic_path = getProfilePicPath(session["Username"])  # get pfp
     username = session["Username"]  # get username
 
     return render_template("template.html", profile_pic=profile_pic_path)

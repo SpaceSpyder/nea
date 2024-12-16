@@ -137,6 +137,7 @@
         });
 
             document.getElementById('deckForm').addEventListener('submit', (event) => {
+                console.log(new FormData(document.getElementById('deckForm')));  // Log for debugging
                 if (selectedCards.length !== maxSelection) {
                     event.preventDefault();
                     alert('You must select exactly 20 cards.');

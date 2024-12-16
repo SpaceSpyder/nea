@@ -2,15 +2,15 @@ import os
 import sqlite3
 from flask import g, url_for, session
 
-DATABASE_URI = "databases/database.db"  # SQLite database file path
-DEFAULT_PIC_PATH = "images/profilePics/Default.png"
+databaseUri = "databases/database.db"  # SQLite database file path
+defaultPicPath = "images/profilePics/Default.png"
 
 
 # Helper function to get a database connection
-def get_db():
+def getDb():
     if "db" not in g:
         g.db = sqlite3.connect(
-            DATABASE_URI,
+            databaseUri,
             detect_types=sqlite3.PARSE_DECLTYPES,
             timeout=10  # Increase the timeout to 10 seconds
         )
@@ -18,29 +18,26 @@ def get_db():
     return g.db
 
 
-def close_db(exception):
+def closeDb(exception):
     db = g.pop("db", None)
     if db is not None:
         db.close()
 
 
-def get_user_id_by_username(username):
+def getUserIdByUsername(username):
     try:
-        conn = get_db()
+        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
-        user = cursor.fetchone()
-        return user[0] if user else None
-    except sqlite3.DatabaseError as e:
-        print(f"Database error: {e}")
-        return None
+        userId = cursor.fetchone()
+        return userId[0] if userId else None
     finally:
         cursor.close()
 
 
-def get_user_details_by_username(username):
+def getUserDetailsByUsername(username):
     try:
-        conn = get_db()
+        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
@@ -51,47 +48,39 @@ def get_user_details_by_username(username):
             session["DateCreated"] = user[4]
             session["ProfilePicture"] = user[5]
             session["CurrentDeck"] = user[6]
-        return user
-    except sqlite3.DatabaseError as e:
-        print(f"Database error: {e}")
-        return None
     finally:
         cursor.close()
 
 
-def get_decks_for_user(username):
+def getDecksForUser(username):
     try:
-        conn = get_db()
+        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username,))
-        return cursor.fetchall()
-    except sqlite3.DatabaseError as e:
-        print(f"Database error: {e}")
-        return []
+        decks = cursor.fetchall()
+        return decks
     finally:
         cursor.close()
 
 
-def get_deck_for_user(username, deck_id):
+def getDeckForUser(username, deckId):
     try:
-        conn = get_db()
+        conn = getDb()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Decks WHERE Owner = ? AND DeckId = ?", (username, deck_id))
-        return cursor.fetchall()
-    except sqlite3.DatabaseError as e:
-        print(f"Database error: {e}")
-        return []
+        cursor.execute("SELECT * FROM Decks WHERE Owner = ? AND UserDeckNum = ?", (username, deckId))
+        deck = cursor.fetchone()
+        return deck
     finally:
         cursor.close()
 
 
-def get_profile_pic_path(username=None):
+def getProfilePicPath(username=None):
     if not username:
         # Return default profile picture path if no username is provided
-        return DEFAULT_PIC_PATH
+        return defaultPicPath
 
     # Retrieve the profile picture for the specific user from the database
-    with get_db() as conn:
+    with getDb() as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,))
@@ -103,24 +92,24 @@ def get_profile_pic_path(username=None):
     if result and result[0]:
         return url_for('static', filename=f'images/profilePics/{result[0]}')
     else:
-        return DEFAULT_PIC_PATH
+        return defaultPicPath
 
 
-def check_username():
-    if 'Username' not in session:  # Check if the user is logged in
+def checkUsername():
+    if "Username" not in session:  # Check if the user is logged in
         return None
     else:
-        return session['Username']  # Get the username from the session
+        return session["Username"]  # Get the username from the session
 
 
-def calculate_rank(username):
+def calculateRank(username):
     # Calculate the rank of the user based on the number of wins they have
-    conn = get_db()
+    conn = getDb()
     cursor = conn.cursor()
     try:
         # Get the number of wins for the current user
         cursor.execute("SELECT COUNT(*) FROM UserStats WHERE GamesWon = ?", (username,))
-        user_wins = cursor.fetchone()[0]
+        userWins = cursor.fetchone()[0]
 
         # Count how many users have more wins than the current user
         cursor.execute("""
@@ -128,7 +117,7 @@ def calculate_rank(username):
             FROM UserStats 
             GROUP BY GamesWon 
             HAVING COUNT(*) > ?
-        """, (user_wins,))
+        """, (userWins,))
         rank = cursor.fetchone()[0] + 1  # Rank is the count of users with more wins + 1
 
         return rank
