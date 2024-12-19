@@ -318,11 +318,12 @@ def dbTest():
 
 
 def insert_user(username, password, email):
+    defaultDeck = "Knight, DarkKnight, Boar, Cavalry, PossessedArmour, Dragon, BabyDragon, Monk, Wizard, Orc, Skeleton, Medusa, StrongMan, FireSpirit, Stranger, SwampMonster, Executioner, IceSpirit, Harpy, Bear"
     date = datetime.today().strftime("%Y-%m-%d")
     conn = getDb()
-    cursor = conn.cursor()
     try:
         with conn:
+            cursor = conn.cursor()
             # Insert the new user into the Users table
             cursor.execute("""
                 INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
@@ -339,15 +340,16 @@ def insert_user(username, password, email):
                 VALUES (?, 0, 0, ?, "/images/CardPictures/Knight.png")
             """, (user_id, date))
 
-            cursor.execute("""INSERT INTO Decks (Username, Password, Email, DateCreated, ProfilePicture)
-                VALUES (?, ?, ?, ?, "Default.png") """, (username,))
+            cursor.execute("""
+                INSERT INTO Decks (Owner, UserDeckNum Deck)
+                VALUES (?, 1, ?)
+            """, (username, defaultDeck))
 
     except sqlite3.OperationalError as e:
         print(f"Error: {e}")  # Error handling
         raise
     finally:
-        cursor.close()
-        closeDb(conn)  # Close the database connection
+        conn.close()  # Close the database connection
 
 
 @app.route("/create_deck/<username>", methods=["POST"])
@@ -407,4 +409,4 @@ def test_alert(alert_type):
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
