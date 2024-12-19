@@ -7,8 +7,10 @@
     <link rel="shortcut icon" type="image/png" href="images/SheildLogo.png">
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-image: url('images/Backgrounds/LibraryBackground.png');
+            min-height: 1080px;
+            background: url('images/Backgrounds/LibraryBackground.png') no-repeat;
+            background-size: cover;
+            overflow: hidden; 
         }
 
         input[type=text], input[type=password], input[type=email] {
@@ -61,18 +63,6 @@
             mix-blend-mode: multiply;
         }
     </style>
-
-    <script>
-        function checkDetails() {
-            let username = document.querySelector("input[name='username']").value;
-            let password = document.querySelector("input[name='password']").value;
-            if(username === "" || password === ""){
-                //alert("Both username and password are required.");
-            } else {
-                document.querySelector("form").submit();
-            }
-        }
-    </script>
 </head>
 
 <body>
@@ -93,7 +83,7 @@
         <h1 class="large-text in-tablet" style="padding-top: 45px; padding-bottom: 1px;">Sign up:</h1>
 
         <form method="post" action="{{ url_for('signUp') }}" class="in-tablet">
-            <input class="medium-text" required type="text" name="username" placeholder="Username"> <!-- asks for user name -->
+            <input class="medium-text" required type="text" name="username" placeholder="Username" maxlength="12"> <!-- asks for user name -->
                 <br/> <!-- break line -->
             <input class="medium-text" required type="email" name="email" placeholder="Email"> <!-- asks for user name -->
                 <br/> <!-- break line -->

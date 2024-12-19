@@ -6,6 +6,10 @@ import sqlite3
 import os  # Import os module
 import json  # Import json module
 
+from templates.scripts.cropImage import (crop_and_show_image)
+
+from templates.scripts.clearImages import (removeUnusedImages)
+
 from templates.scripts.utils import (
     getProfilePicPath,
     getUserIdByUsername,
@@ -83,6 +87,7 @@ def signUp():
             session.permanent = True
             flash("Signed up successfully!", "success")
             return redirect(url_for("index"))
+
         except sqlite3.IntegrityError as e:
             if "UNIQUE constraint failed: Users.Username" in str(e):
                 flash("Username already exists. Please choose a different username.", "error")
@@ -245,6 +250,9 @@ def change_profile_pic():
             # Save the file to the upload folder
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
+            # Crop and save the uploaded image
+            crop_and_show_image(filename)
+
             # Update the user's profile picture in the database
             conn = getDb()
             cursor = conn.cursor()
@@ -256,10 +264,12 @@ def change_profile_pic():
                 conn.rollback()
                 flash(f"Error: {str(e)}", "error")
 
+            removeUnusedImages()
             return redirect(url_for("profile"))
 
     # Render the change profile picture template
     return render_template("changePfp.html", profile_pic=profile_pic_path)
+
 
 
 @app.route("/use_deck", methods=["POST"])
@@ -328,6 +338,10 @@ def insert_user(username, password, email):
                 INSERT INTO UserStats (UserId, GamesPlayed, GamesWon, DateCreated, FavouriteCard)
                 VALUES (?, 0, 0, ?, "/images/CardPictures/Knight.png")
             """, (user_id, date))
+
+            cursor.execute("""INSERT INTO Decks (Username, Password, Email, DateCreated, ProfilePicture)
+                VALUES (?, ?, ?, ?, "Default.png") """, (username,))
+
     except sqlite3.OperationalError as e:
         print(f"Error: {e}")  # Error handling
         raise
