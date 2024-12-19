@@ -341,7 +341,7 @@ def insert_user(username, password, email):
             """, (user_id, date))
 
             cursor.execute("""
-                INSERT INTO Decks (Owner, UserDeckNum Deck)
+                INSERT INTO Decks (Owner, UserDeckNum, Deck)
                 VALUES (?, 1, ?)
             """, (username, defaultDeck))
 
