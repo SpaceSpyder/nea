@@ -17,7 +17,6 @@ from templates.scripts.utils import (
     getDecksForUser,
     getDeckForUser,
     getDb,
-    closeDb,
     checkUsername,
     calculateRank,
 )
@@ -408,6 +407,18 @@ def test_alert(alert_type):
         flash("This is an error alert!", "error")
     return redirect(url_for("index"))
 
+@app.route("/networkTest", methods=["GET"])
+def networkTest():
+    return render_template("networkTest.html")
+
+@app.route("/networkTest/getGame", methods=["GET"])
+def getGame():
+    global globalGameCount
+    if globalGameCount % 2 == 0:
+        globalGameCount += 1
+    return '{"gameCount" : ' + str( globalGameCount) + '}'
+
 
 if __name__ == "__main__":
+    globalGameCount = 0
     app.run(debug=True)

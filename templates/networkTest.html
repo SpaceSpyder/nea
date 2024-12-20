@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Test</title>
+    <script>
+        function getGame(){
+            fetch('networkTest/getGame')
+                .then(response => response.text())  // Convert the response to text
+                .then(data => {
+                    const game = JSON.parse(data);  // Parse the data as JSON
+                    alert(game.gameCount);  // Display the data in an alert
+                })
+                .catch(error => {
+                    console.error('Error:', error);  // Handle any errors
+                });
+        }
+    </script>
+</head>
+<body onload="getGame()">
+    
+</body>
+</html>
