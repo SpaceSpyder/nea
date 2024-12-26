@@ -20,6 +20,9 @@ from templates.scripts.utils import (
     checkUsername,
     calculateRank,
 )
+from dataclasses import dataclass, asdict
+
+from moduels import(Game)
 
 # Database setup
 DATABASE_URI = "databases/database.db"  # SQLite database file path
@@ -414,10 +417,26 @@ def networkTest():
 @app.route("/networkTest/getGame", methods=["GET"])
 def getGame():
     global globalGameCount
+    global globalGameList
+    username = session.get("Username")
+
     if globalGameCount % 2 == 0:
+        session["CurrentGame"] = globalGameCount
         globalGameCount += 1
-    return '{"gameCount" : ' + str( globalGameCount) + '}'
+        newGame = Game(username, None, globalGameCount, 0, None)
+        globalGameList.append(newGame)   
+        return json.dumps(asdict(newGame), indent=4)
+    return '{"isPlayer1" : false}'
+
+@app.route("/networkTest/waitForPlayer2", methods=["GET"])
+def waitForPlayer2():
+    global globalGameCount
+    global globalGameList
+    game = globalGameList[session["CurrentGame"]]
+    return '{"player2Found" :"' + str( game.player2 != None) +'"}'
+
 
 if __name__ == "__main__":
     globalGameCount = 0
+    globalGameList = []
     app.run(debug=True)
