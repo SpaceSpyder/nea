@@ -107,6 +107,13 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route("/howToPlay")
+def howToPlay():
+    username = session.get("Username")
+    profile_pic_path = getProfilePicPath(username) if username else getProfilePicPath()
+    return render_template("howToPlay.html", profile_pic=profile_pic_path)
+
+
 @app.route("/profile")
 def profile():
     if not session.get("Username"):

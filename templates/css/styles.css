@@ -20,6 +20,7 @@ body {
     margin-left: 252px;
     font-size: 28px;
     padding: 0px 10px;
+    margin-top: 10px;
 }
 
 
@@ -73,7 +74,7 @@ body {
 }
 
 .navbar-left a:hover, .navbar-right a:hover {
-    background-color: #556c6842;
+    /*background-color: #556c6842;*/
     transform: scale(1.05);
 }
 
