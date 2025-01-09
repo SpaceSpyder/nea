@@ -356,13 +356,15 @@ def insert_user(username, password, email):
         conn.close()  # Close the database connection
 
 
-@app.route("/create_deck/<username>", methods=["POST"])
-def create_deck(username):
+@app.route("/modifyDeck/<username>", methods=["POST"])
+def modifyDeck(username):
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
 
-    selected_cards = request.form.get("selectedCards")
-    if selected_cards:
+    selectedCards = request.form.get("selectedCards")
+    selectedDeck = request.form.get("deck")
+
+    if selectedDeck == "create":
         # Add your logic for creating a new deck with the selected cards here
         # For example, insert the selected cards into the database
         conn = getDb()
@@ -381,8 +383,25 @@ def create_deck(username):
                 cursor.execute("""
                     INSERT INTO Decks (Owner, UserDeckNum, Deck)
                     VALUES (?, ?, ?)
-                """, (username, user_deck_num, selected_cards))
+                """, (username, user_deck_num, selectedCards))
                 flash("New deck created successfully!", "success")
+        except sqlite3.Error as e:
+            flash(f"Error: {str(e)}", "error")
+        finally:
+            cursor.close()
+    
+    else:
+        # change current deck of the user
+        conn = getDb()
+        cursor = conn.cursor()
+        try:
+            with conn:
+                cursor.execute("""
+                    UPDATE Users
+                    SET CurrentDeck = ?
+                    WHERE Username = ?
+                """, (selectedDeck, username))
+                flash("Current deck updated successfully!", "success")
         except sqlite3.Error as e:
             flash(f"Error: {str(e)}", "error")
         finally:
