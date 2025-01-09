@@ -186,25 +186,44 @@ def show_decks(username):
             flash("New deck created successfully!", "success")
             return redirect(url_for("show_decks", username=username))
 
-    # Get deck ID from URL parameters, if any
-    deck_id = request.args.get("deck", session.get("CurrentDeck"))
-
     # Retrieve decks for the specified username
     decks = getDecksForUser(username)
-    deck = getDeckForUser(username, deck_id)
+    print(f"Decks for user {username}: {decks}")  # Debug print
 
-    # Fetch the current deck from the database
+    # Fetch the current deck number from the Users table
     try:
         conn = sqlite3.connect("databases/database.db")
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT Deck FROM Decks
-            WHERE Owner = ?
+            SELECT CurrentDeck FROM Users
+            WHERE Username = ?
         """, (username,))
-        deck_row = cursor.fetchone()
-        current_deck = deck_row[0].split(", ") if deck_row else []
+        current_deck_num = cursor.fetchone()
+        if current_deck_num:
+            current_deck_num = current_deck_num[0]
+            print(f"Current deck number for user {username}: {current_deck_num}")  # Debug print
+        else:
+            print(f"No current deck number found for user {username}")  # Debug print
+            current_deck_num = None
+
+        # Fetch the current deck from the Decks table
+        if current_deck_num is not None:
+            cursor.execute("""
+                SELECT Deck FROM Decks
+                WHERE Owner = ? AND UserDeckNum = ?
+            """, (username, current_deck_num))
+            deck_row = cursor.fetchone()
+            if deck_row:
+                current_deck = deck_row[0].split(", ")
+                print(f"Current deck for user {username}: {current_deck}")  # Debug print
+            else:
+                print(f"No deck found for user {username} with deck number {current_deck_num}")  # Debug print
+                current_deck = []
+        else:
+            current_deck = []
     except sqlite3.Error as e:
         flash(f"Error: {str(e)}", "error")
+        print(f"SQLite error: {str(e)}")  # Debug print
         current_deck = []
     finally:
         cursor.close()
@@ -215,7 +234,6 @@ def show_decks(username):
         profile_pic=profile_pic_path,
         username=session_username,
         decks=decks,
-        deck=deck,
         current_deck=current_deck
     )
 
@@ -365,8 +383,6 @@ def modifyDeck(username):
     selectedDeck = request.form.get("deck")
 
     if selectedDeck == "create":
-        # Add your logic for creating a new deck with the selected cards here
-        # For example, insert the selected cards into the database
         conn = getDb()
         cursor = conn.cursor()
         try:
