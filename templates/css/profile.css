@@ -34,7 +34,7 @@ body {
     top: 0;
     left: 0;
     padding-top: 80px;
-    box-shadow: #00000098 0px 0px 10px;
+    
 }
 
 .sidenav-background {
@@ -44,6 +44,7 @@ body {
     top: 0;
     left: 0;
     background-color: #c3846b;
+    box-shadow: #00000098 0px 0px 10px;
 }
 
 .sidenav a {

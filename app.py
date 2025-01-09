@@ -167,10 +167,11 @@ def stats(username=None):
 @app.route("/decks/<username>", methods=["GET", "POST"])
 @app.route("/profile/decks/<username>", methods=["GET", "POST"])
 def show_decks(username):
-    if not session.get("Username"):  # check if the user is logged in
+    if not session.get("Username"):  # Check if the user is logged in
         return redirect(url_for("login"))
-    profile_pic_path = getProfilePicPath(session["Username"])  # get pfp
-    session_username = session["Username"]  # get username
+    
+    profile_pic_path = getProfilePicPath(session["Username"])  # Get profile picture
+    session_username = session["Username"]  # Get the logged-in username
 
     # Check if the user exists
     user_id = getUserIdByUsername(username)
@@ -179,10 +180,8 @@ def show_decks(username):
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        selected_cards = request.form.get("selectedCards")
-        if selected_cards:
-            selected_cards = json.loads(selected_cards)
-            # Add your logic for creating a new deck with the selected cards here
+        formResult = request.form.get("selectedCards")
+        if formResult:
             flash("New deck created successfully!", "success")
             return redirect(url_for("show_decks", username=username))
 
@@ -193,16 +192,35 @@ def show_decks(username):
     decks = getDecksForUser(username)
     deck = getDeckForUser(username, deck_id)
 
-    # Fetch the current deck from the database
+    # Fetch the current deck from the database using currentDeckNum from Users table
     try:
         conn = sqlite3.connect("databases/database.db")
         cursor = conn.cursor()
+        
+        # Get the user's current deck number from the Users table
         cursor.execute("""
-            SELECT Deck FROM Decks
-            WHERE Owner = ?
+            SELECT CurrentDeck FROM Users WHERE Username = ?
         """, (username,))
-        deck_row = cursor.fetchone()
-        current_deck = deck_row[0].split(", ") if deck_row else []
+        user_row = cursor.fetchone()
+        
+        if user_row:
+            current_deck_num = user_row[0]
+        else:
+            flash("User does not have a current deck set.", "error")
+            current_deck_num = None
+        
+        # If current_deck_num exists, fetch the corresponding deck
+        if current_deck_num:
+            cursor.execute("""
+                SELECT Deck FROM Decks
+                WHERE Owner = ? AND UserDeckNum = ?
+            """, (username, current_deck_num))
+            deck_row = cursor.fetchone()
+            current_deck = deck_row[0].split(", ") if deck_row else []
+        else:
+            current_deck = []
+            flash("Current deck not found.", "error")
+    
     except sqlite3.Error as e:
         flash(f"Error: {str(e)}", "error")
         current_deck = []
@@ -218,6 +236,7 @@ def show_decks(username):
         deck=deck,
         current_deck=current_deck
     )
+
 
 
 @app.route("/profile/changePfp", methods=["GET", "POST"])
@@ -355,37 +374,55 @@ def insert_user(username, password, email):
         conn.close()  # Close the database connection
 
 
-@app.route("/create_deck/<username>", methods=["POST"])
-def create_deck(username):
+@app.route("/deckForm/<username>", methods=["POST"])
+def deckForm(username):
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
 
-    selected_cards = request.form.get("selectedCards")
-    if selected_cards:
-        # Add your logic for creating a new deck with the selected cards here
-        # For example, insert the selected cards into the database
-        conn = getDb()
-        cursor = conn.cursor()
-        try:
-            with conn:
-                # Determine the next UserDeckNum for the user
-                cursor.execute("""
-                    SELECT COALESCE(MAX(UserDeckNum), 0) + 1
-                    FROM Decks
-                    WHERE Owner = ?
-                """, (username,))
-                user_deck_num = cursor.fetchone()[0]
+    if request.form.get("formType") == "true":
+        selectedCards = request.form.get("selectedCards")
+        if selectedCards:
+            conn = getDb()
+            cursor = conn.cursor()
+            try:
+                with conn:
+                    # Determine the next UserDeckNum for the user
+                    cursor.execute("""
+                        SELECT COALESCE(MAX(UserDeckNum), 0) + 1
+                        FROM Decks
+                        WHERE Owner = ?
+                    """, (username,))
+                    user_deck_num = cursor.fetchone()[0]
 
-                # Insert the new deck into the Decks table
-                cursor.execute("""
-                    INSERT INTO Decks (Owner, UserDeckNum, Deck)
-                    VALUES (?, ?, ?)
-                """, (username, user_deck_num, selected_cards))
-                flash("New deck created successfully!", "success")
-        except sqlite3.Error as e:
-            flash(f"Error: {str(e)}", "error")
-        finally:
-            cursor.close()
+                    # Insert the new deck into the Decks table
+                    cursor.execute("""
+                        INSERT INTO Decks (Owner, UserDeckNum, Deck)
+                        VALUES (?, ?, ?)
+                    """, (username, user_deck_num, selectedCards))
+                    flash("New deck created successfully!", "success")
+            except sqlite3.Error as e:
+                flash(f"Error: {str(e)}", "error")
+            finally:
+                cursor.close()
+    else:
+        # If formType is not "true", update the current deck for the user
+        selected_deck = request.form.get("selectedDeck")
+        if selected_deck:
+            try:
+                conn = getDb()
+                cursor = conn.cursor()
+                with conn:
+                    # Update the CurrentDeck for the user
+                    cursor.execute("""
+                        UPDATE Users
+                        SET CurrentDeck = ?
+                        WHERE Username = ?
+                    """, (selected_deck, username))
+                    flash("Current deck updated successfully!", "success")
+            except sqlite3.Error as e:
+                flash(f"Error: {str(e)}", "error")
+            finally:
+                cursor.close()
 
     return redirect(url_for("show_decks", username=username))
 
