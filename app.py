@@ -436,7 +436,7 @@ def modifyDeck(username):
         finally:
             cursor.close()
 
-    return redirect(url_for("show_decks", username=username))
+    return redirect(url_for("show_decks", username=username, selecteddeckid=selectedDeck))
 
 
 @app.route("/template")
@@ -468,21 +468,30 @@ def getGame():
     global globalGameCount
     global globalGameList
     username = session.get("Username")
-
-    if globalGameCount % 2 == 0:
-        session["CurrentGame"] = globalGameCount
-        globalGameCount += 1
-        newGame = Game(username, None, globalGameCount, 0, None)
-        globalGameList.append(newGame)   
-        return json.dumps(asdict(newGame), indent=4)
-    return '{"isPlayer1" : false}'
-
+    if session.get("CurrentGame"): 
+        return '{"status" : "in game"}'
+    session["CurrentGame"] = globalGameCount
+    
+    for game in globalGameList:
+        if game.player2 is None:
+            game.player2 = username
+            return '{"isPlayer1" : false}'
+            
+    globalGameCount += 1
+    newGame = Game(username, None, globalGameCount, 0, None)
+    newGame.player1 = username
+    globalGameList.append(newGame)
+    session["CurrentGame"] = globalGameCount
+    return '{"isPlayer1" : true}'
+    
 @app.route("/networkTest/waitForPlayer2", methods=["GET"])
 def waitForPlayer2():
     global globalGameCount
     global globalGameList
-    game = globalGameList[session["CurrentGame"]]
-    return '{"player2Found" :"' + str( game.player2 != None) +'"}'
+    
+    if session.get("CurrentGame"): 
+        game = globalGameList[(session["CurrentGame"]  -1)]
+        return '{"player2Found" :"' + str( game.player2 ) +'"}' # gets username rather than boolean
 
 
 if __name__ == "__main__":

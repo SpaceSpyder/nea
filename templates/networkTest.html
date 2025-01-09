@@ -12,7 +12,7 @@
                 .then(response => response.text())  // Convert the response to text
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
-                    alert(game.gameCount);  // Display the data in an alert
+                    alert(data);  // Display the data in an alert
                 })
                 .catch(error => {
                     console.error('Error:', error);  // Handle any errors
@@ -30,7 +30,7 @@
                 .then(response => response.text())  // Convert the response to text
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
-                    if (game.someSpecificValue === 'desiredValue') {
+                    if (game.player2Found === 'True') {
                         clearInterval(intervalId);  // Stop the interval if the specific value is received
                         alert('Desired value received!');
                     } else if (callCount >= 10) {
