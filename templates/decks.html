@@ -152,7 +152,7 @@
                     alert('You must select at least 20 cards to create a new deck.');
                     return;  // Prevent form submission
                 }
-                document.getElementById('selectedCards').value = JSON.stringify(selectedCards);
+                document.getElementById('selectedCards').value = selectedCards.join(', ');
                 document.getElementById('deckForm').submit();
             }
     
@@ -165,7 +165,7 @@
                         event.preventDefault();  // Prevent form submission
                         return;
                     }
-                    document.getElementById('selectedCards').value = JSON.stringify(selectedCards);
+                    document.getElementById('selectedCards').value = selectedCards.join(', ');
                 } else {
                     console.log(`Selected deck: ${selectedDeck}`);
                     document.getElementById('selectedCards').value = ""; // Clear selected cards for existing deck

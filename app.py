@@ -181,8 +181,8 @@ def show_decks(username):
     if request.method == "POST":
         selected_cards = request.form.get("selectedCards")
         if selected_cards:
-            selected_cards = json.loads(selected_cards)
-            # Add your logic for creating a new deck with the selected cards here
+            #selected_cards = json.loads(selected_cards)
+            
             flash("New deck created successfully!", "success")
             return redirect(url_for("show_decks", username=username))
 

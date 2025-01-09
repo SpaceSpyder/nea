@@ -1,7 +1,7 @@
 <div class="display-deck-grid">
     {% for card in current_deck %}
     <div class="card-div">
-        <img src="/images/CardPictures/{{ card }}.png" class="deck-card" alt="{{ card }}">
+        <img draggable="false" src="/images/CardPictures/{{ card }}.png" class="deck-card" alt="{{ card }}">
     </div>
     {% endfor %}
 </div>
