@@ -102,55 +102,87 @@
 
         <script>
         const maxSelection = 20;
-        let selectedCards = [];
 
-        function changeDeckDisplay(){
-            if (document.getElementById('deck').value == "create"){
-                document.getElementById('deckDisplay').style.display = "none";
-                document.getElementById('deckCreation').style.display = "block";
-            }
-            else{
-                document.getElementById('deckDisplay').style.display = "block";
-                document.getElementById('deckCreation').style.display = "none";
-            }
-        }
+            let selectedCards = [];
 
-        document.querySelectorAll('.deck-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const cardName = card.getAttribute('data-name');
-                console.log(`Card clicked: ${cardName}`);  // Log for debugging
-
-                if (selectedCards.includes(cardName)) {
-                    // Card was already selected, so remove it
-                    card.classList.remove('selected');
-                    selectedCards = selectedCards.filter(c => c !== cardName);
-                    console.log(`Card deselected: ${cardName}`);
+            function changeDeckDisplay() {
+                if (document.getElementById('deck').value == "create") {
+                    document.getElementById('deckDisplay').style.display = "none";
+                    document.getElementById('deckCreation').style.display = "block";
                 } else {
-                    // Card not selected yet
-                    if (selectedCards.length < maxSelection) {
-                        card.classList.add('selected');
-                        selectedCards.push(cardName);
-                        console.log(`Card selected: ${cardName}`);
-                    } else {
-                        alert('You can only select up to 20 cards.');
-                    }
+                    document.getElementById('deckDisplay').style.display = "block";
+                    document.getElementById('deckCreation').style.display = "none";
                 }
+            }
+
+            // Update the counter display
+            function updateCardCount() {
+                document.getElementById('cardCount').textContent = selectedCards.length;
+            }
+
+            document.querySelectorAll('.deck-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const cardName = card.getAttribute('data-name');
+                    console.log(`Card clicked: ${cardName}`);  // Log for debugging
+
+                    if (selectedCards.includes(cardName)) {
+                        // Card was already selected, so remove it
+                        card.classList.remove('selected');
+                        selectedCards = selectedCards.filter(c => c !== cardName);
+                        console.log(`Card deselected: ${cardName}`);
+                    } else {
+                        // Card not selected yet
+                        if (selectedCards.length < maxSelection) {
+                            card.classList.add('selected');
+                            selectedCards.push(cardName);
+                            console.log(`Card selected: ${cardName}`);
+                        } else {
+                            alert('You can only select up to 20 cards.');
+                        }
+                    }
+
+                    updateCardCount(); // Update the counter display
+                });
             });
-        });
 
             document.getElementById('deckForm').addEventListener('submit', (event) => {
                 console.log(new FormData(document.getElementById('deckForm')));  // Log for debugging
-                if (selectedCards.length !== maxSelection) {
+
+                // Check which section is active
+                const isCreateDeckActive = document.getElementById('deckCreation').style.display === "block";
+                const isDisplayDeckActive = document.getElementById('deckDisplay').style.display === "block";
+
+                if (isDisplayDeckActive) {
+                    console.log('Display deck is active.');
+                }
+
+                if (selectedCards.length !== maxSelection && isCreateDeckActive) {
                     event.preventDefault();
                     alert('You must select exactly 20 cards.');
                 } else {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'selectedCards';
-                    input.value = selectedCards.join(', '); // Create a comma-separated string
-                    document.getElementById('deckForm').appendChild(input);
+                    // If the form is for creating a new deck
+                    if (isCreateDeckActive) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'selectedCards';
+                        input.value = selectedCards.join(', '); // Create a comma-separated string
+                        document.getElementById('deckForm').appendChild(input);
+                    }
+
+                    // Add a hidden input for formType value
+                    const formTypeInput = document.createElement('input');
+                    formTypeInput.type = 'hidden';
+                    formTypeInput.name = 'formType';
+
+                    // If the user is creating a deck, set formType to "true"
+                    // If the user selects an existing deck, set formType to the deck number
+                    const selectedDeckValue = document.getElementById('deck').value;
+                    formTypeInput.value = selectedDeckValue === "create" ? "true" : selectedDeckValue;
+
+                    document.getElementById('deckForm').appendChild(formTypeInput);
                 }
             });
+
         </script>
     </div>
 </body>
