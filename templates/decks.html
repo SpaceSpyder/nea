@@ -106,42 +106,52 @@
             let selectedCards = [];
     
             function changeDeckDisplay() {
-                if (document.getElementById('deck').value == "create") {
-                    document.getElementById('deckCreation').style.display = "block";
-                } else {
-                    document.getElementById('deckCreation').style.display = "none";
-                }
+            const deckCreation = document.getElementById('deckCreation');
+            const deckDisplay = document.getElementById('deckDisplay');
+            const selectedDeck = document.getElementById('deck').value;
+
+            if (selectedDeck === "create") {
+                deckCreation.style.display = "block";
+                deckDisplay.style.display = "none";
+            } else {
+                deckCreation.style.display = "none";
+                deckDisplay.style.display = "block";
             }
+        }
     
             function updateCardCount() {
                 document.getElementById('cardCount').innerText = selectedCards.length;
             }
     
             document.querySelectorAll('.deck-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const cardName = card.getAttribute('data-card-name');
-                    console.log(`Card clicked: ${cardName}`);  // Log for debugging
-    
-                    if (selectedCards.includes(cardName)) {
-                        // Card was already selected, so remove it
-                        card.classList.remove('selected');
-                        selectedCards = selectedCards.filter(c => c !== cardName);
-                        console.log(`Card deselected: ${cardName}`);
+            card.addEventListener('click', () => {
+                const cardName = card.getAttribute('data-name');
+                console.log(`Card clicked: ${cardName}`);  // Log for debugging
+
+                if (selectedCards.includes(cardName)) {
+                    // Card was already selected, so remove it
+                    card.classList.remove('selected');
+                    selectedCards = selectedCards.filter(c => c !== cardName);
+                    console.log(`Card deselected: ${cardName}`);
+                } else {
+                    // Card not selected yet
+                    if (selectedCards.length < maxSelection) {
+                        card.classList.add('selected');
+                        selectedCards.push(cardName);
+                        console.log(`Card selected: ${cardName}`);
                     } else {
-                        // Card not selected yet
-                        if (selectedCards.length < maxSelection) {
-                            card.classList.add('selected');
-                            selectedCards.push(cardName);
-                            console.log(`Card selected: ${cardName}`);
-                        } else {
-                            alert('Maximum selection reached');
-                        }
+                        alert('You can only select up to 20 cards.');
                     }
-                    updateCardCount();  // Update the card count display
-                });
+                }
+                updateCardCount();  // Update the card count display
             });
+        });
     
             function submitNewDeck() {
+                if (selectedCards.length < 20) {
+                    alert('You must select at least 20 cards to create a new deck.');
+                    return;  // Prevent form submission
+                }
                 document.getElementById('selectedCards').value = JSON.stringify(selectedCards);
                 document.getElementById('deckForm').submit();
             }
@@ -150,12 +160,20 @@
                 const selectedDeck = document.getElementById('deck').value;
                 if (selectedDeck === "create") {
                     console.log('Creating a new deck');
+                    if (selectedCards.length < 20) {
+                        alert('You must select at least 20 cards to create a new deck.');
+                        event.preventDefault();  // Prevent form submission
+                        return;
+                    }
                     document.getElementById('selectedCards').value = JSON.stringify(selectedCards);
                 } else {
                     console.log(`Selected deck: ${selectedDeck}`);
                     document.getElementById('selectedCards').value = ""; // Clear selected cards for existing deck
                 }
             });
+
+            // Initial call to set the correct display state
+            changeDeckDisplay();
 
         </script>
     </div>

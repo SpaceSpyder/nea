@@ -382,6 +382,9 @@ def modifyDeck(username):
     selectedCards = request.form.get("selectedCards")
     selectedDeck = request.form.get("deck")
 
+    print(f"Selected cards: {selectedCards}")  # Debug print
+    print(f"Selected deck: {selectedDeck}")  # Debug print
+
     if selectedDeck == "create":
         conn = getDb()
         cursor = conn.cursor()
@@ -394,6 +397,7 @@ def modifyDeck(username):
                     WHERE Owner = ?
                 """, (username,))
                 user_deck_num = cursor.fetchone()[0]
+                print(f"Next UserDeckNum for {username}: {user_deck_num}")  # Debug print
 
                 # Insert the new deck into the Decks table
                 cursor.execute("""
@@ -403,6 +407,7 @@ def modifyDeck(username):
                 flash("New deck created successfully!", "success")
         except sqlite3.Error as e:
             flash(f"Error: {str(e)}", "error")
+            print(f"SQLite error: {str(e)}")  # Debug print
         finally:
             cursor.close()
     
@@ -420,6 +425,7 @@ def modifyDeck(username):
                 flash("Current deck updated successfully!", "success")
         except sqlite3.Error as e:
             flash(f"Error: {str(e)}", "error")
+            print(f"SQLite error: {str(e)}")  # Debug print
         finally:
             cursor.close()
 
