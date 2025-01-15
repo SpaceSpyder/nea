@@ -7,8 +7,21 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
     <link rel="shortcut icon" type="image/png" href="images/ShieldLogo.png">
     <style>
-        .main {
-            padding: 40px;
+        main {
+            margin-left: 300px;
+            margin-top: 48px;
+        }
+        
+        #editProfile {
+            float:right;
+            padding-right: 35px;
+        }
+
+        .banner{
+            height: 175px;
+            width: 1000px;
+            background-color: #555;
+            text-align: center;
         }
     </style>
 </head>
@@ -17,8 +30,14 @@
     {% include 'htmlChildren/navbar.html' %} <!-- navbar  -->
     
     <main>
-        {% block content %}
-        {% endblock %}
+        <div id="editProfile">
+                <button type="text" id=editButton >edit profile</button>
+        </div>
+
+        <div class="banner">
+            <p1>banner</p1>
+            <img src="">
+        </div>
     </main>
 
     {% include 'htmlChildren/sideNav.html' %}

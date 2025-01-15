@@ -123,3 +123,33 @@ def calculateRank(username):
         return rank
     finally:
         cursor.close()
+
+def GetDeckNames(username):
+    deckNames = []
+
+    try:
+        # Connect to the database
+        conn = sqlite3.connect("databases/database.db")
+        cursor = conn.cursor()
+
+        # Query to retrieve DeckName for the specified user
+        cursor.execute("""
+            SELECT DeckName
+            FROM Decks
+            WHERE Owner = ?
+        """, (username,))
+
+        # Fetch all results and append DeckName to the list
+        rows = cursor.fetchall()
+        for row in rows:
+            deckNames.append(row[0])  # row[0] corresponds to the DeckName column
+
+    except sqlite3.Error as e:
+        print(f"Error: {str(e)}")
+    
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        conn.close()
+
+    return deckNames
