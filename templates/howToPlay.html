@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="shortcut icon" type="image/png" href="images/SheildLogo.png">
+    <style>
+        body {
+            font-family: "Metamorphous", serif;
+            background-attachment: fixed;  
+            background-size: cover;
+            background-position: center;
+            background-image: url('/images/WoodTexture.png');
+        }
+        main {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar  -->
+    
+    <!-- Flash messages block -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    
+    <main>
+        <div>
+            <img src="/images/howTo/tutorialLocations.png" width="800"/>
+        </div>
+
+
+
+    </main>
+
+    <!-- {% include 'htmlChildren/sideNav.html' %} side nav -->
+</body>
+</html>

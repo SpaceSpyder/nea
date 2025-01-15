@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign up!</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="shortcut icon" type="image/png" href="images/SheildLogo.png">
+    <style>
+        body {
+            min-height: 1080px;
+            background: url('images/Backgrounds/LibraryBackground.png') no-repeat;
+            background-size: cover;
+            overflow: hidden; 
+        }
+
+        input[type=text], input[type=password], input[type=email] {
+            width: 350px;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .tablet a {
+            color: black;
+            display: block; 
+            text-align: center;
+        }
+
+        .tablet {
+            color: rgba(0, 0, 0, 0.743);
+            border-radius: 1%;
+            background-image: url('images/Tablet.png');
+        }
+
+        /* Button Styling */
+        .button {
+            font-family: "UnifrakturMaguntia", cursive;
+            font-weight: bold;
+            width: 350px;
+            height: 60px;
+            background-color: #00000000;
+            border: solid 4px #0000003c;
+            border-radius: 0px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #0000001f;
+            mix-blend-mode: multiply;
+        }
+
+        .tablet input {
+            font-family: "UnifrakturMaguntia", cursive;
+            font-weight: bold;
+            width: 350px;
+            height: 60px;
+            background-color: #00000000;
+            border: solid 4px #0000003c;
+            color: rgba(0, 0, 0, 0.743);
+            mix-blend-mode: multiply;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <div class="tablet">
+
+        <h1 class="large-text in-tablet" style="padding-top: 45px; padding-bottom: 1px;">Sign up:</h1>
+
+        <form method="post" action="{{ url_for('signUp') }}" class="in-tablet">
+            <input class="medium-text" required type="text" name="username" placeholder="Username" maxlength="12"> <!-- asks for user name -->
+                <br/> <!-- break line -->
+            <input class="medium-text" required type="email" name="email" placeholder="Email"> <!-- asks for user name -->
+                <br/> <!-- break line -->
+            <input class="medium-text" required type="password" name="password" placeholder="Password">
+                <br/>
+            <button class="button" type="submit" onclick="checkDetails()">Submit</button> <!-- button type -->
+        </form>
+
+        <a href="{{ url_for('login') }}" class="bottom-tablet" style="padding-top: 10px;">Go back to login page</a>
+    </div>
+</body>
+</html>

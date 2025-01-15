@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Test</title>
+    <script>
+        let callCount = 0;
+        let intervalId;
+        function getGame() {
+            fetch('networkTest/getGame')
+                .then(response => response.text())  // Convert the response to text
+                .then(data => {
+                    const game = JSON.parse(data);  // Parse the data as JSON
+                    alert(data);  // Display the data in an alert
+                })
+                .catch(error => {
+                    console.error('Error:', error);  // Handle any errors
+                });
+        }
+
+        function on() {
+            document.getElementById("overlay").style.display = "block";
+            callCount = 0;
+            intervalId = setInterval(waitForPlayer2, 1000);  // Call waitForPlayer2 every second
+        }
+
+        function waitForPlayer2() {
+            fetch('networkTest/waitForPlayer2')
+                .then(response => response.text())  // Convert the response to text
+                .then(data => {
+                    const game = JSON.parse(data);  // Parse the data as JSON
+                    if (game.player2Found) {
+                        clearInterval(intervalId);  // Stop the interval if the specific value is received
+                        alert('Desired value received!');
+                        document.getElementById("overlay").style.display = "none";
+                    } else if (callCount >= 10) {
+                        clearInterval(intervalId);  // Stop the interval if the number of calls exceeds 10
+                        alert('Maximum number of calls exceeded.');
+                    } else {
+                        callCount++;
+                    }
+                })
+                .catch(error => {
+                    callCount++;
+                    console.error('Error:', error);  // Handle any errors
+                });
+        }
+
+        function off() {
+            document.getElementById("overlay").style.display = "none";
+        }
+
+
+        function login(player) {
+            fetch('networkTest/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ Username: player }),
+            })
+                .then(response => response.text())  // Convert the response to text
+                .then(data => {
+                    const game = JSON.parse(data);  // Parse the data as JSON
+                    alert(data);  // Display the data in an alert
+                })
+                .catch(error => {
+                    console.error('Error:', error);  // Handle any errors
+                });
+        }
+    </script>
+    <style>
+        #overlay {
+            position: fixed;
+            display: none;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2;
+            cursor: pointer;
+            
+            }
+        #text{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 50px;
+            color: white;
+            transform: translate(-50%,-50%);
+            -ms-transform: translate(-50%,-50%);
+            }
+
+    </style>
+    
+</head>
+<body onload="getGame()">
+    <div id="overlay" >
+        <div id="text">WAITING FOR PLAYER 2</div>
+      </div>
+
+    <button onclick="on()">check for player 2</button>
+    <button onclick="login('NW1')">NW1</button>
+    <button onclick="login('NW2')">NW2</button>
+</body>
+</html>

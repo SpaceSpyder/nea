@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decks</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link rel="shortcut icon" type="image/png" href="/images/SheildLogo.png">
+    <style>
+
+        .make-deck-grid, .display-deck-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr); /* Ensure exactly 7 columns */
+            gap: 10px 8px;
+            overflow: visible;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .display-deck-grid img,
+        .make-deck-grid img, .card-div {
+            width: 200px; /*do not change*/
+            height: 300px; /*do not change*/
+            box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+        }
+
+        /* Default: Cards are grey */
+        .make-deck-grid img {
+            filter: grayscale(100%); /* Make the card grey by default */
+            transition: filter 0.3s ease; /* Smooth transition effect */
+            object-fit: cover;
+        }
+
+        /* When selected, remove grayscale to show color */
+        .make-deck-grid img.selected {
+            filter: grayscale(0); /* Remove grayscale to make the card colorful */
+            opacity: 1;  /* Optional: ensure opacity is fully restored */
+        }
+
+        .make-deck-grid img:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        #deckCreation {
+            display: none;
+        }
+        
+        
+    </style>
+</head>
+<body>
+
+    {% include 'htmlChildren/navbar.html' %}
+    <!-- Flash messages block -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes" style="z-index: 10;">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    {% include 'htmlChildren/sideNav.html' %}
+
+    <div class="main">
+        <h1>Decks for {{ username }}</h1>
+        
+        <!-- Deck editor section -->
+        <div class="deck-selection">
+            <form id="deckForm" action="{{ url_for('modifyDeck', username=username) }}" method="POST">
+                <label for="deck">Choose a deck:</label>
+                <select name="deck" id="deck" onchange="changeDeckDisplay()">
+                    {% for i in range(1, decks|length + 1) %}
+                        <option value="{{ i }}">Deck {{ i }}{{ selecteddeckid }}</option>
+                    {% endfor %}
+                    <option value="create">Create a new deck</option> <!-- Option to create a new deck -->
+                </select>
+                <input type="hidden" name="selectedCards" id="selectedCards">
+                <button type="submit">Submit</button>
+            </form>
+            
+            <!-- Display the current deck -->
+            <div>
+                <div id = "deckDisplay">
+                <!-- Display the current deck -->
+                <h2>Current Deck:</h2>
+                {% include 'htmlChildren/deckDisplay.html' %}
+                </div>
+
+                <div id = "deckCreation">
+                <br/>
+                <h2>Edit Deck:</h2>
+                {% include 'htmlChildren/deckCreation.html' %}
+                </div>
+            </div>
+        </div>
+        
+        </div>
+
+
+
+        <script>
+            const maxSelection = 20;
+            let selectedCards = [];
+    
+            function changeDeckDisplay() {
+            const deckCreation = document.getElementById('deckCreation');
+            const deckDisplay = document.getElementById('deckDisplay');
+            const selectedDeck = document.getElementById('deck').value;
+
+            if (selectedDeck === "create") {
+                deckCreation.style.display = "block";
+                deckDisplay.style.display = "none";
+            } else {
+                deckCreation.style.display = "none";
+                deckDisplay.style.display = "block";
+            }
+        }
+    
+            function updateCardCount() {
+                document.getElementById('cardCount').innerText = selectedCards.length;
+            }
+    
+            document.querySelectorAll('.deck-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const cardName = card.getAttribute('data-name');
+                console.log(`Card clicked: ${cardName}`);  // Log for debugging
+
+                if (selectedCards.includes(cardName)) {
+                    // Card was already selected, so remove it
+                    card.classList.remove('selected');
+                    selectedCards = selectedCards.filter(c => c !== cardName);
+                    console.log(`Card deselected: ${cardName}`);
+                } else {
+                    // Card not selected yet
+                    if (selectedCards.length < maxSelection) {
+                        card.classList.add('selected');
+                        selectedCards.push(cardName);
+                        console.log(`Card selected: ${cardName}`);
+                    } else {
+                        alert('You can only select up to 20 cards.');
+                    }
+                }
+                updateCardCount();  // Update the card count display
+            });
+        });
+    
+            function submitNewDeck() {
+                if (selectedCards.length < 20) {
+                    alert('You must select at least 20 cards to create a new deck.');
+                    return;  // Prevent form submission
+                }
+                document.getElementById('selectedCards').value = selectedCards.join(', ');
+                document.getElementById('deckForm').submit();
+            }
+    
+            document.getElementById('deckForm').addEventListener('submit', function(event) {
+                const selectedDeck = document.getElementById('deck').value;
+                if (selectedDeck === "create") {
+                    console.log('Creating a new deck');
+                    if (selectedCards.length < 20) {
+                        alert('You must select at least 20 cards to create a new deck.');
+                        event.preventDefault();  // Prevent form submission
+                        return;
+                    }
+                    document.getElementById('selectedCards').value = selectedCards.join(', ');
+                } else {
+                    console.log(`Selected deck: ${selectedDeck}`);
+                    document.getElementById('selectedCards').value = ""; // Clear selected cards for existing deck
+                }
+            });
+
+            // Initial call to set the correct display state
+            changeDeckDisplay();
+
+        </script>
+    </div>
+</body>
+</html>

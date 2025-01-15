@@ -1,0 +1,31 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Metamorphous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300..700&family=UnifrakturMaguntia&display=swap');
+
+/* Card Styling */
+.card {
+    position: absolute;
+    top: 570px;
+    left: 985px;
+    height: 225px;
+    width: 150px;
+    cursor: move;
+    z-index: 5;
+    user-select: none;
+}
+
+/* Board Layout */
+#board {
+    width: 600px;
+    height: 400px;
+    position: relative;
+    margin: 20px auto;
+}
+
+/* Hand Layout */
+.hand {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}

@@ -1,0 +1,27 @@
+<style>
+    .title {
+        font-size: 27px;
+        white-space: nowrap;  /* Prevent text from wrapping */
+        overflow: hidden;  /* Hide overflowing text */
+        text-overflow: ellipsis;  /* Add ellipsis when text overflows */
+    }
+</style>
+
+<div class="sidenav">
+    <a href="/profile" class="large-pfp-container">
+        <img src="{{ profile_pic }}" alt="Profile Picture" width="220" class="profile-pic">
+    </a>
+
+    {% if session.Username %}
+        <a href="/profile" class="cookie-link title" id="title">{{ session.Username }}</a>
+    {% else %}
+        <a href="/login" class="cookie-link">Log In</a>
+    {% endif %}
+
+    <a class="sidenav-options" href="/profile/stats/{{ session.Username }}">Stats</a>
+    <a class="sidenav-options" href="/profile/decks/{{ session.Username }}">Decks</a>
+    <a class="sidenav-options" href="/profile/changePfp">Change Profile Pic</a>
+    <a class="sidenav-options" href="/logout">Log out</a>
+</div>
+<div class="sidenav-background"></div>
+
