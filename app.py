@@ -480,6 +480,7 @@ def getGame():
         if game.player2 is None:
             game.player2 = username
             dumpGlobalState()
+            session.modified = True
             return '{"isPlayer1" : false}'
             
     globalGameCount += 1
@@ -488,6 +489,7 @@ def getGame():
     globalGameList.append(newGame)
     session["CurrentGame"] = globalGameCount
     dumpGlobalState()
+    session.modified = True
     return '{"isPlayer1" : true}'
     
 @app.route("/networkTest/waitForPlayer2", methods=["GET"])
@@ -515,7 +517,7 @@ def dumpGlobalState():
     print(globalGameCount)
     print("Session")
     if session.get("CurrentGame"):
-        print("Found session" + str(session["CurrentGame"]))
+        print("Found session:" + str(session["CurrentGame"]))
     else:
         print("No session")
 
