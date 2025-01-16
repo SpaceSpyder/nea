@@ -204,7 +204,6 @@ hr {
     padding: 0;
     width: 100%; /* Make the container wider */
     margin: 0 auto; /* Center the container */
-    /*display: flex;*/
     align-items: center; /* Center the flash messages horizontally */
 }
 
@@ -215,6 +214,8 @@ hr {
     opacity: 1;
     animation: fadeOut 3s 3s forwards; /* Apply the fadeOut animation */
     /* max-width: 90%; */ /* Ensure the flash messages do not exceed the screen width */
+    position: relative;
+    z-index: 10;
 }
 
 @keyframes fadeOut {

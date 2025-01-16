@@ -131,53 +131,59 @@ def profile():
     return render_template("profile.html", profile_pic=profilePicPath)
 
 
+
 @app.route("/profile/stats", methods=["GET"])
-@app.route("/stats", methods=["GET"])
 @app.route("/profile/stats/<username>", methods=["GET"])
+@app.route("/stats", methods=["GET"])
 @app.route("/stats/<username>", methods=["GET"])
 def stats(username=None):
-    if not session.get("Username"):  # check if the user is logged in
+    if not session.get("Username"):  # Check if the user is logged in
         return redirect(url_for("login"))
     
     # If username is not provided in the URL, use the logged-in user's username
     if username is None:
         username = session["Username"]
 
-    account_pic_path = getProfilePicPath(username)  if username else getProfilePicPath()
-    profilePicPath = getProfilePicPath(session["Username"])  # get pfp for the username (either from URL or session)
-    session_username = session["Username"]  # get logged-in user's username
+    accountPicPath = getProfilePicPath(username) if username else getProfilePicPath() # pfp from the url
+    accountUsername = username # username from the url
+    profilePicPath = getProfilePicPath(session["Username"])  # pfp from session
+    sessionUsername = session["Username"]  # username from session
 
+    # db connection
     conn = getDb()
     cursor = conn.cursor()
 
-    try:
-        cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
-        result = cursor.fetchone()
-
-        if result:
-            user_id = result[0]
-            cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated, FavouriteCard FROM UserStats WHERE UserId = ?", (user_id,))
-            user_stats = cursor.fetchone()
-
-            if user_stats:
-                rank = calculateRank(username)  # Calculate the rank
-                stats_data = {
-                    "Rank": rank,
-                    "GamesPlayed": user_stats[0],
-                    "GamesWon": user_stats[1],
-                    "DateCreated": user_stats[2],
-                    "FavouriteCard": user_stats[3]
-                }
-            else:
-                stats_data = {"Rank": "N/A", "GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A", "FavouriteCard": "N/A"}
-        else:
-            stats_data = {"Rank": "N/A", "GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A", "FavouriteCard": "N/A"}
-    finally:
+    try: # get user stats
+        userId = getUserId(cursor, username)
+        if userId is None: # if user does not exist
+            flash("User does not exist.", "error")
+            return redirect(url_for("profile"))
+        statsData = getUserStats(cursor, userId, username) # user stats
+    finally: # close db connection
         cursor.close()
+        conn.close()
 
-    return render_template("stats.html", profile_pic=profilePicPath, stats=stats_data, username=session_username, account_pic=account_pic_path)
+    return render_template("stats.html", profile_pic=profilePicPath, stats=statsData, username=sessionUsername, account_pic=accountPicPath, account_username=accountUsername)
 
+def getUserId(cursor, username): # get user id from username
+    cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
+    result = cursor.fetchone()
+    return result[0] if result else None
 
+def getUserStats(cursor, userId, username):
+    if userId:
+        cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated, FavouriteCard FROM UserStats WHERE UserId = ?", (userId,))
+        userStats = cursor.fetchone()
+        if userStats:
+            rank = calculateRank(username)  # Calculate the rank
+            return {
+                "Rank": rank,
+                "GamesPlayed": userStats[0],
+                "GamesWon": userStats[1],
+                "DateCreated": userStats[2],
+                "FavouriteCard": userStats[3]
+            }
+    return {"Rank": "N/A", "GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A", "FavouriteCard": "N/A"}
 
 @app.route("/decks/<username>", methods=["GET", "POST"])
 @app.route("/profile/decks/<username>", methods=["GET", "POST"])
@@ -200,6 +206,8 @@ def show_decks(username):
             
             flash("New deck created successfully!", "success")
             return redirect(url_for("show_decks", username=username))
+
+    accountUsername = username # username from the url
 
     # Retrieve decks for the specified username
     decks = getDecksForUser(username)
@@ -249,7 +257,8 @@ def show_decks(username):
         profile_pic=profilePicPath,
         username=session_username,
         decks=decks,
-        current_deck=current_deck
+        current_deck=current_deck,
+        account_username=accountUsername
     )
 
 

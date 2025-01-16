@@ -20,14 +20,32 @@
         .banner{
             height: 175px;
             width: 1000px;
-            background-color: #555;
+            background-color: #9b9b9b;
+            font-size: xx-large;
             text-align: center;
+            vertical-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
+        
     </style>
 </head>
 
 <body>
     {% include 'htmlChildren/navbar.html' %} <!-- navbar  -->
+
+    <!-- Flash messages block -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
     
     <main>
         <div id="editProfile">
@@ -35,9 +53,13 @@
         </div>
 
         <div class="banner">
-            <p1>banner</p1>
+            <p1>no banner chosen</p1>
             <img src="">
+
         </div>
+
+        <p style="padding-top: 50px; font-size: large;">no bio</p>
+
     </main>
 
     {% include 'htmlChildren/sideNav.html' %}
