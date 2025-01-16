@@ -22,6 +22,7 @@ from templates.scripts.utils import (
     getDb,
     checkUsername,
     calculateRank,
+    insertUser,
 )
 
 from moduels import(Game) # json serial class
@@ -44,6 +45,16 @@ def index():
     username = session.get("Username") # get username from session
     profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()
     return render_template("index.html", profile_pic=profilePicPath)
+
+
+@app.route("/howToPlay")
+def howToPlay():
+    username = session.get("Username")
+    profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()
+    return render_template("howToPlay.html", profile_pic=profilePicPath)
+
+
+# -------- login and sign up ---------
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -115,11 +126,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/howToPlay")
-def howToPlay():
-    username = session.get("Username")
-    profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()
-    return render_template("howToPlay.html", profile_pic=profilePicPath)
+# -------- profile stuff ---------
 
 
 @app.route("/profile")
@@ -172,17 +179,19 @@ def getUserId(cursor, username): # get user id from username
 
 def getUserStats(cursor, userId, username):
     if userId:
+        # Query to get user statistics from the database
         cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated, FavouriteCard FROM UserStats WHERE UserId = ?", (userId,))
         userStats = cursor.fetchone()
         if userStats:
-            rank = calculateRank(username)  # Calculate the rank
+            rank = calculateRank(username)  # Calculate the rank based on the username
             return {
                 "Rank": rank,
-                "GamesPlayed": userStats[0],
-                "GamesWon": userStats[1],
-                "DateCreated": userStats[2],
-                "FavouriteCard": userStats[3]
+                "GamesPlayed": userStats[0],  # Number of games played
+                "GamesWon": userStats[1],  # Number of games won
+                "DateCreated": userStats[2],  # Date the user account was created
+                "FavouriteCard": userStats[3]  # User's favorite card
             }
+    # Return default values if user stats are not found
     return {"Rank": "N/A", "GamesPlayed": 0, "GamesWon": 0, "DateCreated": "N/A", "FavouriteCard": "N/A"}
 
 @app.route("/decks/<username>", methods=["GET", "POST"])
@@ -211,7 +220,6 @@ def show_decks(username):
 
     # Retrieve decks for the specified username
     decks = getDecksForUser(username)
-    print(f"Decks for user {username}: {decks}")  # Debug print
 
     # Fetch the current deck number from the Users table
     try:
@@ -224,9 +232,7 @@ def show_decks(username):
         current_deck_num = cursor.fetchone()
         if current_deck_num:
             current_deck_num = current_deck_num[0]
-            print(f"Current deck number for user {username}: {current_deck_num}")  # Debug print
         else:
-            print(f"No current deck number found for user {username}")  # Debug print
             current_deck_num = None
 
         # Fetch the current deck from the Decks table
@@ -238,15 +244,13 @@ def show_decks(username):
             deck_row = cursor.fetchone()
             if deck_row:
                 current_deck = deck_row[0].split(", ")
-                print(f"Current deck for user {username}: {current_deck}")  # Debug print
             else:
-                print(f"No deck found for user {username} with deck number {current_deck_num}")  # Debug print
                 current_deck = []
         else:
             current_deck = []
     except sqlite3.Error as e:
-        flash(f"Error: {str(e)}", "error")
-        print(f"SQLite error: {str(e)}")  # Debug print
+        flash(f"Error: check server terminal", "error")
+        print(f"SQLite error: {str(e)}")
         current_deck = []
     finally:
         cursor.close()
@@ -317,27 +321,6 @@ def change_profile_pic():
 
 
 
-@app.route("/use_deck", methods=["POST"])
-def use_deck():
-    if not session.get("Username"):  # check if the user is logged in
-        return redirect(url_for("login"))
-    profilePicPath = getProfilePicPath(session["Username"])  # get pfp
-    username = session["Username"]  # get username
-
-    selected_deck = request.form.get("decks")
-    flash(f"You are now using the deck: {selected_deck}", "success")
-    return redirect(url_for("testGame"))
-
-
-@app.route("/submit", methods=["GET", "POST"])
-def submit():
-    if request.method == "POST":
-        userinput = request.form["user_input"]
-        return f"You entered: {userinput}"
-    else:
-        return "ERROR Method Not Allowed"
-
-#wrofwsihfoshdvhisufv
 
 @app.route("/testGame")
 def testGame():
@@ -350,52 +333,7 @@ def testGame():
         return redirect(url_for("login"))  # Redirect response if the user is not logged in
     
 
-@app.route("/dbTest", methods=["GET"])
-def dbTest():
-    username = session.get("Username")
-    profilePicPath = DEFAULT_PIC_PATH
-
-    conn = getDb()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Users")
-    rows = cursor.fetchall()
-    result = ", ".join(str(row) for row in rows)
-    return render_template("record.html", name=result, profile_pic=profilePicPath)
-
-
-def insertUser(username, password, email):
-    defaultDeck = "Knight, DarkKnight, Boar, Cavalry, PossessedArmour, Dragon, BabyDragon, Monk, Wizard, Orc, Skeleton, Medusa, StrongMan, FireSpirit, Stranger, SwampMonster, Executioner, IceSpirit, Harpy, Bear"
-    date = datetime.today().strftime("%Y-%m-%d")
-    conn = getDb()
-    try:
-        with conn:
-            cursor = conn.cursor()
-            # Insert the new user into the Users table
-            cursor.execute("""
-                INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
-                VALUES (?, ?, ?, ?, "Default.png")
-            """, (username, password, email, date))
-            
-            # Get the user ID of the newly inserted user
-            cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
-            user_id = cursor.fetchone()[0]
-            
-            # Insert a new record into the UserStats table
-            cursor.execute("""
-                INSERT INTO UserStats (UserId, GamesPlayed, GamesWon, DateCreated, FavouriteCard)
-                VALUES (?, 0, 0, ?, "/images/CardPictures/Knight.png")
-            """, (user_id, date))
-
-            cursor.execute("""
-                INSERT INTO Decks (Owner, UserDeckNum, Deck)
-                VALUES (?, 1, ?)
-            """, (username, defaultDeck))
-
-    except sqlite3.OperationalError as e:
-        print(f"Error: {e}")  # Error handling
-        raise
-    finally:
-        conn.close()  # Close the database connection
+# -------- POST functions --------
 
 
 @app.route("/modifyDeck/<username>", methods=["POST"])
@@ -405,9 +343,6 @@ def modifyDeck(username):
 
     selectedCards = request.form.get("selectedCards")
     selectedDeck = request.form.get("deck")
-
-    print(f"Selected cards: {selectedCards}")  # Debug print
-    print(f"Selected deck: {selectedDeck}")  # Debug print
 
     if selectedDeck == "create":
         conn = getDb()
@@ -421,7 +356,6 @@ def modifyDeck(username):
                     WHERE Owner = ?
                 """, (username,))
                 user_deck_num = cursor.fetchone()[0]
-                print(f"Next UserDeckNum for {username}: {user_deck_num}")  # Debug print
 
                 # Insert the new deck into the Decks table
                 cursor.execute("""
@@ -430,8 +364,8 @@ def modifyDeck(username):
                 """, (username, user_deck_num, selectedCards))
                 flash("New deck created successfully!", "success")
         except sqlite3.Error as e:
-            flash(f"Error: {str(e)}", "error")
-            print(f"SQLite error: {str(e)}")  # Debug print
+            flash(f"Error: check server terminal", "error")
+            print(f"SQLite error: {str(e)}")
         finally:
             cursor.close()
     
@@ -448,37 +382,32 @@ def modifyDeck(username):
                 """, (selectedDeck, username))
                 flash("Current deck updated successfully!", "success")
         except sqlite3.Error as e:
-            flash(f"Error: {str(e)}", "error")
-            print(f"SQLite error: {str(e)}")  # Debug print
+            flash(f"Error: check server terminal", "error")
+            print(f"SQLite error: {str(e)}")
         finally:
             cursor.close()
 
     return redirect(url_for("show_decks", username=username, selecteddeckid=selectedDeck))
 
 
-@app.route("/template")
-def temp():
+@app.route("/use_deck", methods=["POST"])
+def use_deck():
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
     profilePicPath = getProfilePicPath(session["Username"])  # get pfp
     username = session["Username"]  # get username
 
-    return render_template("template.html", profile_pic=profilePicPath, username=username)
+    selected_deck = request.form.get("decks")
+    flash(f"You are now using the deck: {selected_deck}", "success")
+    return redirect(url_for("testGame"))
 
 
-@app.route("/test_alert/<alert_type>", methods=["POST"])
-def test_alert(alert_type):
-    if alert_type == "info":
-        flash("This is an info alert!", "info")
-    elif alert_type == "success":
-        flash("This is a success alert!", "success")
-    elif alert_type == "error":
-        flash("This is an error alert!", "error")
-    return redirect(url_for("index"))
+# -------- network testing ---------
 
 @app.route("/networkTest", methods=["GET"])
 def networkTest():
     return render_template("networkTest.html")
+
 
 @app.route("/networkTest/getGame", methods=["GET"])
 def getGame():
@@ -508,6 +437,7 @@ def getGame():
     session.modified = True
     return '{"isPlayer1" : true}'
     
+
 @app.route("/networkTest/waitForPlayer2", methods=["GET"])
 def waitForPlayer2():
     global globalGameCount
@@ -518,11 +448,13 @@ def waitForPlayer2():
         return '{"player2Found" :"' + str( game.player2 ) +'"}' # gets username rather than boolean
     return '{"ERROR no current game" : true}'
 
+
 @app.route("/networkTest/login", methods=["POST"])
 def networkLogin():
     username = request.form["Username"]
     session["Username"] = username
     return '{"status" : "logged in"}'
+
 
 def dumpGlobalState():
     global globalGameList
@@ -536,6 +468,34 @@ def dumpGlobalState():
         print("Found session:" + str(session["CurrentGame"]))
     else:
         print("No session")
+
+
+# -------- miscellaneous ---------
+
+
+@app.route("/test_alert/<alert_type>", methods=["POST"]) # test alert
+def test_alert(alert_type):
+    if alert_type == "info":
+        flash("This is an info alert!", "info")
+    elif alert_type == "success":
+        flash("This is a success alert!", "success")
+    elif alert_type == "error":
+        flash("This is an error alert!", "error")
+    return redirect(url_for("index"))
+
+
+@app.route("/template")
+def temp():
+    if not session.get("Username"):  # check if the user is logged in
+        return redirect(url_for("login"))
+    profilePicPath = getProfilePicPath(session["Username"])  # get pfp
+    username = session["Username"]  # get username
+
+    return render_template("template.html", profile_pic=profilePicPath, username=username)
+
+
+# -------- flask --------
+
 
 if __name__ == "__main__":
     globalGameCount = -1

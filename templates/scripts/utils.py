@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from flask import g, url_for, session
+from datetime import datetime, timedelta # date and time for account creation
 
 databaseUri = "databases/database.db"  # SQLite database file path
 defaultPicPath = "images/profilePics/Default.png"
@@ -153,3 +154,37 @@ def GetDeckNames(username):
         conn.close()
 
     return deckNames
+
+def insertUser(username, password, email):
+    defaultDeck = "Knight, DarkKnight, Boar, Cavalry, PossessedArmour, Dragon, BabyDragon, Monk, Wizard, Orc, Skeleton, Medusa, StrongMan, FireSpirit, Stranger, SwampMonster, Executioner, IceSpirit, Harpy, Bear"
+    date = datetime.today().strftime("%Y-%m-%d")
+    conn = getDb()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            # Insert the new user into the Users table
+            cursor.execute("""
+                INSERT INTO Users (Username, Password, Email, DateCreated, ProfilePicture)
+                VALUES (?, ?, ?, ?, "Default.png")
+            """, (username, password, email, date))
+            
+            # Get the user ID of the newly inserted user
+            cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
+            user_id = cursor.fetchone()[0]
+            
+            # Insert a new record into the UserStats table
+            cursor.execute("""
+                INSERT INTO UserStats (UserId, GamesPlayed, GamesWon, DateCreated, FavouriteCard)
+                VALUES (?, 0, 0, ?, "/images/CardPictures/Knight.png")
+            """, (user_id, date))
+
+            cursor.execute("""
+                INSERT INTO Decks (Owner, UserDeckNum, Deck)
+                VALUES (?, 1, ?)
+            """, (username, defaultDeck))
+
+    except sqlite3.OperationalError as e:
+        print(f"Error: {e}")  # Error handling
+        raise
+    finally:
+        conn.close()  # Close the database connection
