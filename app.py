@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta # date and time for account creation
+from datetime import timedelta # date and time for account creation
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash # password hashing
 from werkzeug.utils import secure_filename # for secure file uploads
@@ -415,28 +415,28 @@ def getGame():
     global globalGameList
     dumpGlobalState()
     if not session.get("Username"): 
-        return '{"status" : "please login before joining a game"}'
+        return '{"status" : "please login before joining a game"}'  # Check if user is logged in
     username = session.get("Username")
     if session.get("CurrentGame"): 
-        return '{"status" : "in game"}'
+        return '{"status" : "in game"}'  # Check if user is already in a game
     session["CurrentGame"] = globalGameCount
     
     for game in globalGameList:
         if game.player2 is None:
-            game.player2 = username
+            game.player2 = username  # Assign user to player2 if slot is empty
             dumpGlobalState()
             session.modified = True
-            return '{"isPlayer1" : false}'
+            return '{"isPlayer1" : false}'  # User is player2
             
     globalGameCount += 1
     newGame = Game(username, None, globalGameCount, 0, None)
-    newGame.player1 = username
+    newGame.player1 = username  # Assign user to player1
     globalGameList.append(newGame)
     session["CurrentGame"] = globalGameCount
     dumpGlobalState()
     session.modified = True
-    return '{"isPlayer1" : true}'
-    
+    return '{"isPlayer1" : true}'  # User is player1
+
 
 @app.route("/networkTest/waitForPlayer2", methods=["GET"])
 def waitForPlayer2():
@@ -444,15 +444,15 @@ def waitForPlayer2():
     global globalGameList
     dumpGlobalState()
     if session.get("CurrentGame"): 
-        game = globalGameList[(session["CurrentGame"]  -1)]
-        return '{"player2Found" :"' + str( game.player2 ) +'"}' # gets username rather than boolean
-    return '{"ERROR no current game" : true}'
+        game = globalGameList[(session["CurrentGame"] - 1)]
+        return '{"player2Found" :"' + str(game.player2) + '"}'  # Return player2's username
+    return '{"ERROR no current game" : true}'  # Error if no current game
 
 
 @app.route("/networkTest/login", methods=["POST"])
 def networkLogin():
     username = request.form["Username"]
-    session["Username"] = username
+    session["Username"] = username  # Store username in session
     return '{"status" : "logged in"}'
 
 

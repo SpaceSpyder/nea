@@ -1,7 +1,6 @@
-import os
 import sqlite3
 from flask import g, url_for, session
-from datetime import datetime, timedelta # date and time for account creation
+from datetime import datetime # date and time for account creation
 
 databaseUri = "databases/database.db"  # SQLite database file path
 defaultPicPath = "images/profilePics/Default.png"
