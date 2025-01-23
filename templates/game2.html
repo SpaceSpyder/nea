@@ -4,215 +4,363 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Game Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-
+    <link rel="shortcut icon" type="image/png" href="images/ShieldLogo.png">
     <style>
 
-      @media (-webkit-device-pixel-ratio: 1.25) {
-        * {
-          zoom: 1;
+        body {
+            height: 1080px;
+            margin: 0;
+            padding: 0;
+            /*background-attachment: fixed;*/
+            background-image: url('images/game_wood_background_001.png');
+            /*background-size: cover; /* Ensures the image covers the entire viewport */
+            background-repeat: no-repeat; /* Prevents the image from repeating */
+            overflow: hidden;
         }
-      }
-      
-      body {
-        height:1080px;
-        margin: 0;
-        padding: 0;
-        background-attachment: fixed;
-        background-image: url('images/game_wood_background_001.png');
-        /*background-size: cover; /* Ensures the image covers the entire viewport */
-        background-repeat: no-repeat; /* Prevents the image from repeating */
-      }
 
-      
-      .drag {
-        filter: drop-shadow(rgba(0, 0, 0, 0.5) 1rem 1rem 10px);
-      }
-      #highl {
-        position: absolute;
-        top: -20px; /* Adjust top position */
-        left: -20px; /* Adjust left position */
-        border: red dashed 2px;
-        text-align: center;
-        color: rgba(255, 0, 0, 0.307);
-        padding: 50 0 ;
+        .drag {
+            filter: drop-shadow(rgba(0, 0, 0, 0.5) 1rem 1rem 10px);
+            z-index: 6;
+        }
+
+        #highl {
+            position: absolute;
+            top: -20px; /* Adjust top position */
+            left: -20px; /* Adjust left position */
+            border: rgba(255, 0, 0, 0);
+            /*border: red solid 2px;*/
+        }
+
+        .values {
+            font-family: "Overpass Mono", monospace;
+            height: 118px;
+            width: 130px;
+            position: absolute;
+            text-align: center;
+            font-weight: bold;
+            border: red 1px solid;
+            font-size: 112px;
+            padding: 0px;
+            letter-spacing: -12px;
+        }
+
+        .endTurn {
+            text-align: center;
+            width: 60px;
+            display: flex;
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+            position: absolute; /* Position the button in the center of the page */
+            top: 50%; /* Move to the vertical center */
+            left: 50%; /* Move to the horizontal center */
+            transform: translate(-50%, -50%) rotate(45deg); /* Combine translate and rotate */
+            z-index: 4; /* Ensure it appears above other elements */
+            background: #fff; /* Button background color */
+            height: 60px;
+        }
+
+        .endTurn button {
+            opacity: 0;
+        }
+
+        .endTurnText {
+        color: #333;
+        display: table-cell;
+        height: 60px;
+        transform:rotate(-45deg) translate(-1%, 15%);
         vertical-align: middle;
-        z-index: 100;
-        font-weight: 200;
-      }
+        width:60px;
+        text-align: center;
+        vertical-align: middle;
+        }
+
+        #enterFullscreenPrompt {
+            position: fixed; /* Ensure it stays fixed on the screen */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); /* Dark transparent background */
+            z-index: 5; /* Ensure it sits above other content */
+            display: none; /* Hidden by default */
+            color: #fff; /* Text color */
+            font-size: 40px;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box; /* Ensure padding is included in the element's size */
+        }
+
+        #enterFullscreenPrompt text {
+            display: inline-block;
+            vertical-align: middle;
+            line-height: normal;
+            padding-top: 23.1%; /* To center the text vertically */
+            text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7); /* Shadow added here */
+        }
+
     </style>
-  </head>
-<body>
+</head>
 
-<div class="background">
+<body onload="getCurrentGame()">
+    {% include 'htmlChildren/dropDown.html' %}
 
-</div>
-<!--images and id-->
-<div id="cardContainer">
-  <img src="images/CardPictures/Baby Dragon.png" class="card" id="card1" >
-  <img src="images/CardPictures/Boar.png" class="card" id="card2" >
-  <img src="images/CardPictures/Darkknight.png" class="card" id="card3" >
-  <img src="images/CardPictures/Dragon.png" class="card" id="card3" >
-  <img src="images/CardPictures/EvilWizard.png" class="card" id="card3" >
-  <img src="images/CardPictures/Knight Captin.png" class="card" id="card3" >
-  <img src="images/CardPictures/Monk.png" class="card" id="card3" >
+    <!--<div class="background">-->
+    <!--</div>-->
 
-  <!-- Add more cards as needed -->
-</div>
+    <!--images and id-->
+    <div id="cardContainer">
+        <img src="images/CardPictures/PossessedArmour.png" class="card" id="card1">
+        <img src="images/CardPictures/knight.png" class="card" id="card2">
+        <img src="images/CardPictures/Darkknight.png" class="card" id="card3">
+        <img src="images/CardPictures/Dragon.png" class="card" id="card4">
+        <img src="images/CardPictures/Wizard.png" class="card" id="card5">
+        <img src="images/CardPictures/KnightCaptain.png" class="card" id="card6">
+        <img src="images/CardPictures/Monk.png" class="card" id="card7">
+    </div>
 
+    <div id="highl"></div>
 
-<script>
-  
-  
-  
-  document.addEventListener('click', function() {
-      if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(err => {
-              console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-          });
-      }
-  });
+    <div id="p1Mana" class="values" style="right: 43px;top: 909px;">00</div>
+    <div id="p2Mana" class="values" style="right: 43px;top: 52px;">00</div>
+    <div id="p1Health" class="values" style="right: 203px;top: 909px;">00</div>
+    <div id="p2Health" class="values" style="right: 203px;top: 52px;">00</div>
 
+    <div class="endTurn">
+        <div class="endTurnText">End Turn</div>
+        <button onclick="on()" id="endTurn" class="endTurn"></button>
+    </div>
 
-  // Select all elements with class 'card' and make them draggable
-  var cards = document.getElementsByClassName("card");
-  let inPlayAreas = [
-    { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 }},
-    { topLeft: { x: 30, y: 285}, bottomRight: { x: 930, y: 510 }},
-    { topLeft: { x: 30, y: 570}, bottomRight: { x: 930, y: 795 }},
-    { topLeft: { x: 30, y: 825}, bottomRight: { x: 930, y: 1050}},
-  ];
-
-  let inHandAreas = [
-    { topLeft: { x: 985, y: 285}, bottomRight: { x: 1890, y: 510}},
-    { topLeft: { x: 985, y: 570}, bottomRight: { x: 1890, y: 795}},
-  ];
-
-
-
-  let hitboxContents = [[],[],[],[],[],[]];
-
-  // Loop through each card and make it draggable
-  for (var i = 0; i < cards.length; i++) {
-    dragElement(cards[i]);
-  }
-
-  function dragElement(element) {
-    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    <div id="enterFullscreenPrompt">
+        <text>Click to enter fullscreen</text>
+    </div>
     
-    element.onmousedown = dragMouseDown;
-
-    function dragMouseDown(e) {
-      e = e || window.event;
-      e.preventDefault();
-      // get the mouse cursor position at startup:
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      document.onmouseup = closeDragElement;
-      // call a function whenever the cursor moves:
-      document.onmousemove = elementDrag;
-      e.target.classList.add("drag");
-      
-      let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
-      let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
-      //remove element from array
-      let index = hitboxContents[hitboxNum].indexOf(element);
-      if (index != -1){
-        hitboxContents[hitboxNum].splice(index,1);
-        let numberOfCards = hitboxContents[hitboxNum].length;
-        redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x)
-      }
-
-    }
-
-    function elementDrag(e) {
-      e = e || window.event;
-      e.preventDefault();
-      // calculate the new cursor position:
-      pos1 = pos3 - e.clientX;
-      pos2 = pos4 - e.clientY;
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      // set the element's new position:
-      element.style.top = (element.offsetTop - pos2) + "px";
-      element.style.left = (element.offsetLeft - pos1) + "px";
-      element.style.zIndex = 10
-    }
-
-    function getCardPositions(numberOfCards) {
-      // total width / numofcards+1
-      // foreach card half width and minus from the bit above
-      let positionS = [];
-      let offset = (900/(numberOfCards+1));
-      for (let i = 0; i < numberOfCards; i++) {
-        positionS.push((offset * (i +1)) - 75);
-      }
-
-      return positionS;
-    }
 
 
-    function closeDragElement(e) { // handles card being let go
-      e.target.classList.remove("drag"); // removes shadow
-      document.onmouseup = null; // removes events
-      document.onmousemove = null;
 
-      element.style.zIndex = 1; // puts on top
-      let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
-      let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
-      if (dropLocation){ // if it has data it will snap
-        snapCardY(dropLocation,e.target); // passes the area its over and the card 
-        snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
-      }
-    }
+    <script>
+        let isFullscreen = null; // To store the previous fullscreen state
+        const FullscreenPrompt = document.getElementById('enterFullscreenPrompt');
+        let callCount = 0;
+        let intervalId;
 
-    function snapCardX(hitboxNum, element, cardX, dropLocation){ 
-      numberOfCards = hitboxContents[hitboxNum].length + 1; // creates a variable to say how many cards are in the hitbox and +1 
-      if (numberOfCards > 6) numberOfCards =6;
-      hitboxContents[hitboxNum].push(element); // adds the new card to the array
-      hitboxContents[hitboxNum].sort((a, b) => a.style.left - b.style.left); // sorts the array
-      redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x)
-    }
 
-    function snapCardY(dropLocation, element){ // takes snapping location and snaps the card
-      element.style.top = (dropLocation.topLeft.y - 0) + "px";
-      // highlight hitbox for debugging
-      let hl = document.getElementById("highl");
-      hl.style.left = dropLocation.topLeft.x + "px";
-      hl.style.top = dropLocation.topLeft.y + "px";
-      hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
-      hl.style.height = dropLocation.bottomRight.y -dropLocation.topLeft.y + "px";
-    }
+        function checkFullscreen() {
+            const currentlyFullscreen = document.fullscreenElement !== null;
 
-    function redrawCards(numberOfCards, hitboxNum, left) {
-      let currentPos = getCardPositions(numberOfCards); // gives possible positions of cards relative to num of cards
-      for (let i = 0; i < currentPos.length; i++) { // loops for as many positions
-        hitboxContents[hitboxNum][i].style.left = (left + currentPos[i]) + "px"; // gives the correct x for each card
-      }
-    }
+            // Do nothing if the fullscreen state hasn't changed
+            if (currentlyFullscreen === isFullscreen) {
+                return;
+            }
 
-    function dropToSnap(x, y) { 
-      let target;
-      inPlayAreas.forEach((area) => { // goes through all the areas in inPlayAreas and stores in area
-        // if the mouse is inside the area
-        if ((x >= area.topLeft.x && x <= area.bottomRight.x) && 
-        (y >= area.topLeft.y && y <= area.bottomRight.y)) {
-          target = area; // stores matchng area for returning
+            // Update the stored fullscreen state
+            isFullscreen = currentlyFullscreen;
+
+            // Perform actions based on the new fullscreen state
+            if (isFullscreen) {
+                FullscreenPrompt.style.display = "none";
+                console.log("Page is in fullscreen");
+            } else {
+                FullscreenPrompt.style.display = "block";
+                console.log("Page is not in fullscreen");
+            }
         }
-      });
-      
-      inHandAreas.forEach((area) => {
-        if ((x >= area.topLeft.x && x <= area.bottomRight.x) &&
-        (y >= area.topLeft.y && y <= area.bottomRight.y)) {
-          target = area;
+
+
+
+
+        document.addEventListener('click', function () {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            }
+        });
+
+        let cardData = [];
+        // Select all elements with class 'card' and make them draggable
+        var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
+        cards.forEach(card => {
+            cardData.push({
+                element: card,
+                hitbox: -1,
+                index: -1,
+                owner: "me"
+            });
+        });
+
+        let inPlayAreas = [
+            { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },
+            { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },
+            { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },
+            { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },
+        ];
+
+        let inHandAreas = [
+            { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },
+            { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } },
+        ];
+
+        let hitboxContents = [[], [], [], [], [], []];
+
+        // Loop through each card and make it draggable
+        for (var i = 0; i < cards.length; i++) {
+            dragElement(cards[i]);
         }
-      });
-      return target; // returns the area to snap too
-    }
-  }
-</script>
-<div id="highl">
-  <h2>debug    debug    debug     debug     debug</h2>
-</div>
+
+        function dragElement(element) {
+            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // get the mouse cursor position at startup:
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                // call a function whenever the cursor moves:
+                document.onmousemove = elementDrag;
+                e.target.classList.add("drag");
+
+                let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+                if (!dropLocation) return;
+                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+                //remove element from array
+                let index = hitboxContents[hitboxNum].indexOf(element);
+                if (index != -1) {
+                    hitboxContents[hitboxNum].splice(index, 1);
+                    let numberOfCards = hitboxContents[hitboxNum].length;
+                    redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
+                }
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // calculate the new cursor position:
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // set the element's new position:
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+                element.style.zIndex = 10;
+            }
+
+
+        }
+
+        function closeDragElement(e) { // handles card being let go
+            e.target.classList.remove("drag"); // removes shadow
+            document.onmouseup = null; // removes events
+            document.onmousemove = null;
+
+            e.target.style.zIndex = 1; // puts on top
+            let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+
+            if (dropLocation) { // if it has data it will snap
+                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+
+                snapCardY(dropLocation, e.target); // passes the area its over and the card 
+                snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
+                numberOfCards = hitboxContents[hitboxNum].length; // creates a variable to say how many cards are in the hitbox and +1 
+                if (numberOfCards > 6) numberOfCards = 6;
+                redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
+            }
+            else { // if it doesnt have data it will snap back to the hand
+                e.target.style.left = "0px";
+                e.target.style.top = "5px";
+            }
+        }
+
+        function snapCardX(hitboxNum, element, cardX, dropLocation) {
+            hitboxContents[hitboxNum].push(element); // adds the new card to the array
+            hitboxContents[hitboxNum].sort((a, b) => parseInt(a.style.left) - parseInt(b.style.left)); // sorts the array
+        }
+
+        function snapCardY(dropLocation, element) { // takes snapping location and snaps the card
+            element.style.top = (dropLocation.topLeft.y - 0) + "px";
+            // highlight hitbox for debugging
+            let hl = document.getElementById("highl");
+            hl.style.left = dropLocation.topLeft.x + "px";
+            hl.style.top = dropLocation.topLeft.y + "px";
+            hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
+            hl.style.height = dropLocation.bottomRight.y - dropLocation.topLeft.y + "px";
+        }
+
+        function redrawCards(numberOfCards, hitboxNum, left) {
+            let currentPos = getCardPositions(numberOfCards);
+            for (let i = 0; i < hitboxContents[hitboxNum].length; i++) {
+                hitboxContents[hitboxNum][i].style.left = (left + currentPos[i] + 3) + "px";
+            }
+        }
+
+        function dropToSnap(cardX, cardY) {
+            for (let i = 0; i < inPlayAreas.length; i++) {
+                if (cardX > inPlayAreas[i].topLeft.x && cardX < inPlayAreas[i].bottomRight.x && cardY > inPlayAreas[i].topLeft.y && cardY < inPlayAreas[i].bottomRight.y) {
+                    return inPlayAreas[i]; // return the hitbox position
+                }
+            }
+            return null;
+        }
+        function getCardPositions(numberOfCards) {
+                // total width / numofcards+1
+                // foreach card half width and minus from the bit above
+                let positionS = [];
+                let offset = (1050 / (numberOfCards + 1));
+                for (let i = 0; i < numberOfCards; i++) {
+                    positionS.push((offset * (i + 1)) - 150);
+                }
+
+                return positionS;
+            }
+
+        function on() {
+            document.getElementById("endTurn").style.display = "block";
+            callCount = 0;
+            intervalId = setInterval(waitForPlayer2, 1000);  // Call waitForPlayer2 every second
+        }
+
+        function waitForPlayer2() {
+            fetch('networkTest/waitForPlayer2')
+                .then(response => response.text())  // Convert the response to text
+                .then(data => {
+                    const game = JSON.parse(data);  // Parse the data as JSON
+                    if (game.player2Found) {
+                        clearInterval(intervalId);  // Stop the interval if the specific value is received
+                        alert('Desired value received!');
+                        document.getElementById("endTurn").style.display = "none";
+                    } else if (callCount >= 10) {
+                        clearInterval(intervalId);  // Stop the interval if the number of calls exceeds 10
+                        alert('Maximum number of calls exceeded.');
+                    } else {
+                        callCount++;
+                    }
+                })
+                .catch(error => {
+                    callCount++;
+                    console.error('Error:', error);  // Handle any errors
+                });
+        }
+
+        function getCurrentGame() {
+            fetch('testGame2/getCurrentGame')
+                .then(response => response.text())  // Convert the response to text
+                .then(data => {
+                    const game = JSON.parse(data);  // Parse the data as JSON
+                    alert(data);  // Display the data in an alert
+                })
+                .catch(error => {
+                    console.error('Error:', error);  // Handle any errors
+                });
+        }
+        
+        // Run the check every 3 seconds (3000 milliseconds)
+        setInterval(checkFullscreen, 1000);
+    </script>
 </body>
 </html>

@@ -331,7 +331,53 @@ def testGame():
         return render_template("game.html", profile_pic=profilePicPath)
     else:
         return redirect(url_for("login"))  # Redirect response if the user is not logged in
+
+
+
+@app.route("/testGame2", methods=["GET"])
+def testGame2():
+    return render_template("game2.html")
+
+
+@app.route("/testGame2/getCurrentGame", methods=["GET"])
+def getCurrentGame():
+    global globalGameCount
+    global globalGameList
+    dumpGlobalState()
+    if not session.get("Username"): 
+        return '{"status" : "please login before joining a game"}'  # Check if user is logged in
+    username = session.get("Username")
+    if session.get("CurrentGame"): 
+        return '{"status" : "in game"}'  # Check if user is already in a game
+    session["CurrentGame"] = globalGameCount
     
+    for game in globalGameList:
+        if game.player2 is None:
+            game.player2 = username  # Assign user to player2 if slot is empty
+            dumpGlobalState()
+            session.modified = True
+            return '{"isPlayer1" : false}'  # User is player2
+            
+    globalGameCount += 1
+    newGame = Game(username, None, globalGameCount, 0, None)
+    newGame.player1 = username  # Assign user to player1
+    globalGameList.append(newGame)
+    session["CurrentGame"] = globalGameCount
+    dumpGlobalState()
+    session.modified = True
+    return '{"isPlayer1" : true}'  # User is player1
+
+
+@app.route("/testGame2/waitForSecondPlayer", methods=["GET"])
+def waitForSecondPlayer():
+    global globalGameCount
+    global globalGameList
+    dumpGlobalState()
+    if session.get("CurrentGame"): 
+        game = globalGameList[(session["CurrentGame"] - 1)]
+        return '{"player2Found" :"' + str(game.player2) + '"}'  # Return player2's username
+    return '{"ERROR no current game" : true}'  # Error if no current game
+
 
 # -------- POST functions --------
 
