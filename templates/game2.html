@@ -129,7 +129,7 @@
 
     <div class="endTurn">
         <div class="endTurnText">End Turn</div>
-        <button onclick="on()" id="endTurn" class="endTurn"></button>
+        <button onclick="sendEndTurn()" id="endTurn" class="endTurn"></button>
     </div>
 
     <div id="enterFullscreenPrompt">
@@ -319,14 +319,14 @@
                 return positionS;
             }
 
-        function on() {
+        function waitForPlayerTwo() {
             document.getElementById("endTurn").style.display = "block";
             callCount = 0;
             intervalId = setInterval(waitForPlayer2, 1000);  // Call waitForPlayer2 every second
         }
 
         function waitForPlayer2() {
-            fetch('networkTest/waitForPlayer2')
+            fetch('/testGame2/waitForSecondPlayer')
                 .then(response => response.text())  // Convert the response to text
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
@@ -353,12 +353,23 @@
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
                     alert(data);  // Display the data in an alert
+                    waitForPlayerTwo();
                 })
                 .catch(error => {
                     console.error('Error:', error);  // Handle any errors
                 });
         }
         
+        function sendEndTurn() {
+            fetch('testGame2/receiveEndTurn')
+                .then(response => {
+                    // the server has return after receiving the end turn message from this player
+                    // do sothing here to show the other palyer is taking their turn and to wait patiently
+                })  // 
+                .catch(error => {
+                    console.error('Error:', error);  // Handle any errors
+                });
+        }
         // Run the check every 3 seconds (3000 milliseconds)
         setInterval(checkFullscreen, 1000);
     </script>

@@ -196,7 +196,7 @@ def getUserStats(cursor, userId, username):
 
 @app.route("/decks/<username>", methods=["GET", "POST"])
 @app.route("/profile/decks/<username>", methods=["GET", "POST"])
-def show_decks(username):
+def showDecks(username):
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
     profilePicPath = getProfilePicPath(session["Username"])  # get pfp
@@ -214,7 +214,7 @@ def show_decks(username):
             #selected_cards = json.loads(selected_cards)
             
             flash("New deck created successfully!", "success")
-            return redirect(url_for("show_decks", username=username))
+            return redirect(url_for("showDecks", username=username))
 
     accountUsername = username # username from the url
 
@@ -379,7 +379,7 @@ def waitForSecondPlayer():
     return '{"ERROR no current game" : true}'  # Error if no current game
 
 
-# -------- POST functions --------
+# -------- flask functions --------
 
 
 @app.route("/modifyDeck/<username>", methods=["POST"])
@@ -433,20 +433,7 @@ def modifyDeck(username):
         finally:
             cursor.close()
 
-    return redirect(url_for("show_decks", username=username, selecteddeckid=selectedDeck))
-
-
-@app.route("/use_deck", methods=["POST"])
-def use_deck():
-    if not session.get("Username"):  # check if the user is logged in
-        return redirect(url_for("login"))
-    profilePicPath = getProfilePicPath(session["Username"])  # get pfp
-    username = session["Username"]  # get username
-
-    selected_deck = request.form.get("decks")
-    flash(f"You are now using the deck: {selected_deck}", "success")
-    return redirect(url_for("testGame"))
-
+    return redirect(url_for("showDecks", username=username, selecteddeckid=selectedDeck))
 
 # -------- network testing ---------
 
@@ -501,6 +488,10 @@ def networkLogin():
     session["Username"] = username  # Store username in session
     return '{"status" : "logged in"}'
 
+@app.route("testGame2/receiveEndTurn", methods=["POST"])
+def receiveEndTurn():
+    # update game state
+    return # return no JSON
 
 def dumpGlobalState():
     global globalGameList
