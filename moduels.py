@@ -9,21 +9,21 @@ class Player:
     mana: int
 
 @dataclass
-class GameBoard:
-    p1Attack: int
-    p1Defence: int
-    p2Attack: int
-    p2Defence: int
-    p1bank: int
-    p2bank: int
-
-@dataclass
 class CardSpread:
     card1: str
     card2: str
     card3: str
     card4: str
     card5: str
+
+@dataclass
+class GameBoard:
+    p1Attack: CardSpread
+    p1Defence: CardSpread
+    p2Attack: CardSpread
+    p2Defence: CardSpread
+    p1bank: CardSpread
+    p2bank: CardSpread
 
 @dataclass
 class Game:
