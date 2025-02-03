@@ -217,9 +217,8 @@ def showDecks(username):
             return redirect(url_for("showDecks", username=username))
 
     accountUsername = username # username from the url
-
-    # Retrieve decks for the specified username
-    decks = getDecksForUser(username)
+    
+    decks = getDecksForUser(username) # Retrieve decks for the specified username
 
     # Fetch the current deck number from the Users table
     try:
@@ -256,14 +255,7 @@ def showDecks(username):
         cursor.close()
         conn.close()
 
-    return render_template(
-        "decks.html",
-        profile_pic=profilePicPath,
-        username=session_username,
-        decks=decks,
-        current_deck=current_deck,
-        account_username=accountUsername
-    )
+    return render_template("decks.html", profile_pic=profilePicPath, username=session_username, decks=decks, current_deck=current_deck, account_username=accountUsername)
 
 
 
@@ -488,7 +480,7 @@ def networkLogin():
     session["Username"] = username  # Store username in session
     return '{"status" : "logged in"}'
 
-@app.route("testGame2/receiveEndTurn", methods=["POST"])
+@app.route("/testGame2/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
     # update game state
     return # return no JSON

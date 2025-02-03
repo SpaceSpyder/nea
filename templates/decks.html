@@ -99,11 +99,14 @@
         
         </div>
 
-
+        <div id="selectedCardsContainer" style="display: none;">
+            <input type="hidden" name="selectedCards" id="selectedCards">
+        </div>
 
         <script>
             const maxSelection = 20;
             let selectedCards = [];
+            const selectedCardsContainer = document.getElementById('selectedCardsContainer');
     
             function changeDeckDisplay() {
             const deckCreation = document.getElementById('deckCreation');
@@ -113,9 +116,11 @@
             if (selectedDeck === "create") {
                 deckCreation.style.display = "block";
                 deckDisplay.style.display = "none";
+                selectedCardsContainer.style.display = "block";
             } else {
                 deckCreation.style.display = "none";
                 deckDisplay.style.display = "block";
+                selectedCardsContainer.style.display = "none";
             }
         }
     
