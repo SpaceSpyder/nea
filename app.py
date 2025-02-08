@@ -337,10 +337,12 @@ def getCurrentGame():
     global globalGameList
     dumpGlobalState()
     if not session.get("Username"): 
-        return '{"status" : "please login before joining a game"}'  # Check if user is logged in
+        flash("You are not logged in!", "info")
+        return '{"status" : "NOT_LOGGED_IN", "Message":"please login before joining a game"}'  # Check if user is logged in
     username = session.get("Username")
     if session.get("CurrentGame"): 
-        return '{"status" : "in game"}'  # Check if user is already in a game
+        game = globalGameList[(session["CurrentGame"] - 1)];
+        return json.dumps(asdict(game));
     session["CurrentGame"] = globalGameCount
     
     for game in globalGameList:

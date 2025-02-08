@@ -104,6 +104,17 @@
 </head>
 
 <body onload="getCurrentGame()">
+    <!-- Flash messages block -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
     {% include 'htmlChildren/dropDown.html' %}
 
     <!--<div class="background">-->
@@ -132,14 +143,16 @@
         <button onclick="sendEndTurn()" id="endTurn" class="endTurn"></button>
     </div>
 
+    
     <div class="fullscreenPrompt" id="waitForOtherPlayerTurnPrompt">
         <text>Waiting for other player to complete their turn</text>
     </div>
 
+    <!--
     <div class="fullscreenPrompt" id="enterFullscreenPrompt">
         <text>Click to enter fullscreen</text>
     </div>
-
+    -->
     
     
 
