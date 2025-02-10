@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="shortcut icon" type="image/png" href="images/ShieldLogo.png">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
 
         body {
@@ -104,16 +106,6 @@
 </head>
 
 <body onload="getCurrentGame()">
-    <!-- Flash messages block -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <ul class="flashes">
-        {% for category, message in messages %}
-        <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
 
     {% include 'htmlChildren/dropDown.html' %}
 
@@ -354,11 +346,19 @@
                     const game = JSON.parse(data);  // Parse the data as JSON
                     if (game.player2Found) {
                         clearInterval(intervalId);  // Stop the interval if the specific value is received
-                        alert('Desired value received!');
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Notification',
+                            text: 'Desired value received!'
+                        });
                         document.getElementById("endTurn").style.display = "none";
                     } else if (callCount >= 10) {
                         clearInterval(intervalId);  // Stop the interval if the number of calls exceeds 10
-                        alert('No one else online. Press F5 to try again.');
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Notification',
+                            text: 'No one else online. Press F5 to try again.'
+                        });
                     } else {
                         callCount++;
                     }
@@ -374,7 +374,11 @@
                 .then(response => response.text())  // Convert the response to text
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
-                    alert(data);  // Display the data in an alert
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Game Data',
+                        text: data
+                    });
                     if (!game.player1Found) {
                         waitForOtherPlayerTurnPrompt.style.display = "block";
                     } else {
