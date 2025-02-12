@@ -105,9 +105,8 @@
     </style>
 </head>
 
-<body onload="getCurrentGame()">
+<body>
 
-    {% include 'htmlChildren/dropDown.html' %}
 
     <!--<div class="background">-->
     <!--</div>-->
@@ -140,6 +139,8 @@
         <text>Waiting for other player to complete their turn</text>
     </div>
 
+    {% include 'htmlChildren/dropDown.html' %}
+
     <!--
     <div class="fullscreenPrompt" id="enterFullscreenPrompt">
         <text>Click to enter fullscreen</text>
@@ -156,6 +157,7 @@
         const waitForOtherPlayerTurnPrompt = document.getElementById('waitForOtherPlayerTurnPrompt');
         let callCount = 0;
         let intervalId;
+        const username = "{{ username }}";
 
 
         function checkFullscreen() {
@@ -171,12 +173,12 @@
 
             // Perform actions based on the new fullscreen state
             if (isFullscreen) {
-                enterFullscreenPrompt.style.display = "none";
+                //enterFullscreenPrompt.style.display = "none";
                 getCurrentGame() // Call the function to check if the other player has joined every second
                 console.log("Page is in fullscreen");
             } else {
-                enterFullscreenPrompt.style.display = "block";
-                waitForOtherPlayerTurnPrompt.style.display = "none";
+                //enterFullscreenPrompt.style.display = "block";
+                //waitForOtherPlayerTurnPrompt.style.display = "none";
                 console.log("Page is not in fullscreen");
             }
         }
@@ -334,16 +336,17 @@
             }
 
         function waitForPlayerTwo() {
-            document.getElementById("endTurn").style.display = "block";
             callCount = 0;
             intervalId = setInterval(waitForPlayer2, 1000);  // Call waitForPlayer2 every second
         }
 
         function waitForPlayer2() {
+            console.warn("waitForPlayer2()");
             fetch('/testGame2/waitForSecondPlayer')
                 .then(response => response.text())  // Convert the response to text
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
+                    debbuger;
                     if (game.player2Found) {
                         clearInterval(intervalId);  // Stop the interval if the specific value is received
                         Swal.fire({
@@ -351,6 +354,7 @@
                             title: 'Notification',
                             text: 'Desired value received!'
                         });
+                        document.getElementById("waitForOtherPlayerTurnPrompt").style.display = "none";
                         document.getElementById("endTurn").style.display = "none";
                     } else if (callCount >= 10) {
                         clearInterval(intervalId);  // Stop the interval if the number of calls exceeds 10
@@ -370,6 +374,7 @@
         }
 
         function getCurrentGame() {
+            console.warn("getCurrentGame()");
             fetch('testGame2/getCurrentGame')
                 .then(response => response.text())  // Convert the response to text
                 .then(data => {
@@ -379,11 +384,17 @@
                         title: 'Game Data',
                         text: data
                     });
-                    if (!game.player1Found) {
-                        waitForOtherPlayerTurnPrompt.style.display = "block";
-                    } else {
-                        waitForPlayerTwo();
+                
+                    console.log(game.player1==username); // Check if the current player is player 1
+                    if (game.player1==username) {
+                        if (!game.player2) {
+                            waitForPlayerTwo();
+                        }
+                        else {}
+
                     }
+
+                    
                 })
                 .catch(error => {
                     console.error('Error:', error);  // Handle any errors
@@ -391,6 +402,7 @@
         }
         
         function sendEndTurn() {
+            console.warn("sendEndTurn()");
             fetch('testGame2/receiveEndTurn')
                 .then(response => {
                     // the server has return after receiving the end turn message from this player

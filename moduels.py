@@ -33,3 +33,4 @@ class Game:
     roundNum: int
     gameBoard: GameBoard
     isPlayer1Turn: bool = True
+    isPlayer1: bool = True

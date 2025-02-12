@@ -328,7 +328,8 @@ def testGame():
 
 @app.route("/testGame2", methods=["GET"])
 def testGame2():
-    return render_template("game2.html")
+    username = session.get("Username")
+    return render_template("game2.html", username=username)
 
 
 @app.route("/testGame2/getCurrentGame", methods=["GET"])
@@ -341,7 +342,7 @@ def getCurrentGame():
         return '{"status" : "NOT_LOGGED_IN", "Message":"please login before joining a game"}'  # Check if user is logged in
     username = session.get("Username")
     if session.get("CurrentGame"): 
-        game = globalGameList[(session["CurrentGame"] - 1)];
+        game = globalGameList[(session["CurrentGame"] - 1)]
         return json.dumps(asdict(game));
     session["CurrentGame"] = globalGameCount
     
