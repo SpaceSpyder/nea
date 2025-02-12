@@ -398,6 +398,15 @@
                         }
 
                     }
+                    else {
+                        if (!game.roundNum % 2 == 0) { // if we are player 2 and it is player 2's turn
+                            waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt
+                        }
+                        else { // if we are player 2 and it is player 1's turn
+                            waitForOtherPlayerTurnPrompt.style.display = "block";
+                        }
+                        
+                    }
 
                     
                 })
