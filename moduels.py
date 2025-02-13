@@ -17,10 +17,12 @@ class Card:
 
 @dataclass
 class GameBoard:
+    p2Defence: List[Card] = field(default_factory=list)
+    p2Attack: List[Card] = field(default_factory=list)
+    
     p1Attack: List[Card] = field(default_factory=list)
     p1Defence: List[Card] = field(default_factory=list)
-    p2Attack: List[Card] = field(default_factory=list)
-    p2Defence: List[Card] = field(default_factory=list)
+
     p1bank: List[Card] = field(default_factory=list)
     p2bank: List[Card] = field(default_factory=list)
 

@@ -404,7 +404,7 @@ def receiveEndTurn():
     # Save the updated game state 
     # might want to save it to a database or a file
 
-    return {"status": "success", "message": "Game state updated"}
+    return {"status": "success", "message": "Game state updated", "game": asdict(game)}
 
 
 # -------- flask functions --------

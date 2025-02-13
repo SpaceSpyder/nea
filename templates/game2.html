@@ -329,6 +329,30 @@
                 return positionS;
             }
 
+        function redrawAllCards(game) {
+            const gameBoard = game.gameBoard;
+            const hitboxContents = [
+                gameBoard.p1Attack,
+                gameBoard.p1Defence,
+                gameBoard.p2Attack,
+                gameBoard.p2Defence,
+                gameBoard.p1bank,
+                gameBoard.p2bank
+            ];
+
+            hitboxContents.forEach((hitbox, hitboxNum) => {
+                let numberOfCards = hitbox.length;
+                let currentPos = getCardPositions(numberOfCards);
+                hitbox.forEach((card, index) => {
+                    let cardElement = document.getElementById(card.name);
+                    if (cardElement) {
+                        cardElement.style.left = (currentPos[index] + 3) + "px";
+                        // You may also need to update the top position or other styles based on your requirements
+                    }
+                });
+            });
+        }
+
         function waitForPlayerTwo() {
             callCount = 0;
             intervalId = setInterval(waitForPlayer2, 1000);  // Call waitForPlayer2 every second
@@ -378,31 +402,24 @@
                         title: 'Game Data',
                         text: data
                     });
-                
-                    console.log(game.player1==username); // Check if the current player is player 1
-                    if (game.player1==username) {
+
+                    console.log(game.player1 == username); // Check if the current player is player 1
+                    if (game.player1 == username) {
                         if (!game.player2) { // Check if player 2 has joined
                             waitForPlayerTwo();
-                        }
-                        else if (game.roundNum % 2 == 0) { // if player 2 is joined and it is player 1's turn
+                        } else if (game.roundNum % 2 == 0) { // if player 2 is joined and it is player 1's turn
                             waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt
-                        }
-                        else { // if player 2 is joined and it is player 2's turn
+                            redrawAllCards(game); // Redraw all cards using the game object
+                        } else { // if player 2 is joined and it is player 2's turn
                             waitForOtherPlayerTurnPrompt.style.display = "block";
                         }
-
-                    }
-                    else {
+                    } else {
                         if (!game.roundNum % 2 == 0) { // if we are player 2 and it is player 2's turn
                             waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt
-                        }
-                        else { // if we are player 2 and it is player 1's turn
+                        } else { // if we are player 2 and it is player 1's turn
                             waitForOtherPlayerTurnPrompt.style.display = "block";
                         }
-                        
                     }
-
-                    
                 })
                 .catch(error => {
                     console.error('Error:', error);  // Handle any errors
