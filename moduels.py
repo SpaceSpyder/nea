@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-import json
+from dataclasses import dataclass, field
+from typing import List
 
 @dataclass
 class Player:
@@ -9,21 +9,17 @@ class Player:
     mana: int
 
 @dataclass
-class CardSpread:
-    card1: str
-    card2: str
-    card3: str
-    card4: str
-    card5: str
+class Card:
+    name: str
 
 @dataclass
 class GameBoard:
-    p1Attack: CardSpread
-    p1Defence: CardSpread
-    p2Attack: CardSpread
-    p2Defence: CardSpread
-    p1bank: CardSpread
-    p2bank: CardSpread
+    p1Attack: List[Card] = field(default_factory=list)
+    p1Defence: List[Card] = field(default_factory=list)
+    p2Attack: List[Card] = field(default_factory=list)
+    p2Defence: List[Card] = field(default_factory=list)
+    p1bank: List[Card] = field(default_factory=list)
+    p2bank: List[Card] = field(default_factory=list)
 
 @dataclass
 class Game:
@@ -33,4 +29,3 @@ class Game:
     roundNum: int
     gameBoard: GameBoard
     isPlayer1Turn: bool = True
-    isPlayer1: bool = True
