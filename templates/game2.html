@@ -106,11 +106,6 @@
 </head>
 
 <body>
-
-
-    <!--<div class="background">-->
-    <!--</div>-->
-
     <!--images and id-->
     <div id="cardContainer">
         <img src="images/CardPictures/PossessedArmour.png" class="card" id="card1">
@@ -122,7 +117,7 @@
         <img src="images/CardPictures/Monk.png" class="card" id="card7">
     </div>
 
-    <div id="highl"></div>
+    <!--<div id="highl"></div>-->
 
     <div id="p1Mana" class="values" style="right: 43px;top: 909px;">00</div>
     <div id="p2Mana" class="values" style="right: 43px;top: 52px;">00</div>
@@ -146,13 +141,10 @@
         <text>Click to enter fullscreen</text>
     </div>
     -->
-    
-    
-
 
 
     <script>
-        let isFullscreen = null; // To store the previous fullscreen state
+        let isFullscreen = null; // To store the fullscreen state
         const enterFullscreenPrompt = document.getElementById('enterFullscreenPrompt');
         const waitForOtherPlayerTurnPrompt = document.getElementById('waitForOtherPlayerTurnPrompt');
         let callCount = 0;
@@ -244,6 +236,7 @@
                 let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
                 if (!dropLocation) return;
                 let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+                
                 //remove element from array
                 let index = hitboxContents[hitboxNum].indexOf(element);
                 if (index != -1) {
@@ -280,12 +273,13 @@
 
             if (dropLocation) { // if it has data it will snap
                 let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
-
                 snapCardY(dropLocation, e.target); // passes the area its over and the card 
                 snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
                 numberOfCards = hitboxContents[hitboxNum].length; // creates a variable to say how many cards are in the hitbox and +1 
                 if (numberOfCards > 6) numberOfCards = 6;
                 redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
+
+                console.log("hitboxContents",hitboxContents)
             }
             else { // if it doesnt have data it will snap back to the hand
                 e.target.style.left = "0px";
@@ -301,11 +295,11 @@
         function snapCardY(dropLocation, element) { // takes snapping location and snaps the card
             element.style.top = (dropLocation.topLeft.y - 0) + "px";
             // highlight hitbox for debugging
-            let hl = document.getElementById("highl");
-            hl.style.left = dropLocation.topLeft.x + "px";
-            hl.style.top = dropLocation.topLeft.y + "px";
-            hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
-            hl.style.height = dropLocation.bottomRight.y - dropLocation.topLeft.y + "px";
+            // let hl = document.getElementById("highl");
+            //hl.style.left = dropLocation.topLeft.x + "px";
+            //hl.style.top = dropLocation.topLeft.y + "px";
+            //hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
+            //hl.style.height = dropLocation.bottomRight.y - dropLocation.topLeft.y + "px";
         }
 
         function redrawCards(numberOfCards, hitboxNum, left) {
@@ -318,7 +312,7 @@
         function dropToSnap(cardX, cardY) {
             for (let i = 0; i < inPlayAreas.length; i++) {
                 if (cardX > inPlayAreas[i].topLeft.x && cardX < inPlayAreas[i].bottomRight.x && cardY > inPlayAreas[i].topLeft.y && cardY < inPlayAreas[i].bottomRight.y) {
-                    return inPlayAreas[i]; // return the hitbox position
+                    return inPlayAreas[i]; // return the hitbox & position
                 }
             }
             return null;
@@ -415,19 +409,27 @@
                 });
         }
         
-        function sendEndTurn() {
+        function sendEndTurn(hitboxContents) {
             console.warn("sendEndTurn()");
             fetch('testGame2/receiveEndTurn')
                 .then(response => {
-                    // the server has return after receiving the end turn message from this player
-                    // do sothing here to show the other palyer is taking their turn and to wait patiently
-                })  // 
+                    // get the cards postions
+                    //put them in ~game.gameboard
+                    // ~roundNum + 1
+                    // send to server
+                    const game = JSON.parse(data);  // Parse the data as JSON
+                    game.gameBoard = hitboxContents
+                    game.roundNum =+ 1
+                    
+
+                })  
                 .catch(error => {
                     console.error('Error:', error);  // Handle any errors
                 });
         }
-        // Run the check every 3 seconds (3000 milliseconds)
-        setInterval(checkFullscreen, 1000);
+        
+        setInterval(checkFullscreen, 1000); // Run the check every 1 second (1000 milliseconds)
+        setInterval(console.log(cardData), 2000);
     </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image # pip install pillow
 
 def cropAndShowImage(image):
     imagePath = "D:\\nea\\templates\\images\\profilePics\\" + image  # Correct path

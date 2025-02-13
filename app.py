@@ -430,6 +430,11 @@ def modifyDeck(username):
 
     return redirect(url_for("showDecks", username=username, selecteddeckid=selectedDeck))
 
+@app.route("/testGame2/receiveEndTurn", methods=["POST"])
+def receiveEndTurn():
+    # update game state
+    return # return no JSON
+
 # -------- network testing ---------
 
 @app.route("/networkTest", methods=["GET"])
@@ -483,10 +488,7 @@ def networkLogin():
     session["Username"] = username  # Store username in session
     return '{"status" : "logged in"}'
 
-@app.route("/testGame2/receiveEndTurn", methods=["POST"])
-def receiveEndTurn():
-    # update game state
-    return # return no JSON
+
 
 def dumpGlobalState():
     global globalGameList
