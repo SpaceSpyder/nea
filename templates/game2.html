@@ -126,7 +126,7 @@
 
     <div class="endTurn">
         <div class="endTurnText">End Turn</div>
-        <button onclick="sendEndTurn()" id="endTurn" class="endTurn"></button>
+        <button onclick="sendEndTurn(hitboxContents)" id="endTurn" class="endTurn"></button>
     </div>
 
     
@@ -411,18 +411,26 @@
         
         function sendEndTurn(hitboxContents) {
             console.warn("sendEndTurn()");
-            fetch('testGame2/receiveEndTurn')
-                .then(response => {
-                    // get the cards postions
-                    //put them in ~game.gameboard
-                    // ~roundNum + 1
-                    // send to server
+            fetch('testGame2/getCurrentGame')
+                .then(response => response.text())
+                .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
-                    game.gameBoard = hitboxContents
-                    game.roundNum =+ 1
-                    
+                    game.gameBoard = hitboxContents;  // Update the game board
+                    game.roundNum += 1;  // Increment the round number
 
-                })  
+                    // Send the updated game object back to the server
+                    return fetch('testGame2/receiveEndTurn', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(game)
+                    });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);  // Handle the response data
+                })
                 .catch(error => {
                     console.error('Error:', error);  // Handle any errors
                 });

@@ -374,6 +374,28 @@ def waitForSecondPlayer():
     return '{"ERROR no current game" : true}'  # Error if no current game
 
 
+@app.route("/testGame2/receiveEndTurn", methods=["POST"])
+def receiveEndTurn():
+    data = request.get_json()  # Parse the incoming JSON data
+    if not data:
+        return {"status": "error", "message": "Invalid data"}, 400
+
+    # Update the game state
+    game_id = session.get("CurrentGame")
+    if game_id is None:
+        return {"status": "error", "message": "No current game"}, 400
+
+    global globalGameList
+    game = globalGameList[game_id - 1]
+    game.gameBoard = data.get("gameBoard", game.gameBoard)
+    game.roundNum = data.get("roundNum", game.roundNum)
+
+    # Save the updated game state 
+    # might want to save it to a database or a file
+
+    return {"status": "success", "message": "Game state updated"}
+
+
 # -------- flask functions --------
 
 
@@ -430,10 +452,6 @@ def modifyDeck(username):
 
     return redirect(url_for("showDecks", username=username, selecteddeckid=selectedDeck))
 
-@app.route("/testGame2/receiveEndTurn", methods=["POST"])
-def receiveEndTurn():
-    # update game state
-    return # return no JSON
 
 # -------- network testing ---------
 
