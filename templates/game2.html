@@ -411,11 +411,31 @@
         
         function sendEndTurn(hitboxContents) {
             console.warn("sendEndTurn()");
+
+            // Ensure hitboxContents is structured correctly
+            const formattedHitboxContents = hitboxContents.map(hitbox => {
+                return hitbox.map(element => {
+                    return {
+                        name: element.id,  // Assuming the element's id is the card name
+                        attack: 0,  // Default value, update as needed
+                        cost: 0,    // Default value, update as needed
+                        health: 0   // Default value, update as needed
+                    };
+                });
+            });
+
             fetch('testGame2/getCurrentGame')
                 .then(response => response.text())
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
-                    game.gameBoard = hitboxContents;  // Update the game board
+                    game.gameBoard = {
+                        p1Attack: formattedHitboxContents[0],
+                        p1Defence: formattedHitboxContents[1],
+                        p2Attack: formattedHitboxContents[2],
+                        p2Defence: formattedHitboxContents[3],
+                        p1bank: formattedHitboxContents[4],
+                        p2bank: formattedHitboxContents[5]
+                    };  // Update the game board
                     game.roundNum += 1;  // Increment the round number
 
                     // Send the updated game object back to the server

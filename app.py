@@ -25,7 +25,8 @@ from templates.scripts.utils import (
     insertUser,
 )
 
-from moduels import(Game) # json serial class
+from moduels import Game, GameBoard, Card # Import Game, GameBoard, and Card classes
+
 
 # Database setup
 DATABASE_URI = "databases/database.db"
@@ -387,7 +388,17 @@ def receiveEndTurn():
 
     global globalGameList
     game = globalGameList[game_id - 1]
-    game.gameBoard = data.get("gameBoard", game.gameBoard)
+    game_board_data = data.get("gameBoard", {})
+    
+    # Convert the game board data to GameBoard object
+    game.gameBoard = GameBoard(
+        p1Attack=[Card(**card) for card in game_board_data.get("p1Attack", [])],
+        p1Defence=[Card(**card) for card in game_board_data.get("p1Defence", [])],
+        p2Attack=[Card(**card) for card in game_board_data.get("p2Attack", [])],
+        p2Defence=[Card(**card) for card in game_board_data.get("p2Defence", [])],
+        p1bank=[Card(**card) for card in game_board_data.get("p1bank", [])],
+        p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
+    )
     game.roundNum = data.get("roundNum", game.roundNum)
 
     # Save the updated game state 

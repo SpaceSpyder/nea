@@ -11,6 +11,9 @@ class Player:
 @dataclass
 class Card:
     name: str
+    attack: int
+    cost: int
+    health: int
 
 @dataclass
 class GameBoard:
