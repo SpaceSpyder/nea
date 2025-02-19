@@ -336,7 +336,9 @@
                 gameBoard.p1bank,
                 gameBoard.p2bank
             ];
-
+            if (hitboxContents.filter(x => x.length > 0).length >0) {
+                debugger
+            }
             hitboxContents.forEach((hitbox, hitboxNum) => {
                 let numberOfCards = hitbox.length;
                 let currentPos = getCardPositions(numberOfCards);
@@ -344,7 +346,29 @@
                     let cardElement = document.getElementById(card.name);
                     if (cardElement) {
                         cardElement.style.left = (currentPos[index] + 3) + "px";
-                        // You may also need to update the top position or other styles based on your requirements
+                        if (hitboxNum == 0) {
+                            // set the top style to match the p1Attack hitbox
+                            cardElement.style.top = inPlayAreas[2].topLeft.y + "px";
+
+                        } else if (hitboxNum == 1) {
+                            cardElement.style.top = inPlayAreas[3].topLeft.y + "px";
+                            // set the top style to match the p1defence hitbox
+                        } else if (hitboxNum == 2) {
+                            cardElement.style.top = inPlayAreas[0].topLeft.y + "px";
+                            // set the top style to match the p2Attack hitbox
+                        } else if (hitboxNum == 3) {
+                            cardElement.style.top = inPlayAreas[1].topLeft.y + "px";
+                            // set the top style to match the p2Defence hitbox
+                        } else if (hitboxNum == 4) {
+                            cardElement.style.top = inPlayAreas[2].topLeft.y + "px";
+                            // set the top style to match the p1bank hitbox
+                            // update left for bank
+                        } else if (hitboxNum == 5) {
+                            cardElement.style.top = inPlayAreas[3].topLeft.y + "px";
+                            // set the top style to match the p2bank hitbox
+                            // update left for banks
+                        }
+                        
                     }
                 });
             });
