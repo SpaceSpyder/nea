@@ -155,10 +155,7 @@
         function checkFullscreen() {
             const currentlyFullscreen = document.fullscreenElement !== null;
 
-            // Do nothing if the fullscreen state hasn't changed
-            if (currentlyFullscreen === isFullscreen) {
-                return;
-            }
+            
 
             // Update the stored fullscreen state
             isFullscreen = currentlyFullscreen;
@@ -397,11 +394,11 @@
                 .then(response => response.text())  // Convert the response to text
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
-                    Swal.fire({
+                    /*Swal.fire({
                         icon: 'info',
                         title: 'Game Data',
                         text: data
-                    });
+                    });*/
 
                     console.log(game.player1 == username); // Check if the current player is player 1
                     if (game.player1 == username) {
@@ -414,7 +411,7 @@
                             waitForOtherPlayerTurnPrompt.style.display = "block";
                         }
                     } else {
-                        if (!game.roundNum % 2 == 0) { // if we are player 2 and it is player 2's turn
+                        if (game.roundNum % 2 != 0) { // if we are player 2 and it is player 2's turn
                             waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt
                         } else { // if we are player 2 and it is player 1's turn
                             waitForOtherPlayerTurnPrompt.style.display = "block";
@@ -427,7 +424,9 @@
         }
         
         function sendEndTurn(hitboxContents) {
+            waitForOtherPlayerTurnPrompt.style.display = "block"; // Show the prompt
             console.warn("sendEndTurn()");
+
 
             // Ensure hitboxContents is structured correctly
             const formattedHitboxContents = hitboxContents.map(hitbox => {
@@ -473,7 +472,11 @@
                 });
         }
         
+
+        
+
         setInterval(checkFullscreen, 1000); // Run the check every 1 second (1000 milliseconds)
+        
         setInterval(console.log(cardData), 2000);
     </script>
 </body>
