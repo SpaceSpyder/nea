@@ -86,7 +86,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.6); /* Dark transparent background */
             z-index: 5; /* Ensure it sits above other content */
-            display: none; /* Hidden by default */
+            display: block; /* Hidden by default */
             color: #fff; /* Text color */
             font-size: 40px;
             text-align: center;
@@ -150,6 +150,7 @@
         let callCount = 0;
         let intervalId;
         const username = "{{ username }}";
+        let runOncePerTurn = false;
 
 
         function checkFullscreen() {
@@ -197,9 +198,6 @@
             { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },
             { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },
             { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },
-        ];
-
-        let inHandAreas = [
             { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },
             { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } },
         ];
@@ -272,8 +270,6 @@
                 numberOfCards = hitboxContents[hitboxNum].length; // creates a variable to say how many cards are in the hitbox and +1 
                 if (numberOfCards > 6) numberOfCards = 6;
                 redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
-
-                console.log("hitboxContents",hitboxContents)
             }
             else { // if it doesnt have data it will snap back to the hand
                 e.target.style.left = "0px";
@@ -324,51 +320,32 @@
             }
 
         function redrawAllCards(game) {
-            const gameBoard = game.gameBoard;
-            const hitboxContents = [
-                gameBoard.p1Attack,
-                gameBoard.p1Defence,
-                gameBoard.p2Attack,
-                gameBoard.p2Defence,
-                gameBoard.p1bank,
-                gameBoard.p2bank
-            ];
-            if (hitboxContents.filter(x => x.length > 0).length >0) {
-                debugger
+            if (!runOncePerTurn) {
+                runOncePerTurn = true;
+            } else{
+                return;
             }
-            hitboxContents.forEach((hitbox, hitboxNum) => {
-                let numberOfCards = hitbox.length;
-                let currentPos = getCardPositions(numberOfCards);
-                hitbox.forEach((card, index) => {
-                    let cardElement = document.getElementById(card.name);
-                    if (cardElement) {
-                        cardElement.style.left = (currentPos[index] + 3) + "px";
-                        if (hitboxNum == 0) {
-                            // set the top style to match the p1Attack hitbox
-                            cardElement.style.top = inPlayAreas[2].topLeft.y + "px";
+            const gameBoard = game.gameBoard;
+            hitboxContentsData = [];
+            hitboxContentsData.push(gameBoard.p1Attack),
+            hitboxContentsData.push(gameBoard.p1Defence),
+            hitboxContentsData.push(gameBoard.p2Attack),
+            hitboxContentsData.push(gameBoard.p2Defence),
+            hitboxContentsData.push(gameBoard.p1bank),
+            hitboxContentsData.push(gameBoard.p2bank);
 
-                        } else if (hitboxNum == 1) {
-                            cardElement.style.top = inPlayAreas[3].topLeft.y + "px";
-                            // set the top style to match the p1defence hitbox
-                        } else if (hitboxNum == 2) {
-                            cardElement.style.top = inPlayAreas[0].topLeft.y + "px";
-                            // set the top style to match the p2Attack hitbox
-                        } else if (hitboxNum == 3) {
-                            cardElement.style.top = inPlayAreas[1].topLeft.y + "px";
-                            // set the top style to match the p2Defence hitbox
-                        } else if (hitboxNum == 4) {
-                            cardElement.style.top = inPlayAreas[2].topLeft.y + "px";
-                            // set the top style to match the p1bank hitbox
-                            // update left for bank
-                        } else if (hitboxNum == 5) {
-                            cardElement.style.top = inPlayAreas[3].topLeft.y + "px";
-                            // set the top style to match the p2bank hitbox
-                            // update left for banks
-                        }
-                        
-                    }
-                });
-            });
+            for (let i = 0; i < hitboxContentsData.length; i++) {
+                hitboxContents[i] = [];
+                for (let j = 0; j < hitboxContentsData[i].length; j++) {
+                    let ele = document.getElementById(hitboxContentsData[i][j].name);
+                    ele.style.left = j + "px";
+                    ele.style.top = (inPlayAreas[i].topLeft.y + 5) + "px"; // Set top position based on hitbox
+                    hitboxContents[i].push(ele);
+                }
+                redrawCards(hitboxContents[i].length, i, inPlayAreas[i].topLeft.x);                
+            }
+
+            console.log("hitboxContents after redrawAllCards", hitboxContents, gameBoard);
         }
 
         function waitForPlayerTwo() {
@@ -411,10 +388,26 @@
 
         function getCurrentGame() {
             console.warn("getCurrentGame()");
+            if (!username){
+                swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'not logged in'
+                });
+                document.location.href = "/login";
+            }
             fetch('testGame2/getCurrentGame')
                 .then(response => response.text())  // Convert the response to text
                 .then(data => {
                     const game = JSON.parse(data);  // Parse the data as JSON
+                    if (game.status && game.status=="NOT_LOGGED_IN") {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Not logged in!'
+                        });
+                        document.location.href = "/login";
+                    }
                     /*Swal.fire({
                         icon: 'info',
                         title: 'Game Data',
@@ -434,6 +427,7 @@
                     } else {
                         if (game.roundNum % 2 != 0) { // if we are player 2 and it is player 2's turn
                             waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt
+                            redrawAllCards(game); // Redraw all cards using the game object
                         } else { // if we are player 2 and it is player 1's turn
                             waitForOtherPlayerTurnPrompt.style.display = "block";
                         }
@@ -446,7 +440,6 @@
         
         function sendEndTurn(hitboxContents) {
             waitForOtherPlayerTurnPrompt.style.display = "block"; // Show the prompt
-            console.warn("sendEndTurn()");
 
 
             // Ensure hitboxContents is structured correctly
@@ -460,7 +453,7 @@
                     };
                 });
             });
-
+            runOncePerTurn = false;
             fetch('testGame2/getCurrentGame')
                 .then(response => response.text())
                 .then(data => {
