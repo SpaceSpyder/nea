@@ -396,65 +396,47 @@
 
 
         function getCurrentGame() {
-            //console.warn("getCurrentGame()");
-            if (!username){
-                
-                swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'not logged in'
-                });
+    if (!username) {
+        swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'not logged in'
+        });
+        document.location.href = "/login";
+    }
+    fetch('testGame2/getCurrentGame')
+        .then(response => response.text())
+        .then(data => {
+            const game = JSON.parse(data);
+            if (game.status && game.status=="NOT_LOGGED_IN") {
                 document.location.href = "/login";
+                flashMessage("You need to be logged in to play!", "error");
             }
-            fetch('testGame2/getCurrentGame')
-                .then(response => response.text())  // Convert the response to text
-                .then(data => {
-                    const game = JSON.parse(data);  // Parse the data as JSON
-                    if (game.status && game.status=="NOT_LOGGED_IN") {
-                        
-                        
-                        document.location.href = "/login";
-                        flashMessage("You need to be logged in to play!", "error");
-                        /*Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Not logged in!'
-                        });*/
-                    }
-                    /*Swal.fire({
-                        icon: 'info',
-                        title: 'Game Data',
-                        text: data
-                    });*/
 
-                    //console.log("am i player 1?:" + game.player1 == username); // Check if the current player is player 1
-                    if (game.player1 == username) {
-                        console.info("game: ", game)
-                        if (!game.player2) { // Check if player 2 has joined
-                            
-//                            //waitForPlayerTwo();
-                        } else if (game.roundNum % 2 == 0) { // if player 2 is joined and it is player 1's turn
-                            console.info(game)
-                            waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt 
-                            //console.info("%cp2 joined", 'background: #222; color: #bada55')
-                            redrawAllCards(game); // Redraw all cards using the game object
-                        } else { // if player 2 is joined and it is player 2's turn
-                            waitForOtherPlayerTurnPrompt.style.display = "block"; 
-                        }
-                    } else {
-                        console.info("game: ", game)
-                        if (username == game.player2 && game.roundNum % 2 != 0) { // if we are player 2 and it is player 2's turn
-                            waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt
-                            console.info("p2s turn")
-                        } else { // if we are player 2 and it is player 1's turn
-                            waitForOtherPlayerTurnPrompt.style.display = "block";
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);  // Handle any errors
-                });
-        }
+            if (game.player1 == username) {
+                console.info("game: ", game);
+                if (!game.player2) {
+                    // Waiting for player 2
+                } else if (game.roundNum % 2 == 0) { // Player 1's turn
+                    waitForOtherPlayerTurnPrompt.style.display = "none";
+                    redrawAllCards(game);
+                } else { // Player 2's turn
+                    waitForOtherPlayerTurnPrompt.style.display = "block";
+                }
+            } else if (game.player2 == username) { // Added explicit check for player 2
+                console.info("game: ", game);
+                if (game.roundNum % 2 != 0) { // Player 2's turn
+                    waitForOtherPlayerTurnPrompt.style.display = "none";
+                    redrawAllCards(game); // Add this line to redraw cards for player 2
+                } else { // Player 1's turn
+                    waitForOtherPlayerTurnPrompt.style.display = "block";
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
 
         function sendEndTurn(hitboxContents) {
             waitForOtherPlayerTurnPrompt.style.display = "block"; // Show the prompt
@@ -471,7 +453,6 @@
                     }
                     return {
                         cardId: cardInfo.cardId,
-                        name: cardInfo.name,
                         name: cardInfo.name,
                         attack: cardInfo.attack,
                         cost: cardInfo.cost,
@@ -525,63 +506,51 @@
                 });
         }
 
+        let currentCardId = 1; // Global counter for card IDs
+
         function addTestCards() {
-            // Test card data with unique sequential IDs and simplified structure
-            const testCards = [
-                { 
-                    cardId: 1, 
-                    name: "PossessedArmour",
-                    attack: 2,
-                    health: 3,
-                    cost: 1,
-                    x: 100, 
-                    y: 100 
-                },
-                { 
-                    cardId: 2, 
-                    name: "Knight",
-                    attack: 3,
-                    health: 4,
-                    cost: 2,
-                    x: 200, 
-                    y: 100 
-                }
-            ];
-
-            testCards.forEach(card => {
-                const newCard = document.createElement("img");
-                newCard.src = `images/CardPictures/${card.name}.png`; // Use name for image path
-                newCard.classList.add("card");
-                newCard.id = `card_${card.cardId}`; // Use numeric ID
-                
-                // Set all required data attributes
-                newCard.dataset.cardId = card.cardId;
-                newCard.dataset.name = card.name;
-                newCard.dataset.attack = card.attack;
-                newCard.dataset.health = card.health;
-                newCard.dataset.cost = card.cost;
-                
-                newCard.style.position = "absolute";
-                newCard.style.left = card.x + "px";
-                newCard.style.top = card.y + "px";
-
-                document.getElementById("cardContainer").appendChild(newCard);
-                dragElement(newCard);
-
-                cardData.push({
-                    element: newCard,
-                    hitbox: -1,
-                    index: -1,
-                    owner: "me",
-                    cardInfo: {
-                        cardId: card.cardId,
-                        name: card.name,
-                        attack: card.attack,
-                        health: card.health,
-                        cost: card.cost
+            fetch('/getRandomCard')
+                .then(response => response.json())
+                .then(cardInfo => {
+                    if (cardInfo.error) {
+                        console.error('Error:', cardInfo.error);
+                        return;
                     }
-                });
-            });
+
+                    const newCard = document.createElement("img");
+                    newCard.src = `images/CardPictures/${cardInfo.name}.png`;
+                    newCard.classList.add("card");
+                    newCard.id = `card_${currentCardId}`;
+                    
+                    // Set data attributes
+                    newCard.dataset.cardId = currentCardId;
+                    newCard.dataset.name = cardInfo.name;
+                    newCard.dataset.attack = cardInfo.attack;
+                    newCard.dataset.health = cardInfo.health;
+                    newCard.dataset.cost = cardInfo.cost;
+                    
+                    newCard.style.position = "absolute";
+                    newCard.style.left = "100px";
+                    newCard.style.top = "100px";
+
+                    document.getElementById("cardContainer").appendChild(newCard);
+                    dragElement(newCard);
+
+                    cardData.push({
+                        element: newCard,
+                        hitbox: -1,
+                        index: -1,
+                        owner: "me",
+                        cardInfo: {
+                            cardId: currentCardId++, // Increment ID after use
+                            name: cardInfo.name,
+                            attack: cardInfo.attack,
+                            health: cardInfo.health,
+                            cost: cardInfo.cost
+                        }
+                    });
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         

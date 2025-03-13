@@ -468,6 +468,29 @@ def modifyDeck(username):
     return redirect(url_for("showDecks", username=username, selecteddeckid=selectedDeck))
 
 
+@app.route("/getRandomCard", methods=["GET"])
+def getRandomCard():
+    try:
+        db = getDb()
+        cursor = db.cursor()
+        # Only select the fields we need
+        cursor.execute("SELECT Name, Damage, Cost, Health FROM Cards ORDER BY RANDOM() LIMIT 1")
+        card = cursor.fetchone()
+        db.close()
+        
+        if card:
+            return jsonify({
+                "name": card[0],     # Name from DB
+                "attack": card[1],    # Damage from DB
+                "cost": card[2],      # Cost from DB
+                "health": card[3]     # Health from DB
+            })
+        return jsonify({"error": "No card found"}), 404
+    except Exception as e:
+        print(f"Error getting random card: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 # -------- network testing ---------
 
 @app.route("/networkTest", methods=["GET"])
