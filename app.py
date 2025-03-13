@@ -8,13 +8,8 @@ import json
 import binascii # for unique session key
 
 from templates.scripts.cropImage import (cropAndShowImage)
-
 from templates.scripts.clearImages import (removeUnusedImages)
-
-from dataclasses import dataclass, asdict
-
-# python functions from utils.py
-from templates.scripts.utils import ( 
+from templates.scripts.utils import ( # python functions from utils.py
     getProfilePicPath,
     getUserIdByUsername,
     getUserDetailsByUsername,
@@ -24,9 +19,12 @@ from templates.scripts.utils import (
     calculateRank,
     insertUser,
 )
-
+from dataclasses import dataclass, asdict
 from moduels import Game, GameBoard, Card # Import Game, GameBoard, and Card classes
 
+# pip install flask werkzeug
+# pip install pillow
+# python -m flask --version
 
 # Database setup
 DATABASE_URI = "databases/database.db"
@@ -348,7 +346,7 @@ def getCurrentGame():
     session["CurrentGame"] = globalGameCount
     
     for game in globalGameList:
-        if game.player2 is None:
+        if game.player2 is None and username != game.player1:
             game.player2 = username  # Assign user to player2 if slot is empty
             dumpGlobalState()
             session.modified = True
@@ -417,6 +415,8 @@ def modifyDeck(username):
 
     selectedCards = request.form.get("selectedCards")
     selectedDeck = request.form.get("deck")
+    deckName = request.form.get("deckNameInput")
+    print(deckName)
 
     if selectedDeck == "create":
         conn = getDb()
@@ -433,12 +433,12 @@ def modifyDeck(username):
 
                 # Insert the new deck into the Decks table
                 cursor.execute("""
-                    INSERT INTO Decks (Owner, UserDeckNum, Deck)
-                    VALUES (?, ?, ?)
-                """, (username, user_deck_num, selectedCards))
+                    INSERT INTO Decks (Owner, UserDeckNum, Deck, DeckName)
+                    VALUES (?, ?, ?, ?)
+                """, (username, user_deck_num, selectedCards, deckName))
                 flash("New deck created successfully!", "success")
         except sqlite3.Error as e:
-            flash(f"Error: check server terminal", "error")
+            flash(f"Error: {e}", "error")
             print(f"SQLite error: {str(e)}")
         finally:
             cursor.close()

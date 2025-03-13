@@ -77,7 +77,7 @@
                     {% endfor %}
                     <option value="create">Create a new deck</option> <!-- Option to create a new deck -->
                 </select>
-                <input type="hidden" name="selectedCards" id="selectedCards">
+                <input type="hidden" id="deckNameInput">
                 <button type="submit">Submit</button>
             </form>
             
@@ -107,6 +107,7 @@
             const maxSelection = 20;
             let selectedCards = [];
             const selectedCardsContainer = document.getElementById('selectedCardsContainer');
+            const deckNameInput = document.getElementById('deckNameInput')
     
             function changeDeckDisplay() {
             const deckCreation = document.getElementById('deckCreation');
@@ -117,10 +118,12 @@
                 deckCreation.style.display = "block";
                 deckDisplay.style.display = "none";
                 selectedCardsContainer.style.display = "block";
+                deckNameInput.type = "text"
             } else {
                 deckCreation.style.display = "none";
                 deckDisplay.style.display = "block";
                 selectedCardsContainer.style.display = "none";
+                deckNameInput.type = "hidden"
             }
         }
     
