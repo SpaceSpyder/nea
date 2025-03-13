@@ -86,7 +86,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.6); /* Dark transparent background */
             z-index: 5; /* Ensure it sits above other content */
-            display: block; /* Hidden by default */
+            display: none; /* Hidden by default */
             color: #fff; /* Text color */
             font-size: 40px;
             text-align: center;
@@ -321,13 +321,18 @@
             }
 
             const gameBoard = game.gameBoard;
+            if (!gameBoard) {
+                console.error("gameBoard is null or undefined");
+                return;
+            }
+
             hitboxContentsData = [];
-            hitboxContentsData.push(gameBoard.p1Attack);
-            hitboxContentsData.push(gameBoard.p1Defence);
-            hitboxContentsData.push(gameBoard.p2Attack);
-            hitboxContentsData.push(gameBoard.p2Defence);
-            hitboxContentsData.push(gameBoard.p1bank);
-            hitboxContentsData.push(gameBoard.p2bank);
+            hitboxContentsData.push(gameBoard.p1Attack || []);
+            hitboxContentsData.push(gameBoard.p1Defence || []);
+            hitboxContentsData.push(gameBoard.p2Attack || []);
+            hitboxContentsData.push(gameBoard.p2Defence || []);
+            hitboxContentsData.push(gameBoard.p1bank || []);
+            hitboxContentsData.push(gameBoard.p2bank || []);
 
             // Clear the existing cards
             document.getElementById('cardContainer').innerHTML = '';
@@ -339,7 +344,7 @@
 
                     // Dynamically create the card element
                     let cardElement = document.createElement('img');
-                    cardElement.src = `images/CardPictures/${cardData.name}.png`; // Assuming the name field is the card image
+                    cardElement.src = `images/CardPictures/${cardData.cardImg}.png`; // Assuming the name field is the card image
                     cardElement.classList.add('card');
                     cardElement.id = cardData.name;  // Set the card ID based on its name
                     cardElement.draggable = true;
@@ -394,74 +399,89 @@
 
                     //console.log("am i player 1?:" + game.player1 == username); // Check if the current player is player 1
                     if (game.player1 == username) {
+                        console.info("game: ", game)
                         if (!game.player2) { // Check if player 2 has joined
                             
-                            waitForPlayerTwo();
+//                            //waitForPlayerTwo();
                         } else if (game.roundNum % 2 == 0) { // if player 2 is joined and it is player 1's turn
                             console.info(game)
-                            waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt
+                            waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt 
                             //console.info("%cp2 joined", 'background: #222; color: #bada55')
                             redrawAllCards(game); // Redraw all cards using the game object
                         } else { // if player 2 is joined and it is player 2's turn
-                            waitForOtherPlayerTurnPrompt.style.display = "block";
+                            waitForOtherPlayerTurnPrompt.style.display = "block"; 
                         }
                     } else {
-                        if (username != game.player2 && game.roundNum % 2 != 0 && game.roundNum) { // if we are player 2 and it is player 2's turn
+                        console.info("game: ", game)
+                        if (username == game.player2 && game.roundNum % 2 != 0) { // if we are player 2 and it is player 2's turn
                             waitForOtherPlayerTurnPrompt.style.display = "none"; // Hide the prompt
                             console.info("p2s turn")
-                            redrawAllCards(game); // Redraw all cards using the game object
                         } else { // if we are player 2 and it is player 1's turn
                             waitForOtherPlayerTurnPrompt.style.display = "block";
                         }
                     }
                 })
-                /*.catch(error => {
+                .catch(error => {
                     console.error('Error:', error);  // Handle any errors
-                });*/
+                });
         }
-        
+
         function sendEndTurn(hitboxContents) {
             waitForOtherPlayerTurnPrompt.style.display = "block"; // Show the prompt
-
+            console.log("end turn");
 
             // Ensure hitboxContents is structured correctly
             const formattedHitboxContents = hitboxContents.map(hitbox => {
                 return hitbox.map(element => {
                     return {
-                        name: element.id,  // Assuming the element's id is the card name
+                        cardId: element.id,  // the element's id is the card id
+                        cardImg: element.src.split('/').pop(),  // the element's src is the card image, extract the filename
                         attack: 0,  // Default value, update as needed
                         cost: 0,    // Default value, update as needed
                         health: 0   // Default value, update as needed
                     };
                 });
             });
+
+            // Ensure that the formatted hitbox contents are used in the game object
             runOncePerTurn = false;
             fetch('testGame2/getCurrentGame')
                 .then(response => response.text())
                 .then(data => {
-                    const game = JSON.parse(data);  // Parse the data as JSON
-                    game.gameBoard = {
-                        p1Attack: formattedHitboxContents[0],
-                        p1Defence: formattedHitboxContents[1],
-                        p2Attack: formattedHitboxContents[2],
-                        p2Defence: formattedHitboxContents[3],
-                        p1bank: formattedHitboxContents[4],
-                        p2bank: formattedHitboxContents[5]
-                    };  // Update the game board
-                    game.roundNum += 1;  // Increment the round number
+                    try {
+                        const game = JSON.parse(data);  // Parse the data as JSON
+                        game.gameBoard = {
+                            p1Attack: formattedHitboxContents[0],
+                            p1Defence: formattedHitboxContents[1],
+                            p2Attack: formattedHitboxContents[2],
+                            p2Defence: formattedHitboxContents[3],
+                            p1bank: formattedHitboxContents[4],
+                            p2bank: formattedHitboxContents[5]
+                        };  // Update the game board
+                        game.roundNum += 1;  // Increment the round number
 
-                    // Send the updated game object back to the server
-                    return fetch('testGame2/receiveEndTurn', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(game)
-                    });
+                        // Send the updated game object back to the server
+                        return fetch('testGame2/receiveEndTurn', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(game)
+                        });
+                    } catch (error) {
+                        console.error('Error parsing JSON:', error);
+                        throw new Error('Invalid JSON response');
+                    }
                 })
-                .then(response => response.json())
+                .then(response => response.text())
                 .then(data => {
-                    console.log('Success:', data);  // Handle the response data
+                    try {
+                        const result = JSON.parse(data);
+                        console.log('Success:', result);  // Handle the response data
+                    } catch (error) {
+                        console.error('Error parsing JSON:', error);
+                        throw new Error('Invalid JSON response');
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);  // Handle any errors

@@ -1,5 +1,5 @@
 from datetime import timedelta # date and time for account creation
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash # password hashing
 from werkzeug.utils import secure_filename # for secure file uploads
 import sqlite3 # for database operations
@@ -375,34 +375,43 @@ def waitForSecondPlayer():
 
 @app.route("/testGame2/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
-    data = request.get_json()  # Parse the incoming JSON data
-    if not data:
-        return {"status": "error", "message": "Invalid data"}, 400
+    try:
+        data = request.get_json()  # Parse the incoming JSON data
+        if not data:
+            return jsonify({"status": "error", "message": "Invalid data"}), 400
 
-    # Update the game state
-    game_id = session.get("CurrentGame")
-    if game_id is None:
-        return {"status": "error", "message": "No current game"}, 400
+        # Update the game state
+        game_id = session.get("CurrentGame")
+        if game_id is None:
+            return jsonify({"status": "error", "message": "No current game"}), 400
 
-    global globalGameList
-    game = globalGameList[game_id - 1]
-    game_board_data = data.get("gameBoard", {})
-    
-    # Convert the game board data to GameBoard object
-    game.gameBoard = GameBoard(
-        p1Attack=[Card(**card) for card in game_board_data.get("p1Attack", [])],
-        p1Defence=[Card(**card) for card in game_board_data.get("p1Defence", [])],
-        p2Attack=[Card(**card) for card in game_board_data.get("p2Attack", [])],
-        p2Defence=[Card(**card) for card in game_board_data.get("p2Defence", [])],
-        p1bank=[Card(**card) for card in game_board_data.get("p1bank", [])],
-        p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
-    )
-    game.roundNum = data.get("roundNum", game.roundNum)
+        global globalGameList
+        game = globalGameList[game_id - 1]
+        game_board_data = data.get("gameBoard", {})
 
-    # Save the updated game state 
-    # might want to save it to a database or a file
+        # Convert the game board data to GameBoard object
+        try:
+            game.gameBoard = GameBoard(
+                p1Attack=[Card(**card) for card in game_board_data.get("p1Attack", [])],
+                p1Defence=[Card(**card) for card in game_board_data.get("p1Defence", [])],
+                p2Attack=[Card(**card) for card in game_board_data.get("p2Attack", [])],
+                p2Defence=[Card(**card) for card in game_board_data.get("p2Defence", [])],
+                p1bank=[Card(**card) for card in game_board_data.get("p1bank", [])],
+                p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
+            )
+            game.roundNum = data.get("roundNum", game.roundNum)
+        except Exception as e:
+            print(f"Error updating game board: {e}")
+            return jsonify({"status": "error", "message": "Failed to update game board"}), 500
 
-    return {"status": "success", "message": "Game state updated", "game": asdict(game)}
+        # Save the updated game state 
+        # might want to save it to a database or a file
+
+        response = {"status": "success", "message": "Game state updated", "game": game.__dict__}
+        return app.response_class(response=json.dumps(response), status=200, mimetype='application/json')
+    except Exception as e:
+        print(f"Error in receiveEndTurn: {e}")
+        return jsonify({"status": "error", "message": "Internal server error"}), 500
 
 
 # -------- flask functions --------
