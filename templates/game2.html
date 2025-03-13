@@ -433,14 +433,21 @@
             // Ensure hitboxContents is structured correctly
             const formattedHitboxContents = hitboxContents.map(hitbox => {
                 return hitbox.map(element => {
+                    // Find the card data for this element
+                    const cardInfo = cardData.find(c => c.element === element)?.cardInfo;
+                    if (!cardInfo) {
+                        console.warn('No card info found for element:', element);
+                        return null;
+                    }
                     return {
-                        cardId: element.id,  // the element's id is the card id
-                        cardImg: element.src.split('/').pop(),  // the element's src is the card image, extract the filename
-                        attack: 0,  // Default value, update as needed
-                        cost: 0,    // Default value, update as needed
-                        health: 0   // Default value, update as needed
+                        cardId: cardInfo.cardId,
+                        cardImg: cardInfo.cardImg,
+                        name: cardInfo.name,
+                        attack: cardInfo.attack,
+                        cost: cardInfo.cost,
+                        health: cardInfo.health
                     };
-                });
+                }).filter(card => card !== null); // Remove any null entries
             });
 
             // Ensure that the formatted hitbox contents are used in the game object
@@ -489,29 +496,64 @@
         }
 
         function addTestCards() {
-            // Test card data for the demonstration
+            // Test card data with all required attributes
             const testCards = [
-                { id: "testCard1", src: "images/CardPictures/PossessedArmour.png", x: 100, y: 100 },
-                { id: "testCard2", src: "images/CardPictures/knight.png", x: 200, y: 100 },
-                { id: "testCard3", src: "images/CardPictures/Darkknight.png", x: 300, y: 100 },
-                { id: "testCard4", src: "images/CardPictures/Dragon.png", x: 400, y: 100 }
+                { 
+                    cardId: "testCard1", 
+                    name: "PossessedArmour", 
+                    cardImg: "PossessedArmour.png",
+                    attack: 2,
+                    health: 3,
+                    cost: 1,
+                    x: 100, 
+                    y: 100 
+                },
+                { 
+                    cardId: "testCard2", 
+                    name: "Knight", 
+                    cardImg: "knight.png",
+                    attack: 3,
+                    health: 4,
+                    cost: 2,
+                    x: 200, 
+                    y: 100 
+                }
+                // Add other cards with similar structure
             ];
 
             // Loop through the test cards and create them dynamically
             testCards.forEach(card => {
                 const newCard = document.createElement("img");
-                newCard.src = card.src; // Set the card image
-                newCard.classList.add("card"); // Add the class for styling
-                newCard.id = card.id; // Set the card's ID
-                newCard.style.position = "absolute"; // Set absolute positioning
-                newCard.style.left = card.x + "px"; // Set X position
-                newCard.style.top = card.y + "px"; // Set Y position
+                newCard.src = `images/CardPictures/${card.cardImg}`;
+                newCard.classList.add("card");
+                newCard.id = card.cardId;
+                // Store card data as attributes
+                newCard.dataset.name = card.name;
+                newCard.dataset.attack = card.attack;
+                newCard.dataset.health = card.health;
+                newCard.dataset.cost = card.cost;
+                newCard.style.position = "absolute";
+                newCard.style.left = card.x + "px";
+                newCard.style.top = card.y + "px";
 
-                // Append the new card to the card container
                 document.getElementById("cardContainer").appendChild(newCard);
-
-                // Make the new card draggable
                 dragElement(newCard);
+
+                // Add to cardData array with complete card info
+                cardData.push({
+                    element: newCard,
+                    hitbox: -1,
+                    index: -1,
+                    owner: "me",
+                    cardInfo: {
+                        cardId: card.cardId,
+                        name: card.name,
+                        cardImg: card.cardImg,
+                        attack: card.attack,
+                        health: card.health,
+                        cost: card.cost
+                    }
+                });
             });
         }
 
