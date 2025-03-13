@@ -376,11 +376,10 @@ def waitForSecondPlayer():
 @app.route("/testGame2/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
     try:
-        data = request.get_json()  # Parse the incoming JSON data
+        data = request.get_json()
         if not data:
             return jsonify({"status": "error", "message": "Invalid data"}), 400
 
-        # Update the game state
         game_id = session.get("CurrentGame")
         if game_id is None:
             return jsonify({"status": "error", "message": "No current game"}), 400
@@ -389,7 +388,6 @@ def receiveEndTurn():
         game = globalGameList[game_id - 1]
         game_board_data = data.get("gameBoard", {})
 
-        # Convert the game board data to GameBoard object
         try:
             game.gameBoard = GameBoard(
                 p1Attack=[Card(**card) for card in game_board_data.get("p1Attack", [])],
@@ -404,11 +402,8 @@ def receiveEndTurn():
             print(f"Error updating game board: {e}")
             return jsonify({"status": "error", "message": "Failed to update game board"}), 500
 
-        # Save the updated game state 
-        # might want to save it to a database or a file
-
-        response = {"status": "success", "message": "Game state updated", "game": game.__dict__}
-        return app.response_class(response=json.dumps(response), status=200, mimetype='application/json')
+        response = {"status": "success", "message": "Game state updated", "game": asdict(game)}
+        return jsonify(response), 200
     except Exception as e:
         print(f"Error in receiveEndTurn: {e}")
         return jsonify({"status": "error", "message": "Internal server error"}), 500

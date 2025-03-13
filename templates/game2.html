@@ -314,55 +314,85 @@
             }
 
             function redrawAllCards(game) {
-            if (!runOncePerTurn) {
-                runOncePerTurn = true;
-            } else {
-                return;
-            }
+    if (!runOncePerTurn) {
+        runOncePerTurn = true;
+    } else {
+        return;
+    }
 
-            const gameBoard = game.gameBoard;
-            if (!gameBoard) {
-                console.error("gameBoard is null or undefined");
-                return;
-            }
+    const gameBoard = game.gameBoard;
+    if (!gameBoard) {
+        console.error("gameBoard is null or undefined");
+        return;
+    }
 
-            hitboxContentsData = [];
-            hitboxContentsData.push(gameBoard.p1Attack || []);
-            hitboxContentsData.push(gameBoard.p1Defence || []);
-            hitboxContentsData.push(gameBoard.p2Attack || []);
-            hitboxContentsData.push(gameBoard.p2Defence || []);
-            hitboxContentsData.push(gameBoard.p1bank || []);
-            hitboxContentsData.push(gameBoard.p2bank || []);
+    // Clear existing data
+    hitboxContents = [[], [], [], [], [], []];
+    cardData = [];
+    document.getElementById('cardContainer').innerHTML = '';
 
-            // Clear the existing cards
-            document.getElementById('cardContainer').innerHTML = '';
+    // Create arrays of card data for each section
+    const sections = [
+        {data: gameBoard.p1Attack || [], hitboxIndex: 0},
+        {data: gameBoard.p1Defence || [], hitboxIndex: 1},
+        {data: gameBoard.p2Attack || [], hitboxIndex: 2},
+        {data: gameBoard.p2Defence || [], hitboxIndex: 3},
+        {data: gameBoard.p1bank || [], hitboxIndex: 4},
+        {data: gameBoard.p2bank || [], hitboxIndex: 5}
+    ];
 
-            for (let i = 0; i < hitboxContentsData.length; i++) {
-                hitboxContents[i] = [];
-                for (let j = 0; j < hitboxContentsData[i].length; j++) {
-                    const cardData = hitboxContentsData[i][j];
-
-                    // Dynamically create the card element
-                    let cardElement = document.createElement('img');
-                    cardElement.src = `images/CardPictures/${cardData.cardImg}.png`; // Assuming the name field is the card image
-                    cardElement.classList.add('card');
-                    cardElement.id = cardData.name;  // Set the card ID based on its name
-                    cardElement.draggable = true;
-
-                    // Append the card element to the card container
-                    document.getElementById('cardContainer').appendChild(cardElement);
-
-                    // Optionally: Set the card's position based on the game state
-                    cardElement.style.left = (inPlayAreas[i].topLeft.x + j * 150) + 'px';  // Example of positioning
-                    cardElement.style.top = inPlayAreas[i].topLeft.y + 'px'; // Example of positioning
-
-                    // Add it to hitboxContents for future manipulation
-                    hitboxContents[i].push(cardElement);
-                }
-            }
-
-            console.log("hitboxContents after redrawAllCards", hitboxContents, gameBoard);
+    // Process each section
+    sections.forEach(({data, hitboxIndex}) => {
+        if (data.length > 0) {
+            const area = inPlayAreas[hitboxIndex];
+            const positions = getCardPositions(data.length);
+            
+            data.forEach((cardInfo, index) => {
+                // Create card element
+                const cardElement = document.createElement('img');
+                cardElement.src = `images/CardPictures/${cardInfo.name}.png`;
+                cardElement.classList.add('card');
+                cardElement.id = `card_${cardInfo.cardId}`;
+                
+                // Set data attributes
+                cardElement.dataset.cardId = cardInfo.cardId;
+                cardElement.dataset.name = cardInfo.name;
+                cardElement.dataset.attack = cardInfo.attack;
+                cardElement.dataset.health = cardInfo.health;
+                cardElement.dataset.cost = cardInfo.cost;
+                
+                // Position the card
+                cardElement.style.position = "absolute";
+                cardElement.style.left = (area.topLeft.x + positions[index]) + "px";
+                cardElement.style.top = area.topLeft.y + "px";
+                
+                // Add to DOM
+                document.getElementById('cardContainer').appendChild(cardElement);
+                
+                // Make draggable
+                dragElement(cardElement);
+                
+                // Add to tracking arrays
+                hitboxContents[hitboxIndex].push(cardElement);
+                cardData.push({
+                    element: cardElement,
+                    hitbox: hitboxIndex,
+                    index: index,
+                    owner: "me",
+                    cardInfo: {
+                        cardId: cardInfo.cardId,
+                        name: cardInfo.name,
+                        attack: cardInfo.attack,
+                        health: cardInfo.health,
+                        cost: cardInfo.cost
+                    }
+                });
+            });
         }
+    });
+
+    console.log("Cards redrawn:", hitboxContents);
+}
 
 
         function getCurrentGame() {
@@ -441,7 +471,7 @@
                     }
                     return {
                         cardId: cardInfo.cardId,
-                        cardImg: cardInfo.cardImg,
+                        name: cardInfo.name,
                         name: cardInfo.name,
                         attack: cardInfo.attack,
                         cost: cardInfo.cost,
@@ -496,12 +526,11 @@
         }
 
         function addTestCards() {
-            // Test card data with all required attributes
+            // Test card data with unique sequential IDs and simplified structure
             const testCards = [
                 { 
-                    cardId: "testCard1", 
-                    name: "PossessedArmour", 
-                    cardImg: "PossessedArmour.png",
+                    cardId: 1, 
+                    name: "PossessedArmour",
                     attack: 2,
                     health: 3,
                     cost: 1,
@@ -509,29 +538,29 @@
                     y: 100 
                 },
                 { 
-                    cardId: "testCard2", 
-                    name: "Knight", 
-                    cardImg: "knight.png",
+                    cardId: 2, 
+                    name: "Knight",
                     attack: 3,
                     health: 4,
                     cost: 2,
                     x: 200, 
                     y: 100 
                 }
-                // Add other cards with similar structure
             ];
 
-            // Loop through the test cards and create them dynamically
             testCards.forEach(card => {
                 const newCard = document.createElement("img");
-                newCard.src = `images/CardPictures/${card.cardImg}`;
+                newCard.src = `images/CardPictures/${card.name}.png`; // Use name for image path
                 newCard.classList.add("card");
-                newCard.id = card.cardId;
-                // Store card data as attributes
+                newCard.id = `card_${card.cardId}`; // Use numeric ID
+                
+                // Set all required data attributes
+                newCard.dataset.cardId = card.cardId;
                 newCard.dataset.name = card.name;
                 newCard.dataset.attack = card.attack;
                 newCard.dataset.health = card.health;
                 newCard.dataset.cost = card.cost;
+                
                 newCard.style.position = "absolute";
                 newCard.style.left = card.x + "px";
                 newCard.style.top = card.y + "px";
@@ -539,7 +568,6 @@
                 document.getElementById("cardContainer").appendChild(newCard);
                 dragElement(newCard);
 
-                // Add to cardData array with complete card info
                 cardData.push({
                     element: newCard,
                     hitbox: -1,
@@ -548,7 +576,6 @@
                     cardInfo: {
                         cardId: card.cardId,
                         name: card.name,
-                        cardImg: card.cardImg,
                         attack: card.attack,
                         health: card.health,
                         cost: card.cost

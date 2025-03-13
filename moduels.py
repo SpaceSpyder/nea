@@ -10,8 +10,7 @@ class Player:
 
 @dataclass
 class Card:
-    cardId: str
-    cardImg: str
+    cardId: int
     name: str
     attack: int
     cost: int
