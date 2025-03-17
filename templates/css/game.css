@@ -39,8 +39,8 @@
 }*/
 
 .cardImage {
-    width: 225px;
-    height: 150px;
+    height: 225px;
+    width: 150px;
     pointer-events: none;
     user-select: none;
     -webkit-user-drag: none;

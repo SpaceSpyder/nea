@@ -155,6 +155,15 @@
         let runOncePerTurn = false;
         noOneOnline = false
 
+// Define hitbox positions based on player
+let inPlayAreas = [
+    { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p2Defence (top)
+    { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p2Attack
+    { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p1Attack
+    { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p1Defence (bottom)
+    { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },   // p2bank
+    { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } }    // p1bank
+];
 
         function checkFullscreen() {
             const currentlyFullscreen = document.fullscreenElement !== null;
@@ -195,15 +204,6 @@
                 owner: "me"
             });
         });
-
-        let inPlayAreas = [
-            { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },
-            { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },
-            { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },
-            { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },
-            { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },
-            { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } },
-        ];
 
         let hitboxContents = [[], [], [], [], [], []];
 
@@ -322,7 +322,7 @@
                 return positionS;
             }
 
-            function redrawAllCards(game) {
+        function redrawAllCards(game) {
     if (!runOncePerTurn) {
         runOncePerTurn = true;
     } else {
@@ -340,14 +340,23 @@
     cardData = [];
     document.getElementById('cardContainer').innerHTML = '';
 
-    // Create arrays of card data for each section
-    const sections = [
-        {data: gameBoard.p1Attack || [], hitboxIndex: 0},
-        {data: gameBoard.p1Defence || [], hitboxIndex: 1},
-        {data: gameBoard.p2Attack || [], hitboxIndex: 2},
-        {data: gameBoard.p2Defence || [], hitboxIndex: 3},
-        {data: gameBoard.p1bank || [], hitboxIndex: 4},
-        {data: gameBoard.p2bank || [], hitboxIndex: 5}
+    // Create arrays of card data for each section based on player
+    const sections = username === game.player2 ? [
+        // Player 2's view (reversed)
+        {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (bottom)
+        {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
+        {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
+        {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (top)
+        {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
+        {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
+    ] : [
+        // Player 1's view (original)
+        {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (top)
+        {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
+        {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
+        {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (bottom)
+        {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
+        {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
     ];
 
     // Process each section
@@ -357,34 +366,57 @@
             const positions = getCardPositions(data.length);
             
             data.forEach((cardInfo, index) => {
-                // Create card element
-                const cardElement = document.createElement('img');
-                cardElement.src = `images/CardPictures/${cardInfo.name}.png`;
-                cardElement.classList.add('card');
-                cardElement.id = `card_${cardInfo.cardId}`;
+                // Create card div
+                const cardDiv = document.createElement("div");
+                cardDiv.classList.add("card");
+                cardDiv.id = `card_${cardInfo.cardId}`;
+                
+                // Create and add main card image
+                const cardImage = document.createElement("img");
+                cardImage.src = `images/CardPictures/${cardInfo.name}.png`;
+                cardImage.style.width = "100%";
+                cardImage.style.height = "100%";
+                cardImage.style.pointerEvents = "none";
+                cardImage.classList.add("cardImage");
+                cardDiv.appendChild(cardImage);
+                
+                // Add taken damage image
+                const takenDamageHeart = document.createElement("img");
+                takenDamageHeart.src = "images/takenDamage.png";
+                takenDamageHeart.classList.add("takenDamage");
+                cardDiv.appendChild(takenDamageHeart);
+                
+                // Add health display
+                const healthDisplay = document.createElement("p");
+                healthDisplay.classList.add("healthDisplay");
+                healthDisplay.id = `healthDisplay_${cardInfo.cardId}`;
+                healthDisplay.textContent = cardInfo.health;
+                cardDiv.appendChild(healthDisplay);
                 
                 // Set data attributes
-                cardElement.dataset.cardId = cardInfo.cardId;
-                cardElement.dataset.name = cardInfo.name;
-                cardElement.dataset.attack = cardInfo.attack;
-                cardElement.dataset.health = cardInfo.health;
-                cardElement.dataset.cost = cardInfo.cost;
-                
+                cardDiv.dataset.cardId = cardInfo.cardId;
+                cardDiv.dataset.name = cardInfo.name;
+                cardDiv.dataset.attack = cardInfo.attack;
+                cardDiv.dataset.health = cardInfo.health;
+                cardDiv.dataset.currentHealth = cardInfo.health;
+                cardDiv.dataset.cost = cardInfo.cost;
+
                 // Position the card
-                cardElement.style.position = "absolute";
-                cardElement.style.left = (area.topLeft.x + positions[index]) + "px";
-                cardElement.style.top = area.topLeft.y + "px";
+                cardDiv.style.position = "absolute";
+                cardDiv.style.left = (area.topLeft.x + positions[index]) + "px";
+                cardDiv.style.top = area.topLeft.y + "px";
+                cardDiv.style.zIndex = "1";
                 
                 // Add to DOM
-                document.getElementById('cardContainer').appendChild(cardElement);
+                document.getElementById('cardContainer').appendChild(cardDiv);
                 
                 // Make draggable
-                dragElement(cardElement);
+                dragElement(cardDiv);
                 
                 // Add to tracking arrays
-                hitboxContents[hitboxIndex].push(cardElement);
+                hitboxContents[hitboxIndex].push(cardDiv);
                 cardData.push({
-                    element: cardElement,
+                    element: cardDiv,
                     hitbox: hitboxIndex,
                     index: index,
                     owner: "me",
@@ -393,6 +425,7 @@
                         name: cardInfo.name,
                         attack: cardInfo.attack,
                         health: cardInfo.health,
+                        currentHealth: cardInfo.health,
                         cost: cardInfo.cost
                     }
                 });
@@ -422,6 +455,18 @@
                 flashMessage("You need to be logged in to play!", "error");
             }
 
+            // If player 2, reverse the board layout
+            if (username === game.player2) {
+                inPlayAreas = [
+                    { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p2Defence (bottom)
+                    { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p2Attack
+                    { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p1Attack
+                    { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p1Defence (top)
+                    { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } },   // p2bank
+                    { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } }    // p1bank
+                ];
+            }
+
             if (game.player1 == username) {
                 console.info("game: ", game);
                 if (!game.player2) {
@@ -429,6 +474,7 @@
                 } else if (game.roundNum % 2 == 0) { // Player 1's turn
                     waitForOtherPlayerTurnPrompt.style.display = "none";
                     redrawAllCards(game);
+                    calculateBoard();
                 } else { // Player 2's turn
                     waitForOtherPlayerTurnPrompt.style.display = "block";
                 }
@@ -437,6 +483,7 @@
                 if (game.roundNum % 2 != 0) { // Player 2's turn
                     waitForOtherPlayerTurnPrompt.style.display = "none";
                     redrawAllCards(game); // Add this line to redraw cards for player 2
+                    calculateBoard(); // Ensure the board is recalculated for Player 2
                 } else { // Player 1's turn
                     waitForOtherPlayerTurnPrompt.style.display = "block";
                 }
@@ -448,73 +495,75 @@
 }
 
         function sendEndTurn(hitboxContents) {
-            waitForOtherPlayerTurnPrompt.style.display = "block"; // Show the prompt
-            console.log("end turn");
+    waitForOtherPlayerTurnPrompt.style.display = "block";
+    console.log("end turn");
 
-            // Ensure hitboxContents is structured correctly
-            const formattedHitboxContents = hitboxContents.map(hitbox => {
-                return hitbox.map(element => {
-                    // Find the card data for this element
-                    const cardInfo = cardData.find(c => c.element === element)?.cardInfo;
-                    if (!cardInfo) {
-                        console.warn('No card info found for element:', element);
-                        return null;
-                    }
-                    return {
-                        cardId: cardInfo.cardId,
-                        name: cardInfo.name,
-                        attack: cardInfo.attack,
-                        cost: cardInfo.cost,
-                        health: cardInfo.health
-                    };
-                }).filter(card => card !== null); // Remove any null entries
-            });
+    // Don't calculate damage here since getCurrentGame does it
+    const formattedHitboxContents = hitboxContents.map(hitbox => {
+        return hitbox.map(element => {
+            // Find the card data for this element
+            const cardInfo = cardData.find(c => c.element === element)?.cardInfo;
+            if (!cardInfo) {
+                console.warn('No card info found for element:', element);
+                return null;
+            }
+            return {
+                cardId: cardInfo.cardId,
+                name: cardInfo.name,
+                attack: cardInfo.attack,
+                cost: cardInfo.cost,
+                health: cardInfo.currentHealth // Use currentHealth instead of health
+            };
+        }).filter(card => card !== null);
+    });
 
-            // Ensure that the formatted hitbox contents are used in the game object
-            runOncePerTurn = false;
-            fetch('testGame2/getCurrentGame')
-                .then(response => response.text())
-                .then(data => {
-                    try {
-                        const game = JSON.parse(data);  // Parse the data as JSON
-                        game.gameBoard = {
-                            p1Attack: formattedHitboxContents[0],
-                            p1Defence: formattedHitboxContents[1],
-                            p2Attack: formattedHitboxContents[2],
-                            p2Defence: formattedHitboxContents[3],
-                            p1bank: formattedHitboxContents[4],
-                            p2bank: formattedHitboxContents[5]
-                        };  // Update the game board
-                        console.log('Game:', game.gameBoard);
-                        game.roundNum += 1;  // Increment the round number
+    runOncePerTurn = false;
+    fetch('testGame2/getCurrentGame')
+        .then(response => response.text())
+        .then(data => {
+            try {
+                const game = JSON.parse(data);
+                game.gameBoard = {
+                    p2Defence: formattedHitboxContents[0],
+                    p2Attack: formattedHitboxContents[1],
+                    p1Attack: formattedHitboxContents[2],
+                    p1Defence: formattedHitboxContents[3], // Updated to use correct index for p1Defence
+                    
+                    p2bank: formattedHitboxContents[4],
+                    p1bank: formattedHitboxContents[5], // Corrected index for p1bank
+                };
+                
 
-                        // Send the updated game object back to the server
-                        return fetch('testGame2/receiveEndTurn', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(game)
-                        });
-                    } catch (error) {
-                        console.error('Error parsing JSON:', error);
-                        throw new Error('Invalid JSON response');
-                    }
-                })
-                .then(response => response.text())
-                .then(data => {
-                    try {
-                        const result = JSON.parse(data);
-                        console.log('Success:', result);  // Handle the response data
-                    } catch (error) {
-                        console.error('Error parsing JSON:', error);
-                        throw new Error('Invalid JSON response');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);  // Handle any errors
+                // Include any other necessary game updates here before sending
+                game.roundNum += 1; // Increment the round number before sending the game state
+
+                // Send the game state to the server
+                return fetch('testGame2/receiveEndTurn', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(game)
                 });
-        }
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+                throw new Error('Invalid JSON response');
+            }
+        })
+        .then(response => response.text())
+        .then(data => {
+            try {
+                const result = JSON.parse(data);
+                console.log('Success:', result);  // Handle the response data
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+                throw new Error('Invalid JSON response');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);  // Handle any errors
+        });
+}
 
         let currentCardId = 1; // Global counter for card IDs
 
@@ -598,38 +647,38 @@
 
             const cards = document.getElementsByClassName('card');
 
-            // First update health values
-            if (username === game.player2) {
-                if (game.gameBoard.p1Attack) {
-                    game.gameBoard.p1Attack.forEach((cardInfo) => {
+            // Calculate damage for both players
+            if (game.gameBoard.p1Attack && game.gameBoard.p2Attack) {
+                // P1's attack damages P2's first card
+                if (game.gameBoard.p2Attack[0]) {
+                    game.gameBoard.p1Attack.forEach(p1Card => {
+                        const p2FirstCard = game.gameBoard.p2Attack[0];
+                        p2FirstCard.health -= p1Card.attack;
+                        // Update P2's card display
                         Array.from(cards).forEach(card => {
-                            if (card.dataset.cardId == cardInfo.cardId) {
-                                card.dataset.currentHealth = cardInfo.health;
-                                const healthDisplay = card.querySelector('.healthDisplay');
-                                if (healthDisplay) {
-                                    healthDisplay.textContent = cardInfo.health;
-                                }
+                            if (card.dataset.cardId == p2FirstCard.cardId) {
+                                card.dataset.currentHealth = p2FirstCard.health;
                             }
                         });
                     });
                 }
-            } else {
-                if (game.gameBoard.p2Attack) {
-                    game.gameBoard.p2Attack.forEach((cardInfo) => {
+
+                // P2's attack damages P1's first card
+                if (game.gameBoard.p1Attack[0]) {
+                    game.gameBoard.p2Attack.forEach(p2Card => {
+                        const p1FirstCard = game.gameBoard.p1Attack[0];
+                        p1FirstCard.health -= p2Card.attack;
+                        // Update P1's card display
                         Array.from(cards).forEach(card => {
-                            if (card.dataset.cardId == cardInfo.cardId) {
-                                card.dataset.currentHealth = cardInfo.health;
-                                const healthDisplay = card.querySelector('.healthDisplay');
-                                if (healthDisplay) {
-                                    healthDisplay.textContent = cardInfo.health;
-                                }
+                            if (card.dataset.cardId == p1FirstCard.cardId) {
+                                card.dataset.currentHealth = p1FirstCard.health;
                             }
                         });
                     });
                 }
             }
 
-            // Then check all cards for damage and update visibility
+            // Update all damaged cards' displays regardless of owner
             Array.from(cards).forEach(card => {
                 const currentHealth = parseInt(card.dataset.currentHealth);
                 const defaultHealth = parseInt(card.dataset.health);
@@ -637,10 +686,12 @@
                 const healthDisplay = card.querySelector('.healthDisplay');
 
                 if (currentHealth < defaultHealth) {
-                    // Card has taken damage
                     if (takenDamage) takenDamage.style.display = 'block';
-                    if (healthDisplay) healthDisplay.style.display = 'block';
-                } 
+                    if (healthDisplay) {
+                        healthDisplay.style.display = 'block';
+                        healthDisplay.textContent = currentHealth;
+                    }
+                }
             });
         })
         .catch(error => {
@@ -652,7 +703,6 @@
 
         setInterval(checkFullscreen, 500); // Run the check every 1 second (1000 milliseconds)
         setInterval(() => console.log("card data:", cardData), 1000);
-        setInterval(calculateBoard,1000);
 
     </script>
 </body>
