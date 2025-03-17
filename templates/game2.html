@@ -109,6 +109,15 @@
     
     <div id="cardContainer"></div><!--holds all the cards-->
 
+    
+    <!--<div class="card" id="card_1" data-card-id="1" data-name="CaveMonster" data-attack="24" data-health="19" data-current-health="19" data-cost="7" style="top: 285px; left: 583px; z-index: 1;">
+        <img src="images/CardPictures/CaveMonster.png" style="width: 100%; height: 100%; pointer-events: none;" class="cardImage">
+        <img src="images/takenDamage.png" class="takenDamage">
+        <p class="healthDisplay" id="healthDisplay_1">19</p>
+    </div> -->
+
+
+
 
     <!--<div id="highl"></div>-->
 
@@ -476,6 +485,7 @@
                             p1bank: formattedHitboxContents[4],
                             p2bank: formattedHitboxContents[5]
                         };  // Update the game board
+                        console.log('Game:', game.gameBoard);
                         game.roundNum += 1;  // Increment the round number
 
                         // Send the updated game object back to the server
@@ -509,57 +519,140 @@
         let currentCardId = 1; // Global counter for card IDs
 
         function addTestCards() {
-            fetch('/getRandomCard')
-                .then(response => response.json())
-                .then(cardInfo => {
-                    if (cardInfo.error) {
-                        console.error('Error:', cardInfo.error);
-                        return;
-                    }
+    fetch('/getRandomCard')
+        .then(response => response.json())
+        .then(cardInfo => {
+            if (cardInfo.error) {
+                console.error('Error:', cardInfo.error);
+                return;
+            }
 
-                    const newCard = document.createElement("img");
-                    newCard.src = `images/CardPictures/${cardInfo.name}.png`;
-                    newCard.classList.add("card");
-                    newCard.id = `card_${currentCardId}`;
-                    
-                    // Set data attributes
-                    newCard.dataset.cardId = currentCardId;
-                    newCard.dataset.name = cardInfo.name;
-                    newCard.dataset.attack = cardInfo.attack;
-                    newCard.dataset.health = cardInfo.health;
-                    newCard.dataset.cost = cardInfo.cost;
-                    
-                    newCard.style.position = "absolute";
-                    newCard.style.left = "100px";
-                    newCard.style.top = "100px";
+            // Create card div
+            const cardDiv = document.createElement("div");
+            cardDiv.classList.add("card");
+            cardDiv.id = `card_${currentCardId}`;
+            cardDiv.style.zIndex = "1";
+            
+            // Create and add main card image
+            const cardImage = document.createElement("img");
+            cardImage.src = `images/CardPictures/${cardInfo.name}.png`;
+            cardImage.style.width = "100%";
+            cardImage.style.height = "100%";
+            cardImage.style.pointerEvents = "none";
+            cardImage.classList.add("cardImage");
+            cardDiv.appendChild(cardImage);
+            
+            // Add taken damage image
+            const takenDamageHeart = document.createElement("img");
+            takenDamageHeart.src = "images/takenDamage.png";
+            takenDamageHeart.classList.add("takenDamage");
+            cardDiv.appendChild(takenDamageHeart);
+            
+            // Add health display
+            const healthDisplay = document.createElement("p");
+            healthDisplay.classList.add("healthDisplay");
+            healthDisplay.id = `healthDisplay_${currentCardId}`;
+            healthDisplay.textContent = cardInfo.health; // Display the current health
+            cardDiv.appendChild(healthDisplay);
+            
+            // Set data attributes
+            cardDiv.dataset.cardId = currentCardId;
+            cardDiv.dataset.name = cardInfo.name;
+            cardDiv.dataset.attack = cardInfo.attack;
+            cardDiv.dataset.health = cardInfo.health;
+            cardDiv.dataset.currentHealth = cardInfo.health;
+            cardDiv.dataset.cost = cardInfo.cost;
 
-                    document.getElementById("cardContainer").appendChild(newCard);
-                    dragElement(newCard);
+            document.getElementById("cardContainer").appendChild(cardDiv);
+            dragElement(cardDiv);
 
-                    cardData.push({
-                        element: newCard,
-                        hitbox: -1,
-                        index: -1,
-                        owner: "me",
-                        cardInfo: {
-                            cardId: currentCardId++, // Increment ID after use
-                            name: cardInfo.name,
-                            attack: cardInfo.attack,
-                            health: cardInfo.health,
-                            cost: cardInfo.cost
-                        }
+            cardData.push({
+                element: cardDiv,
+                hitbox: -1,
+                index: -1,
+                owner: "me",
+                cardInfo: {
+                    cardId: currentCardId++,
+                    name: cardInfo.name,
+                    attack: cardInfo.attack,
+                    health: cardInfo.health,
+                    currentHealth: cardInfo.health,
+                    cost: cardInfo.cost
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+    function calculateBoard() {
+    fetch('testGame2/getCurrentGame')
+        .then(response => response.text())
+        .then(data => {
+            const game = JSON.parse(data);
+            console.log("board:", game.gameBoard);
+            
+            if (!game) {
+                console.error("Game object is not defined.");
+                return;
+            }
+
+            const cards = document.getElementsByClassName('card');
+
+            // First update health values
+            if (username === game.player2) {
+                if (game.gameBoard.p1Attack) {
+                    game.gameBoard.p1Attack.forEach((cardInfo) => {
+                        Array.from(cards).forEach(card => {
+                            if (card.dataset.cardId == cardInfo.cardId) {
+                                card.dataset.currentHealth = cardInfo.health;
+                                const healthDisplay = card.querySelector('.healthDisplay');
+                                if (healthDisplay) {
+                                    healthDisplay.textContent = cardInfo.health;
+                                }
+                            }
+                        });
                     });
-                })
-                .catch(error => console.error('Error:', error));
-        }
+                }
+            } else {
+                if (game.gameBoard.p2Attack) {
+                    game.gameBoard.p2Attack.forEach((cardInfo) => {
+                        Array.from(cards).forEach(card => {
+                            if (card.dataset.cardId == cardInfo.cardId) {
+                                card.dataset.currentHealth = cardInfo.health;
+                                const healthDisplay = card.querySelector('.healthDisplay');
+                                if (healthDisplay) {
+                                    healthDisplay.textContent = cardInfo.health;
+                                }
+                            }
+                        });
+                    });
+                }
+            }
+
+            // Then check all cards for damage and update visibility
+            Array.from(cards).forEach(card => {
+                const currentHealth = parseInt(card.dataset.currentHealth);
+                const defaultHealth = parseInt(card.dataset.health);
+                const takenDamage = card.querySelector('.takenDamage');
+                const healthDisplay = card.querySelector('.healthDisplay');
+
+                if (currentHealth < defaultHealth) {
+                    // Card has taken damage
+                    if (takenDamage) takenDamage.style.display = 'block';
+                    if (healthDisplay) healthDisplay.style.display = 'block';
+                } 
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
 
         
 
-        
-
-        setInterval(checkFullscreen, 2000); // Run the check every 1 second (1000 milliseconds)
-        
-        setInterval(() => console.log(cardData), 2000);
+        setInterval(checkFullscreen, 500); // Run the check every 1 second (1000 milliseconds)
+        setInterval(() => console.log("card data:", cardData), 1000);
+        setInterval(calculateBoard,1000);
 
     </script>
 </body>

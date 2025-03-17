@@ -321,6 +321,7 @@ def testGame():
         profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()  # get profile picture path from the user details
         return render_template("game.html", profile_pic=profilePicPath)
     else:
+        return render_template("game.html")
         return redirect(url_for("login"))  # Redirect response if the user is not logged in
 
 

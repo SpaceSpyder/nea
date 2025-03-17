@@ -29,3 +29,46 @@
     justify-content: space-around;
     margin-top: 20px;
 }
+
+/*.card {
+    position: absolute;
+    width: 300px;
+    height: 450px;
+    user-select: none;
+    -webkit-user-drag: none;
+}*/
+
+.cardImage {
+    width: 225px;
+    height: 150px;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.takenDamage {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 125px; /* Adjust size as needed */
+    height: 125px; /* Adjust size as needed */
+    pointer-events: none;
+    z-index: 11;
+    display: none;
+}
+
+.healthDisplay {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 12;
+    font-size: 60px;
+    text-align: center;
+    color: white;
+    text-shadow: black 0px 0px 4px;
+    display: none;
+}
