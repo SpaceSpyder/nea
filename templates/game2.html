@@ -131,25 +131,12 @@
         <button onclick="sendEndTurn(hitboxContents)" id="endTurn" class="endTurn"></button>
     </div>
     
+
     <div class="fullscreenPrompt" id="waitForOtherPlayerTurnPrompt">
-        <text>Waiting for {% incl
-    <!--
-    <div class="fullscreenPrompt" id="enterFullscreenPrompt">
-        <text>Click to enter fullscreen</text>
-    </div>
-    -->
-
-udeer</text>
+        <text>Waiting for other player</text>
     </div>
 
-    {% incl
-    <!--
-    <div class="fullscreenPrompt" id="enterFullscreenPrompt">
-        <text>Click to enter fullscreen</text>
-    </div>
-    -->
-
-ude 'htmlChildren/dropDown.html' %}
+    {% include 'htmlChildren/dropDown.html' %}
 
     <!--
     <div class="fullscreenPrompt" id="enterFullscreenPrompt">
@@ -166,7 +153,7 @@ ude 'htmlChildren/dropDown.html' %}
         let intervalId;
         const username = "{{ username }}";
         let runOncePerTurn = false;
-        noOneOnline = false
+        let noOneOnline = false;
 
 // Define hitbox positions based on player
 let inPlayAreas = [
@@ -186,16 +173,16 @@ let inPlayAreas = [
 
             // Perform actions based on the new fullscreen state
             // Perform actions based on the new fullscreen state
-        if (isFullscreen) {
+            if (isFullscreen) {
                 //enterFullscreenPrompt.style.display = "none";
                 getCurrentGame() // Call the function to check if the other player has joined every second
                 //console.log("Page is in fullscreen");
             } else {
-                //enterFullscreenPrompt.style.display = "block";
+                //enterFullscreenPrompt.style.display = "none";
                 //waitForOtherPlayerTurnPrompt.style.display = "none";
                 //console.log("Page is not in fullscreen");
             }
-        
+            }  // Close the checkFullscreen function
 
         document.addEventListener('click', function () {
             if (!document.fullscreenElement) {
@@ -208,15 +195,15 @@ let inPlayAreas = [
         let cardData = [];
         // Select all elements with class 'card' and make them draggable
      // Select all elements with class 'card' and make them draggable
-   var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
-     // Get all elements with the class 'card' and store them in an array    cards.forEach(card => {
-            cardData.push({
-                element: card,
-                hitbox: -1,
-                index: -1,
-                owner: "me"
-            });
-        };
+     var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
+    cards.forEach(card => {
+        cardData.push({
+            element: card,
+            hitbox: -1,
+            index: -1,
+            owner: "me"
+        });
+    });
 
         let hitboxContents = [[], [], [], [], [], []];
 
@@ -236,13 +223,13 @@ let inPlayAreas = [
                                 // get the mouse cursor position at startup:
                 pos3 = e.clientX;
                 pos4 = e.clientY;
-                document.onmouseup = cl// call a function whenever the cursor moves:
-oseDragElement;
+                document.onmouseup = closeDragElement;
                 // call a function whenever the cursor moves:
                 document.onmousemove = elementDrag;
                 e.target.classList.add("drag");
 
-   d // runs a function to get the new x and y for the snapropToSnap   let dropLocation = d // runs a function to get the new x and y for the snapropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+                // Get the drop location for snapping
+                let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
                 if (!dropLocation) return;
                 let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
                 
