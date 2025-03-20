@@ -26,13 +26,24 @@ from moduels import Game, GameBoard, Card # Import Game, GameBoard, and Card cla
 # pip install pillow
 # python -m flask --version
 
+# First, install Flask-Session:
+# pip install flask-session
+
+from flask_session import Session
+
 # Database setup
 DATABASE_URI = "databases/database.db"
 DEFAULT_PIC_PATH = "images/profilePics/Default.png"
 
 # Flask app setup
 app = Flask(__name__, static_folder="templates", static_url_path="") # Set the static folder to the templates directory
-app.config["SECRET_KEY"] = binascii.hexlify(os.urandom(24)) # Generate a random secret key
+app.config["SECRET_KEY"] = binascii.hexlify(os.urandom(24)).decode('utf-8') # Generate a random secret key
+
+# Configure session to use filesystem
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
 app.config["UPLOAD_FOLDER"] = os.path.join("templates", "images", "profilePics") # Set the upload folder
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)  # session timeout after 1 hour
 
@@ -336,31 +347,29 @@ def testGame2():
 def getCurrentGame():
     global globalGameCount
     global globalGameList
-    dumpGlobalState()
-    if not session.get("Username"): 
-        flash("You are not logged in!", "info")
-        return '{"status" : "NOT_LOGGED_IN", "Message":"please login before joining a game"}'  # Check if user is logged in
     username = session.get("Username")
-    if session.get("CurrentGame"): 
-        game = globalGameList[(session["CurrentGame"] - 1)]
-        return json.dumps(asdict(game));
-    session["CurrentGame"] = globalGameCount
-    
-    for game in globalGameList:
-        if game.player2 is None and username != game.player1:
-            game.player2 = username  # Assign user to player2 if slot is empty
-            dumpGlobalState()
-            session.modified = True
-            return '{"isPlayer1" : false}'  # User is player2
-            
-    globalGameCount += 1
-    newGame = Game(username, None, globalGameCount, 0, None)
-    newGame.player1 = username  # Assign user to player1
-    globalGameList.append(newGame)
-    session["CurrentGame"] = globalGameCount
-    dumpGlobalState()
-    session.modified = True
-    return '{"isPlayer1" : true}'  # User is player1
+
+    print(f"getCurrentGame called for user: {username}")
+
+    if not username:
+        print("User not logged in")
+        return '{"status" : "NOT_LOGGED_IN", "Message":"please login before joining a game"}'
+
+    if session.get("CurrentGame"):
+        game_id = session["CurrentGame"]
+        print(f"User has CurrentGame: {game_id}")
+        try:
+            game = globalGameList[(game_id - 1)]
+            print(f"Game found: {game}")
+            return json.dumps(asdict(game))
+        except IndexError:
+            print("Game not found, clearing session")
+            session.pop("CurrentGame", None)
+            session.pop("InGame", None)
+            return '{"status": "GAME_DELETED", "message": "This game has been deleted", "redirect": "/index"}'
+
+    print("User has no CurrentGame, attempting to join or create")
+    # Rest of your game joining/creation logic...
 
 
 @app.route("/testGame2/waitForSecondPlayer", methods=["GET"])
@@ -411,6 +420,74 @@ def receiveEndTurn():
 
 
 # -------- flask functions --------
+
+
+@app.route("/testGame2/deleteGame", methods=["POST"])
+def deleteGame():
+    try:
+        username = session.get("Username")
+        if not username:
+            return jsonify({"status": "NOT_LOGGED_IN", "message": "You are not logged in"})
+
+        game_id = session.get("CurrentGame")
+        if game_id is None:
+            session.pop("CurrentGame", None)
+            session.pop("InGame", None)
+            return jsonify({"status": "success", "message": "No active game to delete", "redirect": "/index"})
+
+        global globalGameList
+
+        if game_id < 1 or game_id > len(globalGameList):
+            session.pop("CurrentGame", None)
+            session.pop("InGame", None)
+            return jsonify({"status": "success", "message": "Invalid game ID cleared", "redirect": "/index"})
+
+        game = globalGameList[game_id - 1]
+
+        if username != game.player1 and username != game.player2:
+            return jsonify({"status": "error", "message": "You are not a player in this game"})
+
+        player1 = game.player1
+        player2 = game.player2
+
+        # Remove the game from the list
+        globalGameList.pop(game_id - 1)
+
+        # Adjust game IDs for all games with higher IDs
+        for i in range(game_id - 1, len(globalGameList)):
+            globalGameList[i].gameId -= 1
+
+        # Adjust the global game count
+        global globalGameCount
+        globalGameCount = len(globalGameList)
+
+        # Clear current game from THIS user's session
+        session.pop("CurrentGame", None)
+        session.pop("InGame", None)
+
+        # Clear the other player's session
+        if player1 and player1 != username:
+            for sess_key, sess_data in session.items():
+                if sess_data.get("Username") == player1:
+                    session.pop(sess_key, None)
+                    break
+
+        if player2 and player2 != username:
+            for sess_key, sess_data in session.items():
+                if sess_data.get("Username") == player2:
+                    session.pop(sess_key, None)
+                    break
+
+        dumpGlobalState()
+
+        return jsonify({
+            "status": "success",
+            "message": "Game deleted successfully",
+            "redirect": "/index"
+        })
+    except Exception as e:
+        print(f"Error in deleteGame: {e}")
+        return jsonify({"status": "error", "message": str(e)})
 
 
 @app.route("/modifyDeck/<username>", methods=["POST"])
@@ -559,6 +636,31 @@ def dumpGlobalState():
         print("Found session:" + str(session["CurrentGame"]))
     else:
         print("No session")
+
+
+def resetUserGameState(username):
+    """Reset a user's game state so they can join new games."""
+    session.pop("CurrentGame", None)
+    session.pop("InGame", None)
+    
+    # Optionally: Clean up any abandoned games where this user was a player
+    global globalGameList
+    abandoned_games = [i for i, game in enumerate(globalGameList) 
+                     if game.player1 == username or game.player2 == username]
+    
+    # Remove abandoned games (in reverse order to maintain indexes)
+    for i in reversed(abandoned_games):
+        globalGameList.pop(i)
+        
+    # Adjust game IDs
+    for i, game in enumerate(globalGameList):
+        game.gameId = i + 1
+        
+    global globalGameCount
+    globalGameCount = len(globalGameList)
+    
+    # Save state
+    dumpGlobalState()
 
 
 # -------- miscellaneous ---------
