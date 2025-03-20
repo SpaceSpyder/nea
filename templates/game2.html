@@ -10,11 +10,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-
         body {
             height: 1080px;
             margin: 0;
             padding: 0;
+            /*background-attachment: fixed;*/
             /*background-attachment: fixed;*/
             background-image: url('images/game_wood_background_001.png');
             /* background-size: cover;  Ensures the image covers the entire viewport */
@@ -42,7 +42,7 @@
             position: absolute;
             text-align: center;
             font-weight: bold;
-            border: red 1px solid;
+            /*border: red 1px solid;*/
             font-size: 112px;
             padding: 0px;
             letter-spacing: -12px;
@@ -121,22 +121,35 @@
 
     <!--<div id="highl"></div>-->
 
-    <div id="p1Mana" class="values" style="right: 43px;top: 909px;">00</div>
+    <div id="p1Mana" class="values" style="right: 43px;top: 920px;">00</div>
     <div id="p2Mana" class="values" style="right: 43px;top: 52px;">00</div>
-    <div id="p1Health" class="values" style="right: 203px;top: 909px;">00</div>
+    <div id="p1Health" class="values" style="right: 203px;top: 920px;">00</div>
     <div id="p2Health" class="values" style="right: 203px;top: 52px;">00</div>
 
     <div class="endTurn">
         <div class="endTurnText">End Turn</div>
         <button onclick="sendEndTurn(hitboxContents)" id="endTurn" class="endTurn"></button>
     </div>
-
     
     <div class="fullscreenPrompt" id="waitForOtherPlayerTurnPrompt">
-        <text>Waiting for other player</text>
+        <text>Waiting for {% incl
+    <!--
+    <div class="fullscreenPrompt" id="enterFullscreenPrompt">
+        <text>Click to enter fullscreen</text>
+    </div>
+    -->
+
+udeer</text>
     </div>
 
-    {% include 'htmlChildren/dropDown.html' %}
+    {% incl
+    <!--
+    <div class="fullscreenPrompt" id="enterFullscreenPrompt">
+        <text>Click to enter fullscreen</text>
+    </div>
+    -->
+
+ude 'htmlChildren/dropDown.html' %}
 
     <!--
     <div class="fullscreenPrompt" id="enterFullscreenPrompt">
@@ -172,7 +185,8 @@ let inPlayAreas = [
             isFullscreen = currentlyFullscreen;
 
             // Perform actions based on the new fullscreen state
-            if (isFullscreen) {
+            // Perform actions based on the new fullscreen state
+        if (isFullscreen) {
                 //enterFullscreenPrompt.style.display = "none";
                 getCurrentGame() // Call the function to check if the other player has joined every second
                 //console.log("Page is in fullscreen");
@@ -181,9 +195,7 @@ let inPlayAreas = [
                 //waitForOtherPlayerTurnPrompt.style.display = "none";
                 //console.log("Page is not in fullscreen");
             }
-        }
-
-
+        
 
         document.addEventListener('click', function () {
             if (!document.fullscreenElement) {
@@ -195,15 +207,16 @@ let inPlayAreas = [
 
         let cardData = [];
         // Select all elements with class 'card' and make them draggable
-        var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
-        cards.forEach(card => {
+     // Select all elements with class 'card' and make them draggable
+   var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
+     // Get all elements with the class 'card' and store them in an array    cards.forEach(card => {
             cardData.push({
                 element: card,
                 hitbox: -1,
                 index: -1,
                 owner: "me"
             });
-        });
+        };
 
         let hitboxContents = [[], [], [], [], [], []];
 
@@ -220,15 +233,16 @@ let inPlayAreas = [
             function dragMouseDown(e) {
                 e = e || window.event;
                 e.preventDefault();
-                // get the mouse cursor position at startup:
+                                // get the mouse cursor position at startup:
                 pos3 = e.clientX;
                 pos4 = e.clientY;
-                document.onmouseup = closeDragElement;
+                document.onmouseup = cl// call a function whenever the cursor moves:
+oseDragElement;
                 // call a function whenever the cursor moves:
                 document.onmousemove = elementDrag;
                 e.target.classList.add("drag");
 
-                let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+   d // runs a function to get the new x and y for the snapropToSnap   let dropLocation = d // runs a function to get the new x and y for the snapropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
                 if (!dropLocation) return;
                 let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
                 
@@ -242,11 +256,13 @@ let inPlayAreas = [
             }
 
             function elementDrag(e) {
-                e = e || window.event;
+                e = e ||  window.event;
                 e.preventDefault();
                 // calculate the new cursor position:
-                pos1 = pos3 - e.clientX;
+              // set the element's new position:
+  pos1 = pos3 - e.clientX;
                 pos2 = pos4 - e.clientY;
+// set the element's new position:
                 pos3 = e.clientX;
                 pos4 = e.clientY;
                 // set the element's new position:
@@ -310,6 +326,7 @@ let inPlayAreas = [
             }
             return null;
         }
+
         function getCardPositions(numberOfCards) {
                 // total width / numofcards+1
                 // foreach card half width and minus from the bit above
@@ -318,7 +335,6 @@ let inPlayAreas = [
                 for (let i = 0; i < numberOfCards; i++) {
                     positionS.push((offset * (i + 1)) - 150);
                 }
-
                 return positionS;
             }
 
@@ -437,62 +453,69 @@ let inPlayAreas = [
 }
 
 
-        function getCurrentGame() {
-    if (!username) {
-        swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'not logged in'
-        });
-        document.location.href = "/login";
+    function getCurrentGame() {
+        if (!username) {
+            swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'not logged in'
+            });
+            document.location.href = "/login";
+        }
+        fetch('testGame2/getCurrentGame')
+            .then(response => response.text())
+            .then(data => {
+                const game = JSON.parse(data);
+                if (game.status && game.status=="NOT_LOGGED_IN") {
+                    document.location.href = "/login";
+                    flashMessage("You need to be logged in to play!", "error");
+                }
+
+                // If player 2, reverse the board layout
+                if (username === game.player2) {
+                    inPlayAreas = [
+                        { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p2Defence (bottom)
+                        { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p2Attack
+                        { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p1Attack
+                        { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p1Defence (top)
+                        { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } },   // p2bank
+                        { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } }    // p1bank
+                    ];
+                }
+
+                if (!game.player2 && game.player1 == username) {
+                    const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
+                    promptText.textContent = "Waiting for another player to join";
+                    waitForOtherPlayerTurnPrompt.style.display = "block";
+                }
+            
+
+                if (game.player1 == username) {
+                    console.info("game: ", game);
+                    if (!game.player2) {
+                        // Waiting for player 2
+                    } else if (game.roundNum % 2 == 0) { // Player 1's turn
+                        waitForOtherPlayerTurnPrompt.style.display = "none";
+                        redrawAllCards(game);
+                        calculateBoard();
+                    } else { // Player 2's turn
+                        waitForOtherPlayerTurnPrompt.style.display = "block";
+                    }
+                } else if (game.player2 == username) { // Added explicit check for player 2
+                    console.info("game: ", game);
+                    if (game.roundNum % 2 != 0) { // Player 2's turn
+                        waitForOtherPlayerTurnPrompt.style.display = "none";
+                        redrawAllCards(game); // Add this line to redraw cards for player 2
+                        calculateBoard(); // Ensure the board is recalculated for Player 2
+                    } else { // Player 1's turn
+                        waitForOtherPlayerTurnPrompt.style.display = "block";
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
-    fetch('testGame2/getCurrentGame')
-        .then(response => response.text())
-        .then(data => {
-            const game = JSON.parse(data);
-            if (game.status && game.status=="NOT_LOGGED_IN") {
-                document.location.href = "/login";
-                flashMessage("You need to be logged in to play!", "error");
-            }
-
-            // If player 2, reverse the board layout
-            if (username === game.player2) {
-                inPlayAreas = [
-                    { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p2Defence (bottom)
-                    { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p2Attack
-                    { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p1Attack
-                    { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p1Defence (top)
-                    { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } },   // p2bank
-                    { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } }    // p1bank
-                ];
-            }
-
-            if (game.player1 == username) {
-                console.info("game: ", game);
-                if (!game.player2) {
-                    // Waiting for player 2
-                } else if (game.roundNum % 2 == 0) { // Player 1's turn
-                    waitForOtherPlayerTurnPrompt.style.display = "none";
-                    redrawAllCards(game);
-                    calculateBoard();
-                } else { // Player 2's turn
-                    waitForOtherPlayerTurnPrompt.style.display = "block";
-                }
-            } else if (game.player2 == username) { // Added explicit check for player 2
-                console.info("game: ", game);
-                if (game.roundNum % 2 != 0) { // Player 2's turn
-                    waitForOtherPlayerTurnPrompt.style.display = "none";
-                    redrawAllCards(game); // Add this line to redraw cards for player 2
-                    calculateBoard(); // Ensure the board is recalculated for Player 2
-                } else { // Player 1's turn
-                    waitForOtherPlayerTurnPrompt.style.display = "block";
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-}
 
         function sendEndTurn(hitboxContents) {
     waitForOtherPlayerTurnPrompt.style.display = "block";
@@ -703,7 +726,6 @@ let inPlayAreas = [
 
         setInterval(checkFullscreen, 500); // Run the check every 1 second (1000 milliseconds)
         setInterval(() => console.log("card data:", cardData), 1000);
-
     </script>
 </body>
 </html>
