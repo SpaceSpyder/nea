@@ -339,47 +339,48 @@ def testGame():
 def testGame2():
     username = session.get("Username")
     return render_template("game2.html", username=username)
-
-
+ 
+ 
 @app.route("/testGame2/getCurrentGame", methods=["GET"])
 def getCurrentGame():
-    global globalGameCount
-    global globalGameList
-    username = session.get("Username")
-
-    print(f"getCurrentGame called for user: {username}")
-
-    if not username:
-        print("User not logged in")
-        return '{"status" : "NOT_LOGGED_IN", "Message":"please login before joining a game"}'
-
-    if session.get("CurrentGame"):
-        game_id = session["CurrentGame"]
-        print(f"User has CurrentGame: {game_id}")
-        try:
-            game = globalGameList[(game_id - 1)]
-            print(f"Game found: {game}")
+        global globalGameCount
+        global globalGameList
+        dumpGlobalState()
+        if not session.get("Username"): 
+            flash("You are not logged in!", "info")
+            return '{"status" : "NOT_LOGGED_IN", "Message":"please login before joining a game"}'  # Check if user is logged in
+        username = session.get("Username")
+        if session.get("CurrentGame"): 
+            game = globalGameList[(session["CurrentGame"] - 1)]
             return json.dumps(asdict(game))
-        except IndexError:
-            print("Game not found, clearing session")
-            session.pop("CurrentGame", None)
-            session.pop("InGame", None)
-            return '{"status": "GAME_DELETED", "message": "This game has been deleted", "redirect": "/index"}'
-
-    print("User has no CurrentGame, attempting to join or create")
-    # Rest of your game joining/creation logic...
-
-
+        session["CurrentGame"] = globalGameCount
+ 
+        for game in globalGameList:
+            if game.player2 is None and username != game.player1:
+                game.player2 = username  # Assign user to player2 if slot is empty
+                dumpGlobalState()
+                session.modified = True
+                return '{"isPlayer1" : false}'  # User is player2
+ 
+        globalGameCount += 1
+        newGame = Game(username, None, globalGameCount, 0, None)
+        newGame.player1 = username  # Assign user to player1
+        globalGameList.append(newGame)
+        session["CurrentGame"] = globalGameCount
+        dumpGlobalState()
+        session.modified = True
+        return '{"isPlayer1" : true}'  # User is player1
+ 
+ 
 @app.route("/testGame2/waitForSecondPlayer", methods=["GET"])
 def waitForSecondPlayer():
     global globalGameCount
     global globalGameList
     dumpGlobalState()
     if session.get("CurrentGame"): 
-        game = globalGameList[(session["CurrentGame"] - 1)]
-        return '{"player2Found" :"' + str(game.player2) + '"}'  # Return player2's username
+         game = globalGameList[(session["CurrentGame"] - 1)]
+         return '{"player2Found" :"' + str(game.player2) + '"}'  # Return player2's username
     return '{"ERROR no current game" : true}'  # Error if no current game
-
 
 @app.route("/testGame2/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
