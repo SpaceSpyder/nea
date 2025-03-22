@@ -29,7 +29,6 @@ from moduels import Game, GameBoard, Card # Import Game, GameBoard, and Card cla
 # First, install Flask-Session:
 # pip install flask-session
 
-from flask_session import Session
 
 # Database setup
 DATABASE_URI = "databases/database.db"
@@ -42,7 +41,6 @@ app.config["SECRET_KEY"] = binascii.hexlify(os.urandom(24)).decode('utf-8') # Ge
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
 
 app.config["UPLOAD_FOLDER"] = os.path.join("templates", "images", "profilePics") # Set the upload folder
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)  # session timeout after 1 hour
