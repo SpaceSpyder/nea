@@ -386,6 +386,7 @@ def waitForSecondPlayer():
 
 @app.route("/testGame2/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
+    print("Received end turn")
     try:
         data = request.get_json()
         if not data:
@@ -408,6 +409,7 @@ def receiveEndTurn():
                 p1bank=[Card(**card) for card in game_board_data.get("p1bank", [])],
                 p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
             )
+            runAttackSequence(game)
             game.roundNum = data.get("roundNum", game.roundNum)
         except Exception as e:
             print(f"Error updating game board: {e}")
@@ -688,8 +690,31 @@ def temp():
     return render_template("template.html", profile_pic=profilePicPath, username=username)
 
 
-# -------- flask --------
 
+def runAttackSequence(game):
+    # check whose turn it is
+    player1sTurn = game.roundNum % 2 == 0
+    # each attack card attacks in sequence the other players attack cards and then defence cards and then the player
+    # while there are attack cards
+    # take the next attacking card and try and attack the other player's attack cards, defence cards and then the player
+    attacking_cards = game.gameBoard.p1Attack if player1sTurn else game.gameBoard.p2Attack
+    defending_attack_cards = game.gameBoard.p2Attack if player1sTurn else game.gameBoard.p1Attack
+    defending_defence_cards = game.gameBoard.p2Defence if player1sTurn else game.gameBoard.p1Defence
+    defending_attack_card_index = 0
+    defending_defence_card_index = 0
+    for i in range(0, len(attacking_cards)):
+
+        if defending_attack_card_index < len(defending_attack_cards):
+            defending_attack_cards[defending_attack_card_index].health -= attacking_cards[i].attack 
+            defending_attack_card_index += 1
+        elif defending_defence_card_index < len(defending_defence_cards):
+            defending_defence_cards[defending_defence_card_index].health -= attacking_cards[i].attack
+            defending_defence_card_index += 1
+        #else:
+            # placeholder for attacking the player
+
+
+# -------- flask --------
 
 if __name__ == "__main__":
     globalGameCount = -1

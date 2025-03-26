@@ -698,9 +698,10 @@ let inPlayAreas = [
             }
 
             const cards = document.getElementsByClassName('card');
-            let needsUpdate = false;
+            let needsUpdate = true;
             
             // Calculate damage for both players
+            /*
             if (game.gameBoard.p1Attack && game.gameBoard.p2Attack) {
                 // P1's attack damages P2's first card
                 if (game.gameBoard.p2Attack[0]) {
@@ -762,8 +763,18 @@ let inPlayAreas = [
                     .then(response => response.json())
                     .catch(error => console.error('Error updating game state:', error));
                 }
-            }
-
+            }*/
+            if (needsUpdate) {
+                    fetch('testGame2/receiveEndTurn', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(game)
+                    })
+                    .then(response => response.json())
+                    .catch(error => console.error('Error updating game state:', error));
+                }
             // Update displays for all cards
             Array.from(cards).forEach(card => {
                 const currentHealth = parseInt(card.dataset.currentHealth);
@@ -849,8 +860,8 @@ function deleteCurrentGame() {
 
         
 
-        setInterval(checkFullscreen, 500); // Run the check every 1 second (1000 milliseconds)
-        setInterval(() => console.log("card data:", cardData), 1000);
+        setInterval(checkFullscreen, 3000); // Run the check every 1 second (1000 milliseconds)
+        setInterval(() => console.log("card data:", cardData), 5000);
     </script>
 </body>
 </html>
