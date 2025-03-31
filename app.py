@@ -701,13 +701,22 @@ def runAttackSequence(game):
     defending_attack_card_index = 0
     defending_defence_card_index = 0
     for i in range(0, len(attacking_cards)):
-
         if defending_attack_card_index < len(defending_attack_cards):
             defending_attack_cards[defending_attack_card_index].health -= attacking_cards[i].attack 
             defending_attack_card_index += 1
         elif defending_defence_card_index < len(defending_defence_cards):
             defending_defence_cards[defending_defence_card_index].health -= attacking_cards[i].attack
             defending_defence_card_index += 1
+#else:
+    # placeholder for attacking the player
+        #else:
+            # placeholder for attacking the player
+        #else:
+            # placeholder for attacking the player
+#else:
+    # placeholder for attacking the player
+        #else:
+            # placeholder for attacking the player
         #else:
             # placeholder for attacking the player
 

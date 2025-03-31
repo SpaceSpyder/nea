@@ -15,6 +15,7 @@ class Card:
     attack: int
     cost: int
     health: int
+    spawnHealth: int
 
 @dataclass
 class GameBoard:

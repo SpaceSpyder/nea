@@ -400,8 +400,8 @@ let inPlayAreas = [
                 cardDiv.dataset.cardId = cardInfo.cardId;
                 cardDiv.dataset.name = cardInfo.name;
                 cardDiv.dataset.attack = cardInfo.attack;
+                cardDiv.dataset.spawnHealth = cardInfo.health;
                 cardDiv.dataset.health = cardInfo.health;
-                cardDiv.dataset.currentHealth = cardInfo.health;
                 cardDiv.dataset.cost = cardInfo.cost;
 
                 // Position the card
@@ -428,7 +428,7 @@ let inPlayAreas = [
                         name: cardInfo.name,
                         attack: cardInfo.attack,
                         health: cardInfo.health,
-                        currentHealth: cardInfo.health,
+                        spawnHealth: cardInfo.spawnHealth, // SPAWNHEALTH AND HEALTH ARE COMPLETELY DDIFFERENT
                         cost: cardInfo.cost
                     }
                 });
@@ -564,7 +564,7 @@ let inPlayAreas = [
                     name: cardInfo.name,
                     attack: cardInfo.attack,
                     cost: cardInfo.cost,
-                    health: cardInfo.currentHealth,
+                    health: cardInfo.health,
                     spawnHealth: cardInfo.spawnHealth
                 };
 
@@ -577,6 +577,17 @@ let inPlayAreas = [
             .then(data => {
                 try {
                     const game = JSON.parse(data);
+                    if (!game.gameBoard) {
+                        console.log("Creating empty gameBoard");
+                        game.gameBoard = {
+                            p2Defence: [],
+                            p2Attack: [],
+                            p1Attack: [],
+                            p1Defence: [],
+                            p2bank: [],
+                            p1bank: []
+                        };
+                    }
                     game.gameBoard = {
                         p2Defence: formattedHitboxContents[0],
                         p2Attack: formattedHitboxContents[1],
@@ -662,8 +673,8 @@ let inPlayAreas = [
             cardDiv.dataset.cardId = currentCardId;
             cardDiv.dataset.name = cardInfo.name;
             cardDiv.dataset.attack = cardInfo.attack;
-            cardDiv.dataset.spawnHealth = cardInfo.health;
-            cardDiv.dataset.currentHealth = cardInfo.health;
+            cardDiv.dataset.spawnHealth = cardInfo.spawnHealth;
+            cardDiv.dataset.health = cardInfo.health;
             cardDiv.dataset.cost = cardInfo.cost;
 
             document.getElementById("cardContainer").appendChild(cardDiv);
@@ -678,8 +689,8 @@ let inPlayAreas = [
                     cardId: currentCardId++,
                     name: cardInfo.name,
                     attack: cardInfo.attack,
+                    spawnHealth: cardInfo.health, //makes sure the spawn health is the same as the health only at card creation
                     health: cardInfo.health,
-                    currentHealth: cardInfo.health,
                     cost: cardInfo.cost
                 }
             });
@@ -719,7 +730,7 @@ let inPlayAreas = [
                     // Update P2's card display (only once)
                     Array.from(cards).forEach(card => {
                         if (card.dataset.cardId == p2FirstCard.cardId) {
-                            card.dataset.currentHealth = p2FirstCard.health;
+                            card.dataset.health = p2FirstCard.health;
                         }
                     });
                     
@@ -743,7 +754,7 @@ let inPlayAreas = [
                     // Update P1's card display
                     Array.from(cards).forEach(card => {
                         if (card.dataset.cardId == p1FirstCard.cardId) {
-                            card.dataset.currentHealth = p1FirstCard.health;
+                            card.dataset.health = p1FirstCard.health;
                         }
                     });
                     
@@ -779,12 +790,17 @@ let inPlayAreas = [
                 }
             // Update displays for all cards
             Array.from(cards).forEach(card => {
-                const currentHealth = parseInt(card.dataset.currentHealth);
+                const health = parseInt(card.dataset.health);
                 const spawnHealth = parseInt(card.dataset.spawnHealth);
                 const takenDamage = card.querySelector('.takenDamage');
                 const healthDisplay = card.querySelector('.healthDisplay');
 
-                if (currentHealth <= 0) {
+                // Always update the health display with current value regardless of damage state
+                if (healthDisplay) {
+                    healthDisplay.textContent = health;
+                }
+
+                if (health <= 0) {
                     // Remove dead card
                     card.remove();
                     
@@ -803,13 +819,14 @@ let inPlayAreas = [
                             redrawCards(hitbox.length, hitboxNum, inPlayAreas[hitboxNum].topLeft.x);
                         }
                     });
-                } else if (currentHealth < spawnHealth) {
+                } else if (health < spawnHealth) {
                     // Show damage indicators
                     if (takenDamage) takenDamage.style.display = 'block';
-                    if (healthDisplay) {
-                        healthDisplay.style.display = 'block';
-                        healthDisplay.textContent = currentHealth;
-                    }
+                    if (healthDisplay) healthDisplay.style.display = 'block'; // Add this line
+                } else {
+                    // No damage, hide the damage indicator
+                    if (takenDamage) takenDamage.style.display = 'none';
+                    if (healthDisplay) healthDisplay.style.display = 'none'; // Add this line
                 }
             });
         })
