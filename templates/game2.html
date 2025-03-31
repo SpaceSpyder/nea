@@ -564,8 +564,10 @@ let inPlayAreas = [
                     name: cardInfo.name,
                     attack: cardInfo.attack,
                     cost: cardInfo.cost,
-                    health: cardInfo.currentHealth // Use currentHealth instead of health
+                    health: cardInfo.currentHealth,
+                    spawnHealth: cardInfo.spawnHealth
                 };
+
             }).filter(card => card !== null);
         });
 
@@ -660,7 +662,7 @@ let inPlayAreas = [
             cardDiv.dataset.cardId = currentCardId;
             cardDiv.dataset.name = cardInfo.name;
             cardDiv.dataset.attack = cardInfo.attack;
-            cardDiv.dataset.health = cardInfo.health;
+            cardDiv.dataset.spawnHealth = cardInfo.health;
             cardDiv.dataset.currentHealth = cardInfo.health;
             cardDiv.dataset.cost = cardInfo.cost;
 
@@ -778,7 +780,7 @@ let inPlayAreas = [
             // Update displays for all cards
             Array.from(cards).forEach(card => {
                 const currentHealth = parseInt(card.dataset.currentHealth);
-                const defaultHealth = parseInt(card.dataset.health);
+                const spawnHealth = parseInt(card.dataset.spawnHealth);
                 const takenDamage = card.querySelector('.takenDamage');
                 const healthDisplay = card.querySelector('.healthDisplay');
 
@@ -793,13 +795,15 @@ let inPlayAreas = [
                         cardData.splice(cardIndex, 1);
                     }
                     
-                    hitboxContents.forEach(hitbox => {
+                    hitboxContents.forEach((hitbox, hitboxNum) => {
                         const index = hitbox.findIndex(c => c.dataset.cardId == cardId);
                         if (index !== -1) {
                             hitbox.splice(index, 1);
+                            // Add this line to redraw the remaining cards in the hitbox
+                            redrawCards(hitbox.length, hitboxNum, inPlayAreas[hitboxNum].topLeft.x);
                         }
                     });
-                } else if (currentHealth < defaultHealth) {
+                } else if (currentHealth < spawnHealth) {
                     // Show damage indicators
                     if (takenDamage) takenDamage.style.display = 'block';
                     if (healthDisplay) {
