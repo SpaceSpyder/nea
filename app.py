@@ -357,14 +357,16 @@ def getCurrentGame():
  
         for game in globalGameList:
             if game.player2 is None and username != game.player1:
-                game.player2 = username  # Assign user to player2 if slot is empty
+                game.player2.username = username  # Assign user to player2 if slot is empty
                 dumpGlobalState()
                 session.modified = True
+                game.player1.health = 10
+                game.player2.health = 10
                 return '{"isPlayer1" : false}'  # User is player2
  
         globalGameCount += 1
         newGame = Game(username, None, globalGameCount, 0, None)
-        newGame.player1 = username  # Assign user to player1
+        newGame.player1.username = username  # Assign user to player1
         globalGameList.append(newGame)
         session["CurrentGame"] = globalGameCount
         dumpGlobalState()
@@ -572,56 +574,56 @@ def getRandomCard():
 
 # -------- network testing ---------
 
-@app.route("/networkTest", methods=["GET"])
-def networkTest():
-    return render_template("networkTest.html")
+# @app.route("/networkTest", methods=["GET"])
+# def networkTest():
+#     return render_template("networkTest.html")
 
 
-@app.route("/networkTest/getGame", methods=["GET"])
-def getGame():
-    global globalGameCount
-    global globalGameList
-    dumpGlobalState()
-    if not session.get("Username"): 
-        return '{"status" : "please login before joining a game"}'  # Check if user is logged in
-    username = session.get("Username")
-    if session.get("CurrentGame"): 
-        return '{"status" : "in game"}'  # Check if user is already in a game
-    session["CurrentGame"] = globalGameCount
+# @app.route("/networkTest/getGame", methods=["GET"])
+# def getGame():
+#     global globalGameCount
+#     global globalGameList
+#     dumpGlobalState()
+#     if not session.get("Username"): 
+#         return '{"status" : "please login before joining a game"}'  # Check if user is logged in
+#     username = session.get("Username")
+#     if session.get("CurrentGame"): 
+#         return '{"status" : "in game"}'  # Check if user is already in a game
+#     session["CurrentGame"] = globalGameCount
     
-    for game in globalGameList:
-        if game.player2 is None:
-            game.player2 = username  # Assign user to player2 if slot is empty
-            dumpGlobalState()
-            session.modified = True
-            return '{"isPlayer1" : false}'  # User is player2
+#     for game in globalGameList:
+#         if game.player2 is None:
+#             game.player2 = username  # Assign user to player2 if slot is empty
+#             dumpGlobalState()
+#             session.modified = True
+#             return '{"isPlayer1" : false}'  # User is player2
             
-    globalGameCount += 1
-    newGame = Game(username, None, globalGameCount, 0, None)
-    newGame.player1 = username  # Assign user to player1
-    globalGameList.append(newGame)
-    session["CurrentGame"] = globalGameCount
-    dumpGlobalState()
-    session.modified = True
-    return '{"isPlayer1" : true}'  # User is player1
+#     globalGameCount += 1
+#     newGame = Game(username, None, globalGameCount, 0, None)
+#     newGame.player1.username = username  # Assign user to player1
+#     globalGameList.append(newGame)
+#     session["CurrentGame"] = globalGameCount
+#     dumpGlobalState()
+#     session.modified = True
+#     return '{"isPlayer1" : true}'  # User is player1
 
 
-@app.route("/networkTest/waitForPlayer2", methods=["GET"])
-def waitForPlayer2():
-    global globalGameCount
-    global globalGameList
-    dumpGlobalState()
-    if session.get("CurrentGame"): 
-        game = globalGameList[(session["CurrentGame"] - 1)]
-        return '{"player2Found" :"' + str(game.player2) + '"}'  # Return player2's username
-    return '{"ERROR no current game" : true}'  # Error if no current game
+# @app.route("/networkTest/waitForPlayer2", methods=["GET"])
+# def waitForPlayer2():
+#     global globalGameCount
+#     global globalGameList
+#     dumpGlobalState()
+#     if session.get("CurrentGame"): 
+#         game = globalGameList[(session["CurrentGame"] - 1)]
+#         return '{"player2Found" :"' + str(game.player2) + '"}'  # Return player2's username
+#     return '{"ERROR no current game" : true}'  # Error if no current game
 
 
-@app.route("/networkTest/login", methods=["POST"])
-def networkLogin():
-    username = request.form["Username"]
-    session["Username"] = username  # Store username in session
-    return '{"status" : "logged in"}'
+# @app.route("/networkTest/login", methods=["POST"])
+# def networkLogin():
+#     username = request.form["Username"]
+#     session["Username"] = username  # Store username in session
+#     return '{"status" : "logged in"}'
 
 
 
