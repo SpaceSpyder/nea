@@ -400,7 +400,7 @@ let inPlayAreas = [
                 cardDiv.dataset.cardId = cardInfo.cardId;
                 cardDiv.dataset.name = cardInfo.name;
                 cardDiv.dataset.attack = cardInfo.attack;
-                cardDiv.dataset.spawnHealth = cardInfo.health;
+                cardDiv.dataset.spawnHealth = cardInfo.spawnHealth;
                 cardDiv.dataset.health = cardInfo.health;
                 cardDiv.dataset.cost = cardInfo.cost;
 
@@ -630,8 +630,7 @@ let inPlayAreas = [
             });
     }
 
-        let currentCardId = 1; // Global counter for card IDs
-
+    
         function addTestCards() {
     fetch('/getRandomCard')
         .then(response => response.json())
@@ -644,7 +643,7 @@ let inPlayAreas = [
             // Create card div
             const cardDiv = document.createElement("div");
             cardDiv.classList.add("card");
-            cardDiv.id = `card_${currentCardId}`;
+            cardDiv.id = `card_${GetCurrentCardId()}`;
             cardDiv.style.zIndex = "1";
             
             // Create and add main card image
@@ -665,12 +664,12 @@ let inPlayAreas = [
             // Add health display
             const healthDisplay = document.createElement("p");
             healthDisplay.classList.add("healthDisplay");
-            healthDisplay.id = `healthDisplay_${currentCardId}`;
+            healthDisplay.id = `healthDisplay_${GetCurrentCardId()}`;
             healthDisplay.textContent = cardInfo.health; // Display the current health
             cardDiv.appendChild(healthDisplay);
             
             // Set data attributes
-            cardDiv.dataset.cardId = currentCardId;
+            cardDiv.dataset.cardId = GetCurrentCardId();
             cardDiv.dataset.name = cardInfo.name;
             cardDiv.dataset.attack = cardInfo.attack;
             cardDiv.dataset.spawnHealth = cardInfo.spawnHealth;
@@ -686,7 +685,7 @@ let inPlayAreas = [
                 index: -1,
                 owner: "me",
                 cardInfo: {
-                    cardId: currentCardId++,
+                    cardId: GetCurrentCardId()+1,
                     name: cardInfo.name,
                     attack: cardInfo.attack,
                     spawnHealth: cardInfo.health, //makes sure the spawn health is the same as the health only at card creation
@@ -698,6 +697,9 @@ let inPlayAreas = [
         .catch(error => console.error('Error:', error));
 }
 
+function GetCurrentCardId() {
+    return cardData.length+1;
+}
     function calculateBoard() {
     fetch('testGame2/getCurrentGame')
         .then(response => response.text())
@@ -881,7 +883,7 @@ function deleteCurrentGame() {
 
         
 
-        setInterval(checkFullscreen, 3000); // Run the check every 1 second (1000 milliseconds)
+        setInterval(checkFullscreen, 1500); // Run the check every 1.5 seconds (1500 milliseconds)
         setInterval(() => console.log("card data:", cardData), 5000);
     </script>
 </body>
