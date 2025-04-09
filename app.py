@@ -337,6 +337,8 @@ def testGame():
 
 @app.route("/testGame2", methods=["GET"])
 def testGame2():
+    if not session.get("Username"):  # check if the user is logged in
+        return redirect(url_for("login"))
     username = session.get("Username")
     return render_template("game2.html", username=username)
  
@@ -346,9 +348,6 @@ def getCurrentGame():
         global globalGameCount
         global globalGameList
         dumpGlobalState()
-        if not session.get("Username"): 
-            flash("You are not logged in!", "info")
-            return '{"status" : "NOT_LOGGED_IN", "Message":"please login before joining a game"}'  # Check if user is logged in
         username = session.get("Username")
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
@@ -711,6 +710,11 @@ def runAttackSequence(game):
         elif defending_defence_card_index < len(defending_defence_cards):
             defending_defence_cards[defending_defence_card_index].health -= attacking_cards[i].attack
             defending_defence_card_index += 1
+        else:
+            if player1sTurn:
+                game.player2.health -= attacking_cards[i].attack
+            else:
+                game.player1.health -= attacking_cards[i].attack
 #else:
     # placeholder for attacking the player
         #else:

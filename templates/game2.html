@@ -178,7 +178,7 @@ let inPlayAreas = [
                 getCurrentGame() // Call the function to check if the other player has joined every second
                 //console.log("Page is in fullscreen");
             } else {
-                //enterFullscreenPrompt.style.display = "none";
+                //enter.styFullscreenPromptle.display = "none";
                 //waitForOtherPlayerTurnPrompt.style.display = "none";
                 //console.log("Page is not in fullscreen");
             }
@@ -440,7 +440,7 @@ let inPlayAreas = [
 }
 
 
-    function getCurrentGame() {
+function getCurrentGame() {
     if (gameDeleted) return; // Skip if game is deleted
     
     const previousRoundNum = window.currentRoundNum || 0;
@@ -475,15 +475,18 @@ let inPlayAreas = [
                     });
                     return; // Critical: Stop processing
                 }
+
+
                 
                 // Save current round number to detect changes
                 window.currentRoundNum = game.roundNum;
                 const roundChanged = previousRoundNum !== game.roundNum;
                 
-                if (game.status && game.status=="NOT_LOGGED_IN") {
-                    document.location.href = "/login";
-                    flashMessage("You need to be logged in to play!", "error");
+                if (!game.gameBoard) {
+                 return;
                 }
+               
+// some crap
 
                 // If player 2, reverse the board layout
                 if (game.player2 && username === game.player2.username) {
@@ -498,7 +501,7 @@ let inPlayAreas = [
                 }
                 
                 // Handle waiting for another player
-                if (!game.player2 && game.player1.username == username) {
+                if (!game.player2.username && game.player1.username == username) {
                     const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
                     promptText.textContent = "Waiting for another player to join";
                     waitForOtherPlayerTurnPrompt.style.display = "block";
@@ -537,6 +540,18 @@ let inPlayAreas = [
                     } else { // Player 1's turn
                         waitForOtherPlayerTurnPrompt.style.display = "block";
                     }
+                }
+                 // update health and mana display of players
+                 if (game.player1.username == username)  { //if player1 is the current user
+                    document.getElementById("userHealth").textContent = game.player1.health;
+                    document.getElementById("opponentHealth").textContent = game.player2.health;
+                    document.getElementById("userMana").textContent = game.player1.mana;
+                    document.getElementById("opponentMana").textContent = game.player2.mana;
+                } else { //if player2 is the current user
+                    document.getElementById("userHealth").textContent = game.player2.health;
+                    document.getElementById("opponentHealth").textContent = game.player1.health;
+                    document.getElementById("userMana").textContent = game.player2.mana;
+                    document.getElementById("opponentMana").textContent = game.player1.mana;
                 }
             } catch (e) {
                 console.error("Error parsing game data:", e);
@@ -884,7 +899,7 @@ function deleteCurrentGame() {
         
 
         setInterval(checkFullscreen, 1500); // Run the check every 1.5 seconds (1500 milliseconds)
-        setInterval(() => console.log("card data:", cardData), 5000);
+        setInterval(() => console.log("card data:", cardData), 2000);
     </script>
 </body>
 </html>
