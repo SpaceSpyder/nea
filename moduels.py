@@ -5,8 +5,8 @@ from typing import List
 class Player:
     username: str
     isPlayer1: bool
-    health: int
-    mana: int
+    health: int = field(default=10)
+    mana: int = field(default=5)
 
 @dataclass
 class Card:

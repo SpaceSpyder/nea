@@ -20,7 +20,7 @@ from templates.scripts.utils import ( # python functions from utils.py
     insertUser,
 )
 from dataclasses import dataclass, asdict
-from moduels import Game, GameBoard, Card # Import Game, GameBoard, and Card classes
+from moduels import Game, GameBoard, Card, Player # Import Game, GameBoard, and Card classes
 
 # pip install flask werkzeug
 # pip install pillow
@@ -356,8 +356,9 @@ def getCurrentGame():
         session["CurrentGame"] = globalGameCount
  
         for game in globalGameList:
-            if game.player2 is None and username != game.player1:
-                game.player2.username = username  # Assign user to player2 if slot is empty
+            if game.player2 is None and username != game.player1.username:
+                player2 = Player(username, False, 10, 5)  # Create player2 with default health and mana
+                game.player2 = player2  # Assign user to player2 if slot is empty
                 dumpGlobalState()
                 session.modified = True
                 game.player1.health = 10
@@ -365,7 +366,8 @@ def getCurrentGame():
                 return '{"isPlayer1" : false}'  # User is player2
  
         globalGameCount += 1
-        newGame = Game(username, None, globalGameCount, 0, None)
+        player1 = Player(username, True, 10, 5)  # Create player1 with default health and mana
+        newGame = Game(player1, None, globalGameCount, 0, None)
         newGame.player1.username = username  # Assign user to player1
         globalGameList.append(newGame)
         session["CurrentGame"] = globalGameCount
@@ -381,7 +383,7 @@ def waitForSecondPlayer():
     dumpGlobalState()
     if session.get("CurrentGame"): 
          game = globalGameList[(session["CurrentGame"] - 1)]
-         return '{"player2Found" :"' + str(game.player2) + '"}'  # Return player2's username
+         return '{"player2Found" :"' + str(game.player2.username) + '"}'  # Return player2's username
     return '{"ERROR no current game" : true}'  # Error if no current game
 
 @app.route("/testGame2/receiveEndTurn", methods=["POST"])
@@ -447,7 +449,7 @@ def deleteGame():
 
         game = globalGameList[game_id - 1]
 
-        if username != game.player1 and username != game.player2:
+        if username != game.player1.username and username != game.player2.username:
             return jsonify({"status": "error", "message": "You are not a player in this game"})
 
         player1 = game.player1
@@ -469,15 +471,15 @@ def deleteGame():
         session.pop("InGame", None)
 
         # Clear the other player's session
-        if player1 and player1 != username:
+        if player1 and player1.username != username:
             for sess_key, sess_data in session.items():
                 if sess_data.get("Username") == player1:
                     session.pop(sess_key, None)
                     break
 
-        if player2 and player2 != username:
+        if player2 and player2.username != username:
             for sess_key, sess_data in session.items():
-                if sess_data.get("Username") == player2:
+                if sess_data.get("Username") == player2.username:
                     session.pop(sess_key, None)
                     break
 
@@ -574,9 +576,9 @@ def getRandomCard():
 
 # -------- network testing ---------
 
-# @app.route("/networkTest", methods=["GET"])
-# def networkTest():
-#     return render_template("networkTest.html")
+@app.route("/networkTest", methods=["GET"])
+def networkTest():
+    return render_template("networkTest.html")
 
 
 # @app.route("/networkTest/getGame", methods=["GET"])
@@ -649,7 +651,7 @@ def resetUserGameState(username):
     # Optionally: Clean up any abandoned games where this user was a player
     global globalGameList
     abandoned_games = [i for i, game in enumerate(globalGameList) 
-                     if game.player1 == username or game.player2 == username]
+                     if game.player1.username == username or game.player2.username == username]
     
     # Remove abandoned games (in reverse order to maintain indexes)
     for i in reversed(abandoned_games):

@@ -344,7 +344,7 @@ let inPlayAreas = [
     document.getElementById('cardContainer').innerHTML = '';
 
     // Create arrays of card data for each section based on player
-    const sections = username === game.player2 ? [
+    const sections = username === game.player2.username ? [
         // Player 2's view (reversed)
         {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (bottom)
         {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
@@ -486,7 +486,7 @@ let inPlayAreas = [
                 }
 
                 // If player 2, reverse the board layout
-                if (username === game.player2) {
+                if (game.player2 && username === game.player2.username) {
                     inPlayAreas = [
                         { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p2Defence (bottom)
                         { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p2Attack
@@ -498,7 +498,7 @@ let inPlayAreas = [
                 }
                 
                 // Handle waiting for another player
-                if (!game.player2 && game.player1 == username) {
+                if (!game.player2 && game.player1.username == username) {
                     const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
                     promptText.textContent = "Waiting for another player to join";
                     waitForOtherPlayerTurnPrompt.style.display = "block";
@@ -507,7 +507,7 @@ let inPlayAreas = [
                 }
                 
                 // Handle turns for player 1
-                if (game.player1 == username) {
+                if (game.player1.username == username) {
                     console.info("game: ", game);
                     if (game.player2) { // Only proceed if player 2 has joined
                         if (game.roundNum % 2 == 0) { // Player 1's turn
@@ -524,7 +524,7 @@ let inPlayAreas = [
                     }
                 } 
                 // Handle turns for player 2
-                else if (game.player2 == username) {
+                else if (game.player2.username == username) {
                     console.info("game: ", game);
                     if (game.roundNum % 2 != 0) { // Player 2's turn
                         waitForOtherPlayerTurnPrompt.style.display = "none";

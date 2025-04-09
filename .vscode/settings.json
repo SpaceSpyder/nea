@@ -33,5 +33,6 @@
     // Enable parameter hints
     "editor.parameterHints.enabled": true,
 
-    "files.autoSave": "afterDelay"
+    "files.autoSave": "afterDelay",
+    "github.copilot.nextEditSuggestions.enabled": false
 }
