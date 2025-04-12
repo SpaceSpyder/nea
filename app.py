@@ -351,10 +351,11 @@ def getCurrentGame():
         username = session.get("Username")
         if username == None:  # check if the user is logged in
             return '{"status" : "GAME_DELETED"}'  # Check if user is logged in
+        
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
             return json.dumps(asdict(game))
-        session["CurrentGame"] = globalGameCount
+        #session["CurrentGame"] = globalGameCount
  
         for game in globalGameList:
             if (game.player2 == None ) and username != game.player1.username:
@@ -369,7 +370,6 @@ def getCurrentGame():
         globalGameCount += 1
         player1 = Player(username, True, 10, 5)  # Create player1 with default health and mana
         newGame = Game(player1, None, globalGameCount, 0, None)
-        newGame.player1.username = username  # Assign user to player1
         globalGameList.append(newGame)
         session["CurrentGame"] = globalGameCount
         dumpGlobalState()
@@ -734,6 +734,6 @@ def runAttackSequence(game):
 # -------- flask --------
 
 if __name__ == "__main__":
-    globalGameCount = -1
+    globalGameCount = 0
     globalGameList = []
     app.run(debug=True)
