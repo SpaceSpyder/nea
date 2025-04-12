@@ -349,13 +349,15 @@ def getCurrentGame():
         global globalGameList
         dumpGlobalState()
         username = session.get("Username")
+        if username == None:  # check if the user is logged in
+            return '{"status" : "GAME_DELETED"}'  # Check if user is logged in
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
             return json.dumps(asdict(game))
         session["CurrentGame"] = globalGameCount
  
         for game in globalGameList:
-            if game.player2 is None and username != game.player1.username:
+            if (game.player2 == None ) and username != game.player1.username:
                 player2 = Player(username, False, 10, 5)  # Create player2 with default health and mana
                 game.player2 = player2  # Assign user to player2 if slot is empty
                 dumpGlobalState()
