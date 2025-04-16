@@ -471,7 +471,7 @@ function getCurrentGame() {
                         text: game.message,
                         confirmButtonText: 'OK'
                     }).then(() => {
-                        window.location.href = game.redirect || "/index";
+                        window.location.href = game.redirect || "/login";
                     });
                     return; // Critical: Stop processing
                 }
@@ -508,6 +508,7 @@ function getCurrentGame() {
                     // never return here
                     // continue processing
                 }
+
                 
                 // Handle turns for player 1
                 if (game.player1.username == username) {
@@ -523,6 +524,8 @@ function getCurrentGame() {
                             }
                         } else { // Player 2's turn
                             waitForOtherPlayerTurnPrompt.style.display = "block";
+                            document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
+                            
                         }
                     }
                 } 
@@ -539,6 +542,7 @@ function getCurrentGame() {
                         }
                     } else { // Player 1's turn
                         waitForOtherPlayerTurnPrompt.style.display = "block";
+                        document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
                     }
                 }
                  // update health and mana display of players
@@ -562,8 +566,8 @@ function getCurrentGame() {
     function sendEndTurn(hitboxContents) {
         waitForOtherPlayerTurnPrompt.style.display = "block";
         console.log("end turn");
-        const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
-        promptText.textContent = "Waiting for other player to complete their turn";
+        //const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
+        document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
 
         // Don't calculate damage here since getCurrentGame does it
         const formattedHitboxContents = hitboxContents.map(hitbox => {
@@ -873,7 +877,7 @@ function deleteCurrentGame() {
                     confirmButtonText: 'OK'
                 }).then(() => {
                     // Force redirect immediately
-                    window.location.href = data.redirect || "/index";
+                    window.location.href = data.redirect || "/login";
                 });
             } else {
                 gameDeleted = false; // Reset flag if deletion failed

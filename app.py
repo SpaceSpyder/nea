@@ -362,6 +362,7 @@ def getCurrentGame():
                 player2 = Player(username, False, 10, 5)  # Create player2 with default health and mana
                 game.player2 = player2  # Assign user to player2 if slot is empty
                 dumpGlobalState()
+                session["CurrentGame"] = globalGameCount
                 session.modified = True
                 game.player1.health = 10
                 game.player2.health = 10
@@ -369,7 +370,7 @@ def getCurrentGame():
  
         globalGameCount += 1
         player1 = Player(username, True, 10, 5)  # Create player1 with default health and mana
-        newGame = Game(player1, None, globalGameCount, 0, None)
+        newGame = Game(player1, None, globalGameCount, 0)
         globalGameList.append(newGame)
         session["CurrentGame"] = globalGameCount
         dumpGlobalState()
