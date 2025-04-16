@@ -351,9 +351,13 @@ def getCurrentGame():
         username = session.get("Username")
         if username == None:  # check if the user is logged in
             return '{"status" : "GAME_DELETED"}'  # Check if user is logged in
-        
+
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
+            if (game and game.player1 and game.player2 and game.player1.health <= 0 or game.player2.health <= 0):
+                # End the game if either player is dead
+                winner = "player1" if game.player2.health <= 0 else "player2"
+                return jsonify({"status": "game_over", "winner": winner, "currentGame":game}), 200  
             return json.dumps(asdict(game))
         #session["CurrentGame"] = globalGameCount
  
@@ -414,6 +418,7 @@ def receiveEndTurn():
                 p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
             )
             runAttackSequence(game)
+            
             game.roundNum = data.get("roundNum", game.roundNum)
         except Exception as e:
             print(f"Error updating game board: {e}")

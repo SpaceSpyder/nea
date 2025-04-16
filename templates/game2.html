@@ -474,8 +474,46 @@ function getCurrentGame() {
                         window.location.href = game.redirect || "/login";
                     });
                     return; // Critical: Stop processing
+                } else if (game.status === "game_over"){
+                    if (game.currentGame.player1.username == username){
+                        if (game.winner == "player1"){
+                            swal.fire({
+                                icon: 'success',
+                                title: 'Game Over',
+                                text: 'You won!',
+                                confirmButtonText: 'OK'
+                            });
+                        } else {
+                            swal.fire({
+                                icon: 'error',
+                                title: 'Game Over',
+                                text: 'You lost!',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                        return;
+
+                    } else if (game.currentGame.player2.username == username){
+                        if (game.winner == "player2"){
+                            swal.fire({
+                                icon: 'success',
+                                title: 'Game Over',
+                                text: 'You won!',
+                                confirmButtonText: 'OK'
+                            });
+                        } else {
+                            swal.fire({
+                                icon: 'error',
+                                title: 'Game Over',
+                                text: 'You lost!',  
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                        return;
+                    }
                 }
 
+                
 
                 
                 // Save current round number to detect changes
