@@ -20,6 +20,8 @@ from templates.scripts.utils import ( # python functions from utils.py
     checkUsername,
     calculateRank,
     insertUser,
+    increaseGamesWon,
+    increaseGamesPlayed,
 )
 from dataclasses import dataclass, asdict
 from moduels import Game, GameBoard, Card, Player # Import Game, GameBoard, and Card classes
@@ -85,7 +87,6 @@ def login():
         cursor = conn.cursor()  # Creates a cursor object to interact with the database
         cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))  # Executes a query to find the user by username
         result = cursor.fetchone()  # Fetches the first result from the query
-
         if result and check_password_hash(result[2], password):  # Checks if the user exists and the password is correct
             getUserDetailsByUsername(username)  # Retrieves user details by username
             flash("Logged in successfully!", "success")  # Displays a success message
@@ -379,14 +380,22 @@ def getCurrentGame():
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
             if (game and game.player1 and game.player2 and game.player1.health <= 0 or game.player2.health <= 0):
+                
                 # End the game if either player is dead
                 winner = "player1" if game.player2.health <= 0 else "player2"
+                winnerUsername = game.player1.username if winner == "player1" else game.player2.username
+                if username == winnerUsername:
+                    increaseGamesWon(username)  # Increases the number of games won for the user
+
                 if (username):
                     game.player1.status = "dead"
+
                 else:
                     game.player2.status = "dead"
                 game.status = "game_over"
                 session.pop("CurrentGame")
+                increaseGamesPlayed(username)  # Increases the number of games won for the user
+
                 if (game.player1.status == "dead" and game.player2.status == "dead"):
                     globalGameList.remove(game)  # Remove the game from the list
                     globalGameCount -= 1

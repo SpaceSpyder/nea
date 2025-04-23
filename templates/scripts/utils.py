@@ -25,19 +25,20 @@ def closeDb(exception):
 
 
 def getUserIdByUsername(username):
+    conn = getDb()
     try:
-        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
         userId = cursor.fetchone()
         return userId[0] if userId else None
-    finally:
-        cursor.close()
+    except Exception as e:
+        print(f"Error getting user ID: {str(e)}")
+        return None
 
 
 def getUserDetailsByUsername(username):
+    conn = getDb()
     try:
-        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
         user = cursor.fetchone()
@@ -48,30 +49,32 @@ def getUserDetailsByUsername(username):
             session["DateCreated"] = user[4]
             session["ProfilePicture"] = user[5]
             session["CurrentDeck"] = user[6]
-    finally:
-        cursor.close()
+    except Exception as e:
+        print(f"Error getting user details: {str(e)}")
 
 
 def getDecksForUser(username):
+    conn = getDb()
     try:
-        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username,))
         decks = cursor.fetchall()
         return decks
-    finally:
-        cursor.close()
+    except Exception as e:
+        print(f"Error getting decks: {str(e)}")
+        return []
 
 
 def getDeckForUser(username, deckId):
+    conn = getDb()
     try:
-        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Decks WHERE Owner = ? AND UserDeckNum = ?", (username, deckId))
         deck = cursor.fetchone()
         return deck
-    finally:
-        cursor.close()
+    except Exception as e:
+        print(f"Error getting deck: {str(e)}")
+        return None
 
 
 def getProfilePicPath(username=None):
@@ -80,18 +83,19 @@ def getProfilePicPath(username=None):
         return defaultPicPath
 
     # Retrieve the profile picture for the specific user from the database
-    with getDb() as conn:
+    conn = getDb()
+    try:
         cursor = conn.cursor()
-        try:
-            cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,))
-            result = cursor.fetchone()
-        finally:
-            cursor.close()
-
-    # Return the user's profile picture path if it exists, otherwise return the default path
-    if result and result[0]:
-        return url_for('static', filename=f'images/profilePics/{result[0]}')
-    else:
+        cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,))
+        result = cursor.fetchone()
+        
+        # Return the user's profile picture path if it exists, otherwise return the default path
+        if result and result[0]:
+            return url_for('static', filename=f'images/profilePics/{result[0]}')
+        else:
+            return defaultPicPath
+    except Exception as e:
+        print(f"Error getting profile picture: {str(e)}")
         return defaultPicPath
 
 
@@ -105,8 +109,8 @@ def checkUsername():
 def calculateRank(username):
     # Calculate the rank of the user based on the number of wins they have
     conn = getDb()
-    cursor = conn.cursor()
     try:
+        cursor = conn.cursor()
         # Get the number of wins for the current user
         cursor.execute("SELECT COUNT(*) FROM UserStats WHERE GamesWon = ?", (username,))
         userWins = cursor.fetchone()[0]
@@ -121,17 +125,16 @@ def calculateRank(username):
         rank = cursor.fetchone()[0] + 1  # Rank is the count of users with more wins + 1
 
         return rank
-    finally:
-        cursor.close()
+    except Exception as e:
+        print(f"Error calculating rank: {str(e)}")
+        return 0
+
 
 def GetDeckNames(username):
     deckNames = []
-
+    conn = getDb()
     try:
-        # Connect to the database
-        conn = sqlite3.connect("databases/database.db")
         cursor = conn.cursor()
-
         # Query to retrieve DeckName for the specified user
         cursor.execute("""
             SELECT DeckName
@@ -143,16 +146,11 @@ def GetDeckNames(username):
         rows = cursor.fetchall()
         for row in rows:
             deckNames.append(row[0])  # row[0] corresponds to the DeckName column
-
-    except sqlite3.Error as e:
-        print(f"Error: {str(e)}")
+    except Exception as e:
+        print(f"Error getting deck names: {str(e)}")
     
-    finally:
-        # Close the cursor and connection
-        cursor.close()
-        conn.close()
-
     return deckNames
+
 
 def insertUser(username, password, email):
     defaultDeck = "Knight, DarkKnight, Boar, Cavalry, PossessedArmour, Dragon, BabyDragon, Monk, Wizard, Orc, Skeleton, Medusa, StrongMan, FireSpirit, Stranger, SwampMonster, Executioner, IceSpirit, Harpy, Bear"
@@ -181,9 +179,38 @@ def insertUser(username, password, email):
                 INSERT INTO Decks (Owner, UserDeckNum, Deck)
                 VALUES (?, 1, ?)
             """, (username, defaultDeck))
-
     except sqlite3.OperationalError as e:
-        print(f"Error: {e}")  # Error handling
+        print(f"Error inserting user: {e}")
         raise
-    finally:
-        conn.close()  # Close the database connection
+
+
+def increaseGamesPlayed(username):
+    userId = getUserIdByUsername(username)
+    conn = getDb()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE UserStats 
+                SET GamesPlayed = GamesPlayed + 1
+                WHERE UserId = ?
+            """, (userId,))
+    except sqlite3.OperationalError as e:
+        print(f"Error increasing games played: {e}")
+        raise
+
+
+def increaseGamesWon(username):
+    userId = getUserIdByUsername(username)
+    conn = getDb()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE UserStats 
+                SET GamesWon = GamesWon + 1
+                WHERE UserId = ?
+            """, (userId,))
+    except sqlite3.OperationalError as e:
+        print(f"Error increasing games won: {e}")
+        raise
