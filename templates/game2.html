@@ -154,7 +154,8 @@
         const username = "{{ username }}";
         let runOncePerTurn = false;
         let noOneOnline = false;
-        let gameDeleted = false; // Add this at the top with your other globals
+        let gameDeleted = false; 
+        let gameEnded = false; 
 
 // Define hitbox positions based on player
 let inPlayAreas = [
@@ -174,7 +175,7 @@ let inPlayAreas = [
 
             // Perform actions based on the new fullscreen state
             // Perform actions based on the new fullscreen state
-            if (isFullscreen && !gameDeleted) { // Only call if game isn't deleted
+            if (isFullscreen && !gameDeleted && !gameEnded) { // Only call if game isn't deleted
                 getCurrentGame() // Call the function to check if the other player has joined every second
                 //console.log("Page is in fullscreen");
             } else {
@@ -475,6 +476,7 @@ function getCurrentGame() {
                     });
                     return; // Critical: Stop processing
                 } else if (game.status === "game_over"){
+                    gameEnded = true; // Set flag to prevent further calls
                     if (game.currentGame.player1.username == username){
                         if (game.winner == "player1"){
                             swal.fire({
@@ -482,6 +484,10 @@ function getCurrentGame() {
                                 title: 'Game Over',
                                 text: 'You won!',
                                 confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/"; // Redirect to game page
+                                }
                             });
                         } else {
                             swal.fire({
@@ -489,6 +495,10 @@ function getCurrentGame() {
                                 title: 'Game Over',
                                 text: 'You lost!',
                                 confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/"; // Redirect to game page
+                                }
                             });
                         }
                         return;
@@ -500,6 +510,10 @@ function getCurrentGame() {
                                 title: 'Game Over',
                                 text: 'You won!',
                                 confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/"; // Redirect to game page
+                                }
                             });
                         } else {
                             swal.fire({
@@ -507,6 +521,10 @@ function getCurrentGame() {
                                 title: 'Game Over',
                                 text: 'You lost!',  
                                 confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/"; // Redirect to game page
+                                }
                             });
                         }
                         return;
@@ -772,70 +790,7 @@ function GetCurrentCardId() {
             const cards = document.getElementsByClassName('card');
             let needsUpdate = true;
             
-            // Calculate damage for both players
-            /*
-            if (game.gameBoard.p1Attack && game.gameBoard.p2Attack) {
-                // P1's attack damages P2's first card
-                if (game.gameBoard.p2Attack[0]) {
-                    let totalDamage = 0;
-                    game.gameBoard.p1Attack.forEach(p1Card => {
-                        totalDamage += p1Card.attack;
-                    });
-                    
-                    const p2FirstCard = game.gameBoard.p2Attack[0];
-                    p2FirstCard.health -= totalDamage;
-                    needsUpdate = true;
-
-                    // Update P2's card display (only once)
-                    Array.from(cards).forEach(card => {
-                        if (card.dataset.cardId == p2FirstCard.cardId) {
-                            card.dataset.health = p2FirstCard.health;
-                        }
-                    });
-                    
-                    // Remove if dead
-                    if (p2FirstCard.health <= 0) {
-                        game.gameBoard.p2Attack.shift(); // Remove the first card
-                    }
-                }
-
-                // P2's attack damages P1's first card
-                if (game.gameBoard.p1Attack[0]) {
-                    let totalDamage = 0;
-                    game.gameBoard.p2Attack.forEach(p2Card => {
-                        totalDamage += p2Card.attack;
-                    });
-                    
-                    const p1FirstCard = game.gameBoard.p1Attack[0];
-                    p1FirstCard.health -= totalDamage;
-                    needsUpdate = true;
-                    
-                    // Update P1's card display
-                    Array.from(cards).forEach(card => {
-                        if (card.dataset.cardId == p1FirstCard.cardId) {
-                            card.dataset.health = p1FirstCard.health;
-                        }
-                    });
-                    
-                    // Remove if dead
-                    if (p1FirstCard.health <= 0) {
-                        game.gameBoard.p1Attack.shift(); // Remove the first card
-                    }
-                }
-                
-                // Send updated game state if needed
-                if (needsUpdate) {
-                    fetch('testGame2/receiveEndTurn', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(game)
-                    })
-                    .then(response => response.json())
-                    .catch(error => console.error('Error updating game state:', error));
-                }
-            }*/
+            
             if (needsUpdate) {
                     fetch('testGame2/receiveEndTurn', {
                         method: 'POST',

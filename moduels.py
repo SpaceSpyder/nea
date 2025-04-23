@@ -7,6 +7,7 @@ class Player:
     isPlayer1: bool
     health: int = field(default=10)
     mana: int = field(default=5)
+    status: str = field(default="alive")
 
 @dataclass
 class Card:

@@ -6,8 +6,10 @@ import sqlite3 # for database operations
 import os  # Import os module
 import json
 import binascii # for unique session key
+import uuid
+from PIL import Image
 
-from templates.scripts.cropImage import (cropAndShowImage)
+from templates.scripts.cropImage import (cropImage)
 from templates.scripts.clearImages import (removeUnusedImages)
 from templates.scripts.utils import ( # python functions from utils.py
     getProfilePicPath,
@@ -271,52 +273,74 @@ def showDecks(username):
 def change_profile_pic():
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
+
     profilePicPath = getProfilePicPath(session["Username"])  # get pfp
     username = session["Username"]  # get username
 
-    # Handle the POST request to change the profile picture
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+    def allowed_file(filename):
+        return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
     if request.method == "POST":
-        # Check if the profile picture file is in the request
         if "profile_pic" not in request.files:
             flash("No file part", "error")
             return redirect(url_for("profile"))
 
         file = request.files["profile_pic"]
-        # Check if a file is selected
+
         if file.filename == "":
             flash("No selected file", "error")
             return redirect(url_for("profile"))
 
-        if file:
-            # Secure the filename and set the upload folder
-            filename = secure_filename(file.filename)
-            app.config["UPLOAD_FOLDER"] = os.path.join("templates", "images", "profilePics")
-
-            # Create the upload folder if it doesn't exist
-            if not os.path.exists(app.config["UPLOAD_FOLDER"]):
-                os.makedirs(app.config["UPLOAD_FOLDER"])
-
-            # Save the file to the upload folder
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-
-            # Crop and save the uploaded image
-            cropAndShowImage(filename)
-
-            # Update the user's profile picture in the database
-            conn = getDb()
-            cursor = conn.cursor()
+        if file and allowed_file(file.filename):
             try:
+                # Validate image content
+                img = Image.open(file.stream)
+                img.verify()  # Confirm it's a real image
+                file.stream.seek(0)  # Reset stream pointer after verification
+            except Exception:
+                flash("Uploaded file is not a valid image.", "error")
+                return redirect(url_for("profile"))
+
+            # Generate a unique filename
+            file_ext = file.filename.rsplit(".", 1)[1].lower()
+            filename = f"{username}_{uuid.uuid4().hex}.{file_ext}"
+
+            upload_folder = os.path.join("templates", "images", "profilePics")
+            app.config["UPLOAD_FOLDER"] = upload_folder
+
+            try:
+                # Save the file
+                file_path = os.path.join(upload_folder, filename)
+                file.save(file_path)
+
+                # Crop and save the uploaded image
+                cropImage(filename)
+
+                # Update the database
+                conn = getDb()
+                cursor = conn.cursor()
                 cursor.execute("UPDATE Users SET ProfilePicture = ? WHERE Username = ?", (filename, username))
                 conn.commit()
                 flash("Profile picture updated successfully!", "success")
-            except sqlite3.Error as e:
-                conn.rollback()
-                flash(f"Error: {str(e)}", "error")
+            except Exception as e:
+                if 'conn' in locals():
+                    conn.rollback()
+                flash(f"An error occurred: {str(e)}", "error")
+            finally:
+                if 'cursor' in locals():
+                    cursor.close()
+                if 'conn' in locals():
+                    conn.close()
 
             removeUnusedImages()
             return redirect(url_for("profile"))
 
-    # Render the change profile picture template
+        else:
+            flash("Unsupported file type", "error")
+            return redirect(url_for("change_profile_pic"))
+
     return render_template("changePfp.html", profile_pic=profilePicPath)
 
 
@@ -357,9 +381,17 @@ def getCurrentGame():
             if (game and game.player1 and game.player2 and game.player1.health <= 0 or game.player2.health <= 0):
                 # End the game if either player is dead
                 winner = "player1" if game.player2.health <= 0 else "player2"
+                if (username):
+                    game.player1.status = "dead"
+                else:
+                    game.player2.status = "dead"
+                game.status = "game_over"
+                session.pop("CurrentGame")
+                if (game.player1.status == "dead" and game.player2.status == "dead"):
+                    globalGameList.remove(game)  # Remove the game from the list
+                    globalGameCount -= 1
                 return jsonify({"status": "game_over", "winner": winner, "currentGame":game}), 200  
             return json.dumps(asdict(game))
-        #session["CurrentGame"] = globalGameCount
  
         for game in globalGameList:
             if (game.player2 == None ) and username != game.player1.username:

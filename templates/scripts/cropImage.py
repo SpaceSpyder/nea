@@ -1,6 +1,6 @@
 from PIL import Image # pip install pillow
 
-def cropAndShowImage(image):
+def cropImage(image):
     imagePath = "D:\\nea\\templates\\images\\profilePics\\" + image  # Correct path
     cropSize = 250  # Size of the square crop
 
