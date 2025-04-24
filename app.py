@@ -373,8 +373,8 @@ def getCurrentGame():
         global globalGameList
         dumpGlobalState()
         username = session.get("Username")
-        if username == None:  # check if the user is logged in
-            return '{"status" : "GAME_DELETED"}'  # Check if user is logged in
+        #if username == None:
+         #   return '{"status" : "GAME_DELETED"}' 
 
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
