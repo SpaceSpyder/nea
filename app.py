@@ -356,7 +356,6 @@ def testGame():
         return render_template("game.html", profile_pic=profilePicPath)
     else:
         return render_template("game.html")
-        return redirect(url_for("login"))  # Redirect response if the user is not logged in
 
 
 
@@ -629,54 +628,6 @@ def networkTest():
     return render_template("networkTest.html")
 
 
-# @app.route("/networkTest/getGame", methods=["GET"])
-# def getGame():
-#     global globalGameCount
-#     global globalGameList
-#     dumpGlobalState()
-#     if not session.get("Username"): 
-#         return '{"status" : "please login before joining a game"}'  # Check if user is logged in
-#     username = session.get("Username")
-#     if session.get("CurrentGame"): 
-#         return '{"status" : "in game"}'  # Check if user is already in a game
-#     session["CurrentGame"] = globalGameCount
-    
-#     for game in globalGameList:
-#         if game.player2 is None:
-#             game.player2 = username  # Assign user to player2 if slot is empty
-#             dumpGlobalState()
-#             session.modified = True
-#             return '{"isPlayer1" : false}'  # User is player2
-            
-#     globalGameCount += 1
-#     newGame = Game(username, None, globalGameCount, 0, None)
-#     newGame.player1.username = username  # Assign user to player1
-#     globalGameList.append(newGame)
-#     session["CurrentGame"] = globalGameCount
-#     dumpGlobalState()
-#     session.modified = True
-#     return '{"isPlayer1" : true}'  # User is player1
-
-
-# @app.route("/networkTest/waitForPlayer2", methods=["GET"])
-# def waitForPlayer2():
-#     global globalGameCount
-#     global globalGameList
-#     dumpGlobalState()
-#     if session.get("CurrentGame"): 
-#         game = globalGameList[(session["CurrentGame"] - 1)]
-#         return '{"player2Found" :"' + str(game.player2) + '"}'  # Return player2's username
-#     return '{"ERROR no current game" : true}'  # Error if no current game
-
-
-# @app.route("/networkTest/login", methods=["POST"])
-# def networkLogin():
-#     username = request.form["Username"]
-#     session["Username"] = username  # Store username in session
-#     return '{"status" : "logged in"}'
-
-
-
 def dumpGlobalState():
     global globalGameList
     global globalGameCount
@@ -718,6 +669,9 @@ def resetUserGameState(username):
 
 # -------- miscellaneous ---------
 
+@app.route("/getProfilePicPath/<username>")
+def profile_pic_path(username):
+    return getProfilePicPath(username)
 
 @app.route("/test_alert/<alert_type>", methods=["POST"]) # test alert
 def test_alert(alert_type):
@@ -764,18 +718,6 @@ def runAttackSequence(game):
                 game.player2.health -= attacking_cards[i].attack
             else:
                 game.player1.health -= attacking_cards[i].attack
-#else:
-    # placeholder for attacking the player
-        #else:
-            # placeholder for attacking the player
-        #else:
-            # placeholder for attacking the player
-#else:
-    # placeholder for attacking the player
-        #else:
-            # placeholder for attacking the player
-        #else:
-            # placeholder for attacking the player
 
 
 # -------- flask --------

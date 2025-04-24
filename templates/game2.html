@@ -102,6 +102,12 @@
             text-shadow: 0px 0px 20px black, 0px 0px 5px black, 0px 0px 20px black; /* Shadow added here */
         }
 
+        .opponent-profile-pic {
+            position: absolute;
+            right: 43px;
+            top: 20px;
+        }
+
     </style>
 </head>
 
@@ -109,22 +115,24 @@
     
     <div id="cardContainer"></div><!--holds all the cards-->
 
-    
-    <!--<div class="card" id="card_1" data-card-id="1" data-name="CaveMonster" data-attack="24" data-health="19" data-current-health="19" data-cost="7" style="top: 285px; left: 583px; z-index: 1;">
-        <img src="images/CardPictures/CaveMonster.png" style="width: 100%; height: 100%; pointer-events: none;" class="cardImage">
-        <img src="images/takenDamage.png" class="takenDamage">
-        <p class="healthDisplay" id="healthDisplay_1">19</p>
-    </div> -->
 
-
-
-
-    <!--<div id="highl"></div>-->
 
     <div id="userHealth" class="values" style="right: 43px;top: 920px;">00</div>
     <div id="opponentHealth" class="values" style="right: 43px;top: 52px;">00</div>
     <div id="userMana" class="values" style="right: 203px;top: 920px;">00</div>
     <div id="opponentMana" class="values" style="right: 203px;top: 52px;">00</div>
+
+    <div id="userInfo">
+        <div class="values user-info">{{ username }}</div>
+        <img src="{{profilepic}}" alt="Profile Picture" class="profilepic" style="right: 43px; top: 850px;">
+    </div>
+
+    <div id="opponentInfo">
+        <div class="values" style="right: 43px; top: 20px;">{{ opponentName }}</div>
+        <img src="{{opponentProfilepic}}" alt="Profile Picture" class="profilepic opponent-profile-pic">
+    </div>
+
+
 
     <div class="endTurn">
         <div class="endTurnText">End Turn</div>
@@ -613,6 +621,22 @@ function getCurrentGame() {
                     document.getElementById("userMana").textContent = game.player2.mana;
                     document.getElementById("opponentMana").textContent = game.player1.mana;
                 }
+
+                // When you get game data in your getCurrentGame fetch:
+if (game.player1 && game.player2) {
+    // Figure out which player is the opponent
+    const currentUser = '{{ username }}';
+    const opponentName = game.player1.username === currentUser ? 
+                         game.player2.username : 
+                         game.player1.username;
+    
+    // Update the opponent name in the DOM
+    document.querySelector('#opponentInfo .values').textContent = opponentName;
+    
+    // For the profile pic, you can use a simple endpoint
+    document.querySelector('#opponentInfo .profilepic').src = `/static/${getProfilePicPath(opponentName)}`;
+}
+
             } catch (e) {
                 console.error("Error parsing game data:", e);
             }
