@@ -116,7 +116,6 @@
     <div id="cardContainer"></div><!--holds all the cards-->
 
 
-
     <div id="userHealth" class="values" style="right: 43px;top: 920px;">00</div>
     <div id="opponentHealth" class="values" style="right: 43px;top: 52px;">00</div>
     <div id="userMana" class="values" style="right: 203px;top: 920px;">00</div>
@@ -187,9 +186,9 @@ let inPlayAreas = [
                 getCurrentGame() // Call the function to check if the other player has joined every second
                 //console.log("Page is in fullscreen");
             } else {
-                //enter.styFullscreenPromptle.display = "none";
+                //enterFullscreenPrompt.display = "none";
                 //waitForOtherPlayerTurnPrompt.style.display = "none";
-                //console.log("Page is not in fullscreen");
+                console.log("Page is not in fullscreen");
             }
             }  // Close the checkFullscreen function
 
@@ -541,6 +540,7 @@ function getCurrentGame() {
 
                 
 
+
                 
                 // Save current round number to detect changes
                 window.currentRoundNum = game.roundNum;
@@ -565,20 +565,38 @@ function getCurrentGame() {
                 }
                 
                 // Handle waiting for another player
-                if (!game.player2.username && game.player1.username == username) {
-                    const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
-                    promptText.textContent = "Waiting for another player to join";
-                    waitForOtherPlayerTurnPrompt.style.display = "block";
-                    // never return here
-                    // continue processing
-                }
-
-                
-                // Handle turns for player 1
-                if (game.player1.username == username) {
-                    console.info("game: ", game);
-                    if (game.player2) { // Only proceed if player 2 has joined
-                        if (game.roundNum % 2 == 0) { // Player 1's turn
+                if (!game.player2 || !game.player2.username) {
+                    if (game.player1.username == username) {
+                        const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
+                        promptText.textContent = "Waiting for another player to join";
+                        waitForOtherPlayerTurnPrompt.style.display = "block";
+                        // Continue processing but skip parts that require player2
+                    }
+                    // Skip other player2-dependent code
+                } else {
+                    // Handle turns for player 1
+                    if (game.player1.username == username) {
+                        console.info("game: ", game);
+                        if (game.player2) { // Only proceed if player2 has joined
+                            if (game.roundNum % 2 == 0) { // Player 1's turn
+                                waitForOtherPlayerTurnPrompt.style.display = "none";
+                                redrawAllCards(game);
+                                
+                                // Only calculate damage if the round number just changed
+                                if (roundChanged) {
+                                    calculateBoard();
+                                }
+                            } else { // Player 2's turn
+                                waitForOtherPlayerTurnPrompt.style.display = "block";
+                                document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
+                                
+                            }
+                        }
+                    } 
+                    // Handle turns for player 2
+                    else if (game.player2.username == username) {
+                        console.info("game: ", game);
+                        if (game.roundNum % 2 != 0) { // Player 2's turn
                             waitForOtherPlayerTurnPrompt.style.display = "none";
                             redrawAllCards(game);
                             
@@ -586,56 +604,40 @@ function getCurrentGame() {
                             if (roundChanged) {
                                 calculateBoard();
                             }
-                        } else { // Player 2's turn
+                        } else { // Player 1's turn
                             waitForOtherPlayerTurnPrompt.style.display = "block";
                             document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
-                            
                         }
                     }
-                } 
-                // Handle turns for player 2
-                else if (game.player2.username == username) {
-                    console.info("game: ", game);
-                    if (game.roundNum % 2 != 0) { // Player 2's turn
-                        waitForOtherPlayerTurnPrompt.style.display = "none";
-                        redrawAllCards(game);
-                        
-                        // Only calculate damage if the round number just changed
-                        if (roundChanged) {
-                            calculateBoard();
-                        }
-                    } else { // Player 1's turn
-                        waitForOtherPlayerTurnPrompt.style.display = "block";
-                        document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
+
+                    // Update health and mana display of players
+                    if (game.player1.username == username) { // If player1 is the current user
+                        document.getElementById("userHealth").textContent = game.player1.health;
+                        document.getElementById("opponentHealth").textContent = game.player2.health;
+                        document.getElementById("userMana").textContent = game.player1.mana;
+                        document.getElementById("opponentMana").textContent = game.player2.mana;
+                    } else { // If player2 is the current user
+                        document.getElementById("userHealth").textContent = game.player2.health;
+                        document.getElementById("opponentHealth").textContent = game.player1.health;
+                        document.getElementById("userMana").textContent = game.player2.mana;
+                        document.getElementById("opponentMana").textContent = game.player1.mana;
                     }
-                }
-                 // update health and mana display of players
-                 if (game.player1.username == username)  { //if player1 is the current user
-                    document.getElementById("userHealth").textContent = game.player1.health;
-                    document.getElementById("opponentHealth").textContent = game.player2.health;
-                    document.getElementById("userMana").textContent = game.player1.mana;
-                    document.getElementById("opponentMana").textContent = game.player2.mana;
-                } else { //if player2 is the current user
-                    document.getElementById("userHealth").textContent = game.player2.health;
-                    document.getElementById("opponentHealth").textContent = game.player1.health;
-                    document.getElementById("userMana").textContent = game.player2.mana;
-                    document.getElementById("opponentMana").textContent = game.player1.mana;
                 }
 
-                // When you get game data in your getCurrentGame fetch:
-if (game.player1 && game.player2) {
-    // Figure out which player is the opponent
-    const currentUser = '{{ username }}';
-    const opponentName = game.player1.username === currentUser ? 
-                         game.player2.username : 
-                         game.player1.username;
-    
-    // Update the opponent name in the DOM
-    document.querySelector('#opponentInfo .values').textContent = opponentName;
-    
-    // For the profile pic, you can use a simple endpoint
-    document.querySelector('#opponentInfo .profilepic').src = `/static/${getProfilePicPath(opponentName)}`;
-}
+                // Also fix the opponent profile section
+                if (game.player1 && game.player2 && game.player2.username) {
+                    // Figure out which player is the opponent
+                    const currentUser = '{{ username }}';
+                    const opponentName = game.player1.username === currentUser ? 
+                                        game.player2.username : 
+                                        game.player1.username;
+                    
+                    // Update the opponent name in the DOM
+                    document.querySelector('#opponentInfo .values').textContent = opponentName;
+                    
+                    // For the profile pic, you can use a simple endpoint
+                    document.querySelector('#opponentInfo .profilepic').src = `/getProfilePicPath/${opponentName}`;
+                }
 
             } catch (e) {
                 console.error("Error parsing game data:", e);

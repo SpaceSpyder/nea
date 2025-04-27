@@ -36,4 +36,4 @@ class Game:
     gameID: int
     roundNum: int
     gameBoard: GameBoard = field(default_factory=GameBoard)
-    isPlayer1Turn: bool = True
+    #isPlayer1Turn: bool = True

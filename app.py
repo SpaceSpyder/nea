@@ -378,24 +378,28 @@ def getCurrentGame():
 
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
-            if (game and game.player1 and game.player2 and game.player1.health <= 0 or game.player2.health <= 0):
+            # Fix the condition to properly check if either player has 0 health
+            # Only check player2.health if player2 exists
+            if (game and game.player1 and 
+                ((game.player1.health <= 0) or 
+                 (game.player2 and game.player2.health <= 0))):
                 
                 # End the game if either player is dead
-                winner = "player1" if game.player2.health <= 0 else "player2"
+                winner = "player1" if (game.player2 and game.player2.health <= 0) else "player2"
                 winnerUsername = game.player1.username if winner == "player1" else game.player2.username
                 if username == winnerUsername:
                     increaseGamesWon(username)  # Increases the number of games won for the user
 
                 if (username):
                     game.player1.status = "dead"
-
                 else:
                     game.player2.status = "dead"
+                    
                 game.status = "game_over"
                 session.pop("CurrentGame")
-                increaseGamesPlayed(username)  # Increases the number of games won for the user
+                increaseGamesPlayed(username)  # Increases the number of games played for the user
 
-                if (game.player1.status == "dead" and game.player2.status == "dead"):
+                if (game.player1.status == "dead" and game.player2 and game.player2.status == "dead"):
                     globalGameList.remove(game)  # Remove the game from the list
                     globalGameCount -= 1
                 return jsonify({"status": "game_over", "winner": winner, "currentGame":game}), 200  

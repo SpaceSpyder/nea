@@ -91,9 +91,11 @@ def getProfilePicPath(username=None):
         
         # Return the user's profile picture path if it exists, otherwise return the default path
         if result and result[0]:
-            return url_for('static', filename=f'images/profilePics/{result[0]}')
-        else:
+            from flask import has_app_context
+            if has_app_context():
+                return url_for('static', filename=f'images/profilePics/{result[0]}')
             return defaultPicPath
+        return defaultPicPath
     except Exception as e:
         print(f"Error getting profile picture: {str(e)}")
         return defaultPicPath
