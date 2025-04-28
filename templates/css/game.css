@@ -72,3 +72,12 @@
     text-shadow: black 0px 0px 4px;
     display: none;
 }
+
+.profilePic {
+    left: 1015px;
+    position: absolute;
+    height: 13%;
+    border-radius: 40%;
+    pointer-events: none;
+    z-index: 1;
+}

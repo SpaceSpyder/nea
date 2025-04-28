@@ -364,7 +364,7 @@ def testGame2():
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
     username = session.get("Username")
-    return render_template("game2.html", username=username)
+    return render_template("game2.html", username=username, profilepic=getProfilePicPath(username), opponentProfilepic="images/profilePics/Default.png")
  
  
 @app.route("/testGame2/getCurrentGame", methods=["GET"])
