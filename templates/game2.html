@@ -550,7 +550,7 @@ function getCurrentGame() {
                  return;
                 }
                
-// some crap
+
 
                 // If player 2, reverse the board layout
                 if (game.player2 && username === game.player2.username) {
@@ -678,7 +678,7 @@ function getCurrentGame() {
             .then(data => {
                 try {
                     const game = JSON.parse(data);
-                    if (!game.gameBoard) {
+                    if (!game.gameBoard) { // if its the first turn and the gameboard is empty
                         console.log("Creating empty gameBoard");
                         game.gameBoard = {
                             p2Defence: [],

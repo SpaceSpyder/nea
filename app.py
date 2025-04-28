@@ -673,9 +673,9 @@ def resetUserGameState(username):
 
 # -------- miscellaneous ---------
 
-@app.route("/getProfilePicPath/<username>")
-def profile_pic_path(username):
-    return getProfilePicPath(username)
+#@app.route("/getProfilePicPath/<username>")
+#def profile_pic_path(username):
+#    return getProfilePicPath(username)
 
 @app.route("/test_alert/<alert_type>", methods=["POST"]) # test alert
 def test_alert(alert_type):
@@ -686,17 +686,6 @@ def test_alert(alert_type):
     elif alert_type == "error":
         flash("This is an error alert!", "error")
     return redirect(url_for("index"))
-
-
-@app.route("/template")
-def temp():
-    if not session.get("Username"):  # check if the user is logged in
-        return redirect(url_for("login"))
-    profilePicPath = getProfilePicPath(session["Username"])  # get pfp
-    username = session["Username"]  # get username
-
-    return render_template("template.html", profile_pic=profilePicPath, username=username)
-
 
 
 def runAttackSequence(game):
