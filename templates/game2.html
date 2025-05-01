@@ -239,7 +239,7 @@ let inPlayAreas = [
                 // Get the drop location for snapping
                 let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
                 if (!dropLocation) return;
-                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y && area.topLeft.x === dropLocation.topLeft.x && area.bottomRight.x === dropLocation.bottomRight.x);
                 
                 //remove element from array
                 let index = hitboxContents[hitboxNum].indexOf(element);
@@ -254,10 +254,10 @@ let inPlayAreas = [
                 e = e ||  window.event;
                 e.preventDefault();
                 // calculate the new cursor position:
-              // set the element's new position:
-  pos1 = pos3 - e.clientX;
+                 // set the element's new position:
+                pos1 = pos3 - e.clientX;
                 pos2 = pos4 - e.clientY;
-// set the element's new position:
+                // set the element's new position:
                 pos3 = e.clientX;
                 pos4 = e.clientY;
                 // set the element's new position:
@@ -275,10 +275,10 @@ let inPlayAreas = [
             document.onmousemove = null;
 
             e.target.style.zIndex = 1; // puts on top
-            let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+            let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y (of the card) for the snap
 
             if (dropLocation) { // if it has data it will snap
-                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y && area.topLeft.x === dropLocation.topLeft.x && area.bottomRight.x === dropLocation.bottomRight.x);
                 snapCardY(dropLocation, e.target); // passes the area its over and the card 
                 snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
                 numberOfCards = hitboxContents[hitboxNum].length; // creates a variable to say how many cards are in the hitbox and +1 
@@ -315,7 +315,7 @@ let inPlayAreas = [
 
         function dropToSnap(cardX, cardY) {
             for (let i = 0; i < inPlayAreas.length; i++) {
-                if (cardX > inPlayAreas[i].topLeft.x && cardX < inPlayAreas[i].bottomRight.x && cardY > inPlayAreas[i].topLeft.y && cardY < inPlayAreas[i].bottomRight.y) {
+                if (cardX >= inPlayAreas[i].topLeft.x && cardX <= inPlayAreas[i].bottomRight.x && cardY >= inPlayAreas[i].topLeft.y && cardY <= inPlayAreas[i].bottomRight.y) {
                     return inPlayAreas[i]; // return the hitbox & position
                 }
             }
@@ -323,56 +323,56 @@ let inPlayAreas = [
         }
 
         function getCardPositions(numberOfCards) {
-                // total width / numofcards+1
-                // foreach card half width and minus from the bit above
-                let positionS = [];
-                let offset = (1050 / (numberOfCards + 1));
-                for (let i = 0; i < numberOfCards; i++) {
-                    positionS.push((offset * (i + 1)) - 150);
-                }
-                return positionS;
+            // total width / numofcards+1
+            // foreach card half width and minus from the bit above
+            let positionS = [];
+            let offset = (1050 / (numberOfCards + 1));
+            for (let i = 0; i < numberOfCards; i++) {
+                positionS.push((offset * (i + 1)) - 150);
             }
+            return positionS;
+        }
 
-        function redrawAllCards(game) {
-    if (!runOncePerTurn) {
-        runOncePerTurn = true;
-    } else {
-        return;
-    }
+    function redrawAllCards(game) {
+        if (!runOncePerTurn) {
+            runOncePerTurn = true;
+        } else {
+            return;
+        }
 
-    const gameBoard = game.gameBoard;
-    if (!gameBoard) {
-        console.error("gameBoard is null or undefined");
-        return;
-    }
+        const gameBoard = game.gameBoard;
+        if (!gameBoard) {
+            console.error("gameBoard is null or undefined");
+            return;
+        }
 
-    // Clear existing data
-    hitboxContents = [[], [], [], [], [], []];
-    cardData = [];
-    document.getElementById('cardContainer').innerHTML = '';
+        // Clear existing data
+        hitboxContents = [[], [], [], [], [], []];
+        cardData = [];
+        document.getElementById('cardContainer').innerHTML = '';
 
-    // Create arrays of card data for each section based on player
-    const sections = username === game.player2.username ? [
-        // Player 2's view (reversed)
-        {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (bottom)
-        {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
-        {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
-        {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (top)
-        {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
-        {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
-    ] : [
-        // Player 1's view (original)
-        {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (top)
-        {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
-        {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
-        {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (bottom)
-        {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
-        {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
-    ];
+        // Create arrays of card data for each section based on player
+        const sections = username === game.player2.username ? [
+            // Player 2's view (reversed)
+            {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (bottom)
+            {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
+            {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
+            {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (top)
+            {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
+            {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
+        ] : [
+            // Player 1's view (original)
+            {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (top)
+            {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
+            {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
+            {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (bottom)
+            {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
+            {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
+        ];
 
-    // Process each section
-    sections.forEach(({data, hitboxIndex}) => {
-        if (data.length > 0) {
+        // Process each section
+        sections.forEach(({data, hitboxIndex}) => {
+            if (data.length > 0) {
             const area = inPlayAreas[hitboxIndex];
             const positions = getCardPositions(data.length);
             
@@ -734,14 +734,14 @@ function getCurrentGame() {
     }
 
     
-        function addTestCards() {
-    fetch('/getRandomCard')
-        .then(response => response.json())
-        .then(cardInfo => {
-            if (cardInfo.error) {
-                console.error('Error:', cardInfo.error);
-                return;
-            }
+    function addTestCards() {
+        fetch('/getRandomCard')
+            .then(response => response.json())
+            .then(cardInfo => {
+                if (cardInfo.error) {
+                    console.error('Error:', cardInfo.error);
+                    return;
+                }
 
             // Create card div
             const cardDiv = document.createElement("div");
@@ -796,6 +796,79 @@ function getCurrentGame() {
                     cost: cardInfo.cost
                 }
             });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+
+function addCardToSummoningBank() {
+        fetch('/getRandomCard') // change
+            .then(response => response.json())
+            .then(cardInfo => {
+                if (cardInfo.error) {
+                    console.error('Error:', cardInfo.error);
+                    return;
+                }
+
+            // Create card div
+            const cardDiv = document.createElement("div");
+            cardDiv.classList.add("card");
+            cardDiv.id = `card_${GetCurrentCardId()}`;
+            cardDiv.style.zIndex = "1";
+            
+            // Create and add main card image
+            const cardImage = document.createElement("img");
+            cardImage.src = `images/CardPictures/${cardInfo.name}.png`;
+            cardImage.style.width = "100%";
+            cardImage.style.height = "100%";
+            cardImage.style.pointerEvents = "none";
+            cardImage.classList.add("cardImage");
+            cardDiv.appendChild(cardImage);
+            
+            // Add taken damage image
+            const takenDamageHeart = document.createElement("img");
+            takenDamageHeart.src = "images/takenDamage.png";
+            takenDamageHeart.classList.add("takenDamage");
+            cardDiv.appendChild(takenDamageHeart);
+            
+            // Add health display
+            const healthDisplay = document.createElement("p");
+            healthDisplay.classList.add("healthDisplay");
+            healthDisplay.id = `healthDisplay_${GetCurrentCardId()}`;
+            healthDisplay.textContent = cardInfo.health; // Display the current health
+            cardDiv.appendChild(healthDisplay);
+            
+            // Set data attributes
+            cardDiv.dataset.cardId = GetCurrentCardId();
+            cardDiv.dataset.name = cardInfo.name;
+            cardDiv.dataset.attack = cardInfo.attack;
+            cardDiv.dataset.spawnHealth = cardInfo.spawnHealth;
+            cardDiv.dataset.health = cardInfo.health;
+            cardDiv.dataset.cost = cardInfo.cost;
+
+            document.getElementById("cardContainer").appendChild(cardDiv);
+            dragElement(cardDiv);
+
+            cardData.push({
+                element: cardDiv,
+                hitbox: -1,
+                index: -1,
+                owner: "me",
+                cardInfo: {
+                    cardId: GetCurrentCardId()+1,
+                    name: cardInfo.name,
+                    attack: cardInfo.attack,
+                    spawnHealth: cardInfo.health, //makes sure the spawn health is the same as the health only at card creation
+                    health: cardInfo.health,
+                    cost: cardInfo.cost
+                }
+            });
+            const fakeEvent = {
+                target: cardDiv,
+                clientX: cardDiv.offsetLeft,
+                clientY: cardDiv.offsetTop
+            };
+            closeDragElement(fakeEvent); // Simulate mouseup event to snap the card into place
         })
         .catch(error => console.error('Error:', error));
 }
