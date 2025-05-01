@@ -65,16 +65,31 @@ def getDecksForUser(username):
         return []
 
 
-def getDeckForUser(username, deckId):
+def getDeckForUser(username, deckId=None):
     conn = getDb()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Decks WHERE Owner = ? AND UserDeckNum = ?", (username, deckId))
-        deck = cursor.fetchone()
-        return deck
+        if deckId is None:
+            cursor.execute("SELECT CurrentDeck FROM Users WHERE Username = ?", (username,))
+            deckId_row = cursor.fetchone()
+            if not deckId_row:
+                return []
+            deckId = deckId_row[0]
+        cursor.execute(
+            "SELECT Deck FROM Decks WHERE Owner = ? AND UserDeckNum = ?",
+            (username, deckId)
+        )
+        deck_row = cursor.fetchone()
+        if deck_row:
+            return deck_row[0].split(", ")
+        else:
+            return []
     except Exception as e:
         print(f"Error getting deck: {str(e)}")
-        return None
+        return []
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def getProfilePicPath(username=None):
