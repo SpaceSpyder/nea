@@ -378,21 +378,19 @@ def getCurrentGame():
 
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
-            # Fix the condition to properly check if either player has 0 health
-            # Only check player2.health if player2 exists
             if (game and game.player1 and 
                 ((game.player1.health <= 0) or 
                  (game.player2 and game.player2.health <= 0))):
                 
                 # End the game if either player is dead
                 winner = "player1" if (game.player2 and game.player2.health <= 0) else "player2"
-                winnerUsername = game.player1.username if winner == "player1" else game.player2.username
+                winnerUsername = game.player1.username if winner == "player1" else (game.player2.username if game.player2 else "Unknown")
                 if username == winnerUsername:
                     increaseGamesWon(username)  # Increases the number of games won for the user
 
-                if (username):
+                if username == game.player1.username:
                     game.player1.status = "dead"
-                else:
+                elif game.player2 and username == game.player2.username:
                     game.player2.status = "dead"
                     
                 game.status = "game_over"
@@ -402,8 +400,8 @@ def getCurrentGame():
                 if (game.player1.status == "dead" and game.player2 and game.player2.status == "dead"):
                     globalGameList.remove(game)  # Remove the game from the list
                     globalGameCount -= 1
-                return jsonify({"status": "game_over", "winner": winner, "currentGame":game}), 200  
-            return json.dumps(asdict(game))
+                return jsonify({"status": "game_over", "winner": winner, "currentGame": asdict(game)}), 200
+            return jsonify(asdict(game))
  
         for game in globalGameList:
             if (game.player2 == None ) and username != game.player1.username:
@@ -414,7 +412,7 @@ def getCurrentGame():
                 session.modified = True
                 game.player1.health = 10
                 game.player2.health = 10
-                return '{"isPlayer1" : false}'  # User is player2
+                return jsonify({"isPlayer1": False})  # User is player2
  
         globalGameCount += 1
         player1 = Player(username, True, 10, 5)  # Create player1 with default health and mana
@@ -423,7 +421,7 @@ def getCurrentGame():
         session["CurrentGame"] = globalGameCount
         dumpGlobalState()
         session.modified = True
-        return '{"isPlayer1" : true}'  # User is player1
+        return jsonify({"isPlayer1": True})
  
  
 @app.route("/testGame2/waitForSecondPlayer", methods=["GET"])
@@ -432,9 +430,9 @@ def waitForSecondPlayer():
     global globalGameList
     dumpGlobalState()
     if session.get("CurrentGame"): 
-         game = globalGameList[(session["CurrentGame"] - 1)]
-         return '{"player2Found" :"' + str(game.player2.username) + '"}'  # Return player2's username
-    return '{"ERROR no current game" : true}'  # Error if no current game
+        game = globalGameList[(session["CurrentGame"] - 1)]
+        return jsonify({"player2Found": game.player2.username})  # Return player2's username
+    return jsonify({"ERROR_no_current_game": True})  # Error if no current game
 
 @app.route("/testGame2/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
@@ -473,9 +471,6 @@ def receiveEndTurn():
     except Exception as e:
         print(f"Error in receiveEndTurn: {e}")
         return jsonify({"status": "error", "message": "Internal server error"}), 500
-
-
-# -------- flask functions --------
 
 
 @app.route("/testGame2/deleteGame", methods=["POST"])
@@ -625,13 +620,6 @@ def getRandomCard():
         return jsonify({"error": str(e)}), 500
 
 
-# -------- network testing ---------
-
-@app.route("/networkTest", methods=["GET"])
-def networkTest():
-    return render_template("networkTest.html")
-
-
 def dumpGlobalState():
     global globalGameList
     global globalGameCount
@@ -666,16 +654,9 @@ def resetUserGameState(username):
         
     global globalGameCount
     globalGameCount = len(globalGameList)
-    
-    # Save state
+
     dumpGlobalState()
 
-
-# -------- miscellaneous ---------
-
-#@app.route("/getProfilePicPath/<username>")
-#def profile_pic_path(username):
-#    return getProfilePicPath(username)
 
 @app.route("/test_alert/<alert_type>", methods=["POST"]) # test alert
 def test_alert(alert_type):
@@ -712,8 +693,6 @@ def runAttackSequence(game):
             else:
                 game.player1.health -= attacking_cards[i].attack
 
-
-# -------- flask --------
 
 if __name__ == "__main__":
     globalGameCount = 0
