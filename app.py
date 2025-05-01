@@ -17,11 +17,15 @@ from templates.scripts.utils import ( # python functions from utils.py
     getUserDetailsByUsername,
     getDecksForUser,
     getDb,
+    closeDb,
+    db_transaction, 
     checkUsername,
     calculateRank,
     insertUser,
     increaseGamesWon,
     increaseGamesPlayed,
+    getUserId,  
+    getUserStats  
 )
 from dataclasses import dataclass, asdict
 from moduels import Game, GameBoard, Card, Player # Import Game, GameBoard, and Card classes
@@ -692,6 +696,11 @@ def runAttackSequence(game):
                 game.player2.health -= attacking_cards[i].attack
             else:
                 game.player1.health -= attacking_cards[i].attack
+
+
+@app.teardown_appcontext
+def close_db(e=None):
+    closeDb(e)
 
 
 if __name__ == "__main__":

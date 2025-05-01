@@ -24,6 +24,24 @@ def closeDb(exception):
         db.close()
 
 
+def db_transaction(func):
+    """Decorator to handle database transactions."""
+    def wrapper(*args, **kwargs):
+        conn = getDb()
+        try:
+            result = func(conn, *args, **kwargs)
+            conn.commit()
+            return result
+        except sqlite3.Error as e:
+            conn.rollback()
+            print(f"Database error: {e}")
+            raise
+        finally:
+            # Connection will be closed by Flask's teardown
+            pass
+    return wrapper
+
+
 def getUserIdByUsername(username):
     conn = getDb()
     try:
@@ -79,26 +97,21 @@ def getDeckForUser(username, deckId):
 
 def getProfilePicPath(username=None):
     if not username:
-        # Return default profile picture path if no username is provided
         return defaultPicPath
 
-    # Retrieve the profile picture for the specific user from the database
-    conn = getDb()
     try:
+        conn = getDb()
         cursor = conn.cursor()
         cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,))
         result = cursor.fetchone()
-        
-        # Return the user's profile picture path if it exists, otherwise return the default path
         if result and result[0]:
             from flask import has_app_context
             if has_app_context():
                 return url_for('static', filename=f'images/profilePics/{result[0]}')
-            return defaultPicPath
-        return defaultPicPath
+        # Fallback to default if no result or not in app context
     except Exception as e:
         print(f"Error getting profile picture: {str(e)}")
-        return defaultPicPath
+    return defaultPicPath
 
 
 def checkUsername():
