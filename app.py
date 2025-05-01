@@ -550,7 +550,7 @@ def modifyDeck(username):
     selectedCards = request.form.get("selectedCards")
     selectedDeck = request.form.get("deck")
     deckName = request.form.get("deckNameInput")
-    print("deckName: ",deckName)
+    print("deckName: ", deckName)
     print("selectedCards: ", selectedCards)
 
     if selectedDeck == "create":
@@ -565,6 +565,10 @@ def modifyDeck(username):
                     WHERE Owner = ?
                 """, (username,))
                 user_deck_num = cursor.fetchone()[0]
+
+                # If deckName is empty or only whitespace, set default
+                if not deckName or not deckName.strip():
+                    deckName = f"Deck {user_deck_num}"
 
                 # Insert the new deck into the Decks table
                 cursor.execute("""
@@ -692,8 +696,10 @@ def runAttackSequence(game):
         else:
             if player1sTurn:
                 game.player2.health -= attacking_cards[i].attack
+                game.player2.mana += 5
             else:
                 game.player1.health -= attacking_cards[i].attack
+                
 
 
 @app.teardown_appcontext

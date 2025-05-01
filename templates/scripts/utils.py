@@ -188,8 +188,8 @@ def insertUser(username, password, email):
             """, (user_id, date))
 
             cursor.execute("""
-                INSERT INTO Decks (Owner, UserDeckNum, Deck)
-                VALUES (?, 1, ?)
+                INSERT INTO Decks (Owner, UserDeckNum, Deck, DeckName)
+                VALUES (?, 1, ?, "Default Deck")
             """, (username, defaultDeck))
     except sqlite3.OperationalError as e:
         print(f"Error inserting user: {e}")

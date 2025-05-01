@@ -74,8 +74,8 @@
                 <label for="deck">Choose a deck:</label>
 
                 <select name="deck" id="deck" onchange="changeDeckDisplay()">
-                    {% for i in range(1, decks|length + 1) %}
-                        <option value="{{ i }}">Deck {{ i }}{{ selecteddeckid }}</option>
+                    {% for deck in decks %}
+                        <option value="{{ deck[2] }}">{{ deck[4] }}</option>
                     {% endfor %}
                     <option value="create">Create a new deck</option>
                 </select>
