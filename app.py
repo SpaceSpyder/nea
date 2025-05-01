@@ -402,6 +402,12 @@ def getCurrentGame():
                     globalGameList.remove(game)  # Remove the game from the list
                     globalGameCount -= 1
                 return jsonify({"status": "game_over", "winner": winner, "currentGame": asdict(game)}), 200
+            
+            if game.player2 and game.player2.username:
+                game_dict = asdict(game)
+                game_dict["opponentProfilepic"] = getProfilePicPath(game.player2.username)
+                return jsonify(game_dict)
+
             return jsonify(asdict(game))
  
         for game in globalGameList:
@@ -414,6 +420,9 @@ def getCurrentGame():
                 game.player1.health = 10
                 game.player2.health = 10
                 return jsonify({"isPlayer1": False})  # User is player2
+        
+
+            
  
         globalGameCount += 1
         player1 = Player(username, True, 10, 5)  # Create player1 with default health and mana
