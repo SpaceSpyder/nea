@@ -550,7 +550,8 @@ def modifyDeck(username):
     selectedCards = request.form.get("selectedCards")
     selectedDeck = request.form.get("deck")
     deckName = request.form.get("deckNameInput")
-    print(deckName)
+    print("deckName: ",deckName)
+    print("selectedCards: ", selectedCards)
 
     if selectedDeck == "create":
         conn = getDb()

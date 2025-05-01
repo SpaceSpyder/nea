@@ -192,3 +192,15 @@ body {
     background-color: #f2dede;
     color: #a94442;
 }
+
+/* Add this to your profile.css */
+#deckForm {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* space between items */
+}
+
+#deckCreation {
+    display: none;
+    min-height: 350px; /* Adjust this value to fit your deck creation content */
+}

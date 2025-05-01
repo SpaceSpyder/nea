@@ -80,8 +80,9 @@
                     <option value="create">Create a new deck</option>
                 </select>
 
-                <input type="hidden" id="deckNameInput">
+                <input type="text" id="deckNameInput" name="deckNameInput" style="display:none;">
                 <button type="submit">Submit</button>
+                <input type="hidden" name="selectedCards" id="selectedCards">
             </form>
             
             <!-- Display the current deck -->
@@ -93,7 +94,7 @@
                 </div>
 
                 <div id = "deckCreation">
-                <br/>
+                
                 <h2>Edit Deck:</h2>
                 {% include 'htmlChildren/deckCreation.html' %}
                 </div>
@@ -102,9 +103,9 @@
         
         </div>
 
-        <div id="selectedCardsContainer" style="display: none;">
+        <!--<div id="selectedCardsContainer" style="display: none;">
             <input type="hidden" name="selectedCards" id="selectedCards">
-        </div>
+        </div>-->
 
         <script>
             const maxSelection = 20;
@@ -120,13 +121,11 @@
             if (selectedDeck === "create") {
                 deckCreation.style.display = "block";
                 deckDisplay.style.display = "none";
-                selectedCardsContainer.style.display = "block";
-                deckNameInput.type = "text"
+                deckNameInput.style.display = "block";
             } else {
                 deckCreation.style.display = "none";
                 deckDisplay.style.display = "block";
-                selectedCardsContainer.style.display = "none";
-                deckNameInput.type = "hidden"
+                deckNameInput.style.display = "none";
             }
         }
     
