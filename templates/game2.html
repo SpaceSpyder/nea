@@ -163,16 +163,17 @@
         let noOneOnline = false;
         let gameDeleted = false; 
         let gameEnded = false; 
+        let game = null; // Initialize game variable
 
-// Define hitbox positions based on player
-let inPlayAreas = [
-    { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p2Defence (top)
-    { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p2Attack
-    { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p1Attack
-    { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p1Defence (bottom)
-    { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },   // p2bank
-    { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } }    // p1bank
-];
+        // Define hitbox positions based on player
+        let inPlayAreas = [
+            { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p2Defence (top)
+            { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p2Attack
+            { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p1Attack
+            { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p1Defence (bottom)
+            { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },   // p2bank
+            { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } }    // p1bank
+        ];
 
         function checkFullscreen() {
             const currentlyFullscreen = document.fullscreenElement !== null;
@@ -225,12 +226,20 @@ let inPlayAreas = [
 
             element.onmousedown = dragMouseDown;
 
-            function dragMouseDown(e) {
+            function dragMouseDown(e) { // handles the card being clicked on
                 e = e || window.event;
                 e.preventDefault();
                                 // get the mouse cursor position at startup:
                 pos3 = e.clientX;
                 pos4 = e.clientY;
+
+                if (e.target.dataset.cost > game.player1.mana) {
+                    console.log("Not enough mana to play this card!");
+                    return; // Exit the function if not enough mana
+                }
+                game.player1.mana -= e.target.dataset.cost; // Deduct the cost from the player's mana
+                document.getElementById("userMana").textContent = game.player1.mana; // Update the mana display
+                
                 document.onmouseup = closeDragElement;
                 // call a function whenever the cursor moves:
                 document.onmousemove = elementDrag;
@@ -467,7 +476,7 @@ function getCurrentGame() {
         .then(response => response.text())
         .then(data => {
             try {
-                const game = JSON.parse(data);
+                game = JSON.parse(data);
                 
                 // Check for redirect
                 if (game.status === "GAME_DELETED") {
@@ -584,6 +593,7 @@ function getCurrentGame() {
                                 
                                 // Only calculate damage if the round number just changed
                                 if (roundChanged) {
+                                    addCardToSummoningBank();
                                     calculateBoard();
                                 }
                             } else { // Player 2's turn
@@ -600,8 +610,10 @@ function getCurrentGame() {
                             waitForOtherPlayerTurnPrompt.style.display = "none";
                             redrawAllCards(game);
                             
+                            
                             // Only calculate damage if the round number just changed
                             if (roundChanged) {
+                                addCardToSummoningBank();
                                 calculateBoard();
                             }
                         } else { // Player 1's turn
@@ -876,7 +888,8 @@ function addCardToSummoningBank() {
 function GetCurrentCardId() {
     return cardData.length+1;
 }
-    function calculateBoard() {
+
+function calculateBoard() {
     fetch('testGame2/getCurrentGame')
         .then(response => response.text())
         .then(data => {
@@ -893,18 +906,19 @@ function GetCurrentCardId() {
             
             
             if (needsUpdate) {
-                    fetch('testGame2/receiveEndTurn', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(game)
-                    })
-                    .then(response => response.json())
-                    .catch(error => console.error('Error updating game state:', error));
-                }
+                fetch('testGame2/receiveEndTurn', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(game)
+                })
+                .then(response => response.json())
+                .catch(error => console.error('Error updating game state:', error));
+            }
             // Update displays for all cards
             Array.from(cards).forEach(card => {
+                debugger;
                 const health = parseInt(card.dataset.health);
                 const spawnHealth = parseInt(card.dataset.spawnHealth);
                 const takenDamage = card.querySelector('.takenDamage');

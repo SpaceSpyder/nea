@@ -417,8 +417,8 @@ def getCurrentGame():
                 dumpGlobalState()
                 session["CurrentGame"] = globalGameCount
                 session.modified = True
-                game.player1.health = 10
-                game.player2.health = 10
+                game.player1.health = 100
+                game.player2.health = 100
                 return jsonify({"isPlayer1": False})  # User is player2
         
 
@@ -702,12 +702,12 @@ def runAttackSequence(game):
         elif defending_defence_card_index < len(defending_defence_cards):
             defending_defence_cards[defending_defence_card_index].health -= attacking_cards[i].attack
             defending_defence_card_index += 1
-        else:
-            if player1sTurn:
-                game.player2.health -= attacking_cards[i].attack
-                game.player2.mana += 5
-            else:
-                game.player1.health -= attacking_cards[i].attack
+    if player1sTurn:
+        game.player2.health -= attacking_cards[i].attack
+        game.player2.mana += 2
+    else:
+        game.player1.health -= attacking_cards[i].attack
+        game.player1.mana += 2
                 
 
 
