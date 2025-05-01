@@ -24,24 +24,6 @@ def closeDb(exception):
         db.close()
 
 
-def db_transaction(func):
-    """Decorator to handle database transactions."""
-    def wrapper(*args, **kwargs):
-        conn = getDb()
-        try:
-            result = func(conn, *args, **kwargs)
-            conn.commit()
-            return result
-        except sqlite3.Error as e:
-            conn.rollback()
-            print(f"Database error: {e}")
-            raise
-        finally:
-            # Connection will be closed by Flask's teardown
-            pass
-    return wrapper
-
-
 def getUserIdByUsername(username):
     conn = getDb()
     try:

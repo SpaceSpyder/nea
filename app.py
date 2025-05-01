@@ -1,13 +1,19 @@
-from datetime import timedelta # date and time for account creation
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash # password hashing
-from werkzeug.utils import secure_filename # for secure file uploads
-import sqlite3 # for database operations
-import os  # Import os module
-import json
-import binascii # for unique session key
-import uuid
-from PIL import Image
+try:
+    from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+    from werkzeug.security import generate_password_hash, check_password_hash
+    from werkzeug.utils import secure_filename
+    import sqlite3
+    import os
+    import json
+    import binascii
+    import uuid
+    from PIL import Image
+    from datetime import timedelta
+except ImportError as e:
+    print("Some required packages are missing.")
+    print("Please run: pip install -r requirements.txt")
+    print(f"Missing module: {e.name}")
+    exit(1)
 
 from templates.scripts.cropImage import (cropImage)
 from templates.scripts.clearImages import (removeUnusedImages)
@@ -18,24 +24,15 @@ from templates.scripts.utils import ( # python functions from utils.py
     getDecksForUser,
     getDb,
     closeDb,
-    db_transaction, 
     checkUsername,
     calculateRank,
     insertUser,
     increaseGamesWon,
     increaseGamesPlayed,
-    getUserId,  
-    getUserStats  
+
 )
 from dataclasses import dataclass, asdict
 from moduels import Game, GameBoard, Card, Player # Import Game, GameBoard, and Card classes
-
-# pip install flask werkzeug
-# pip install pillow
-# python -m flask --version
-
-# First, install Flask-Session:
-# pip install flask-session
 
 
 # Database setup
@@ -624,7 +621,7 @@ def getRandomCard():
         return jsonify({"error": str(e)}), 500
 
 
-def dumpGlobalState():
+def dumpGlobalState(): # for debugging purposes
     global globalGameList
     global globalGameCount
     print("Global Game List")
@@ -662,7 +659,7 @@ def resetUserGameState(username):
     dumpGlobalState()
 
 
-@app.route("/test_alert/<alert_type>", methods=["POST"]) # test alert
+@app.route("/test_alert/<alert_type>", methods=["POST"]) # test alert debugging 
 def test_alert(alert_type):
     if alert_type == "info":
         flash("This is an info alert!", "info")
