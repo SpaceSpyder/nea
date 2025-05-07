@@ -184,22 +184,9 @@
             // Perform actions based on the new fullscreen state
             // Perform actions based on the new fullscreen state
             if (isFullscreen && !gameDeleted && !gameEnded) { // Only call if game isn't deleted
+                getCurrentGame(); // Call the function to check if the other player has joined every second
 
-
-                if (game.player1.username == username) {
-                    if (game.player2) { // Only proceed if player2 has joined
-                            if (game.roundNum % 2 != 0) { // Player 1's turn
-                                getCurrentGame() // Call the function to check if the other player has joined every second
-                        }
-                    }
-                }
-                if (game.player2.username == username) {
-                    if (game.player1) { // Only proceed if player2 has joined
-                            if (game.roundNum % 2 == 0) { // Player 1's turn
-                                getCurrentGame() // Call the function to check if the other player has joined every second
-                        }
-                    }
-                }
+            
                 //console.log("Page is in fullscreen");
             } else {
                 //enterFullscreenPrompt.display = "none";
@@ -605,11 +592,18 @@ function getCurrentGame() {
                             if (game.roundNum % 2 == 0) { // Player 1's turn
                                 waitForOtherPlayerTurnPrompt.style.display = "none";
                                 redrawAllCards(game);
+                                                    // Update health and mana display of players
                                 
+
+
                                 // Only calculate damage if the round number just changed
                                 if (roundChanged) {
                                     addCardToSummoningBank();
                                     calculateBoard();
+                                    document.getElementById("userHealth").textContent = game.player1.health;
+                                    document.getElementById("opponentHealth").textContent = game.player2.health;
+                                    document.getElementById("userMana").textContent = game.player1.mana;
+                                    document.getElementById("opponentMana").textContent = game.player2.mana;
                                 }
                             } else { // Player 2's turn
                                 waitForOtherPlayerTurnPrompt.style.display = "block";
@@ -623,6 +617,9 @@ function getCurrentGame() {
                         console.info("game: ", game);
                         if (game.roundNum % 2 != 0) { // Player 2's turn
                             waitForOtherPlayerTurnPrompt.style.display = "none";
+                                                // Update health and mana display of players
+
+
                             redrawAllCards(game);
                             
                             
@@ -630,6 +627,10 @@ function getCurrentGame() {
                             if (roundChanged) {
                                 addCardToSummoningBank();
                                 calculateBoard();
+                                document.getElementById("userHealth").textContent = game.player2.health;
+                                document.getElementById("opponentHealth").textContent = game.player1.health;
+                                document.getElementById("userMana").textContent = game.player2.mana;
+                                document.getElementById("opponentMana").textContent = game.player1.mana;
                             }
                         } else { // Player 1's turn
                             waitForOtherPlayerTurnPrompt.style.display = "block";
@@ -637,18 +638,7 @@ function getCurrentGame() {
                         }
                     }
 
-                    // Update health and mana display of players
-                    if (game.player1.username == username) { // If player1 is the current user
-                        document.getElementById("userHealth").textContent = game.player1.health;
-                        document.getElementById("opponentHealth").textContent = game.player2.health;
-                        document.getElementById("userMana").textContent = game.player1.mana;
-                        document.getElementById("opponentMana").textContent = game.player2.mana;
-                    } else { // If player2 is the current user
-                        document.getElementById("userHealth").textContent = game.player2.health;
-                        document.getElementById("opponentHealth").textContent = game.player1.health;
-                        document.getElementById("userMana").textContent = game.player2.mana;
-                        document.getElementById("opponentMana").textContent = game.player1.mana;
-                    }
+
                 }
 
                 // Also fix the opponent profile section
@@ -702,12 +692,13 @@ function getCurrentGame() {
         });
 
         runOncePerTurn = false;
+
         fetch('testGame2/getCurrentGame')
             .then(response => response.text())
             .then(data => {
                 try {
-                    const game = JSON.parse(data);
-                    if (!game.gameBoard) { // if its the first turn and the gameboard is empty
+                    const game2 = JSON.parse(data);
+                    if (!game2.gameBoard) { // if its the first turn and the gameboard is empty
                         console.log("Creating empty gameBoard");
                         game.gameBoard = {
                             p2Defence: [],
@@ -920,17 +911,17 @@ function calculateBoard() {
             let needsUpdate = true;
             
             
-            if (needsUpdate) {
-                fetch('testGame2/receiveEndTurn', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(game)
-                })
-                .then(response => response.json())
-                .catch(error => console.error('Error updating game state:', error));
-            }
+            // if (needsUpdate) {
+            //     fetch('testGame2/receiveEndTurn', {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json'
+            //         },
+            //         body: JSON.stringify(game)
+            //     })
+            //     .then(response => response.json())
+            //     .catch(error => console.error('Error updating game state:', error));
+            // }
             // Update displays for all cards
             Array.from(cards).forEach(card => {
                 debugger;

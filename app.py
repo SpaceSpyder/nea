@@ -446,7 +446,7 @@ def waitForSecondPlayer():
 
 @app.route("/testGame2/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
-    print("Received end turn")
+    print("Received end turn from: ", session.get("Username"))  
     data = request.get_json()
     if not data:
         return jsonify({"status": "error", "message": "Invalid data"}), 400
@@ -468,6 +468,8 @@ def receiveEndTurn():
         p1bank=[Card(**card) for card in game_board_data.get("p1bank", [])],
         p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
     )
+    game.player1.mana = data.get("player1", {}).get("mana", -1)
+    game.player2.mana = data.get("player2", {}).get("mana", -1)
     runAttackSequence(game)
     
     game.roundNum = data.get("roundNum", game.roundNum)
@@ -695,12 +697,12 @@ def runAttackSequence(game):
         elif defending_defence_card_index < len(defending_defence_cards):
             defending_defence_cards[defending_defence_card_index].health -= attacking_cards[i].attack
             defending_defence_card_index += 1
-    if player1sTurn:
-        game.player2.health -= attacking_cards[i].attack
-        game.player2.mana += 2
-    else:
-        game.player1.health -= attacking_cards[i].attack
-        game.player1.mana += 2
+        if player1sTurn:
+            game.player2.health -= attacking_cards[i].attack
+            game.player1.mana += 2
+        else:
+            game.player1.health -= attacking_cards[i].attack
+            game.player2.mana += 2
                 
 
 
