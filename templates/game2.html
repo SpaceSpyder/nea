@@ -184,7 +184,22 @@
             // Perform actions based on the new fullscreen state
             // Perform actions based on the new fullscreen state
             if (isFullscreen && !gameDeleted && !gameEnded) { // Only call if game isn't deleted
-                getCurrentGame() // Call the function to check if the other player has joined every second
+
+
+                if (game.player1.username == username) {
+                    if (game.player2) { // Only proceed if player2 has joined
+                            if (game.roundNum % 2 != 0) { // Player 1's turn
+                                getCurrentGame() // Call the function to check if the other player has joined every second
+                        }
+                    }
+                }
+                if (game.player2.username == username) {
+                    if (game.player1) { // Only proceed if player2 has joined
+                            if (game.roundNum % 2 == 0) { // Player 1's turn
+                                getCurrentGame() // Call the function to check if the other player has joined every second
+                        }
+                    }
+                }
                 //console.log("Page is in fullscreen");
             } else {
                 //enterFullscreenPrompt.display = "none";

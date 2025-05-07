@@ -447,40 +447,33 @@ def waitForSecondPlayer():
 @app.route("/testGame2/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
     print("Received end turn")
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"status": "error", "message": "Invalid data"}), 400
+    data = request.get_json()
+    if not data:
+        return jsonify({"status": "error", "message": "Invalid data"}), 400
 
-        game_id = session.get("CurrentGame")
-        if game_id is None:
-            return jsonify({"status": "error", "message": "No current game"}), 400
+    game_id = session.get("CurrentGame")
+    if game_id is None:
+        return jsonify({"status": "error", "message": "No current game"}), 400
 
-        global globalGameList
-        game = globalGameList[game_id - 1]
-        game_board_data = data.get("gameBoard", {})
+    global globalGameList
+    game = globalGameList[game_id - 1]
+    game_board_data = data.get("gameBoard", {})
 
-        try:
-            game.gameBoard = GameBoard(
-                p1Attack=[Card(**card) for card in game_board_data.get("p1Attack", [])],
-                p1Defence=[Card(**card) for card in game_board_data.get("p1Defence", [])],
-                p2Attack=[Card(**card) for card in game_board_data.get("p2Attack", [])],
-                p2Defence=[Card(**card) for card in game_board_data.get("p2Defence", [])],
-                p1bank=[Card(**card) for card in game_board_data.get("p1bank", [])],
-                p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
-            )
-            runAttackSequence(game)
-            
-            game.roundNum = data.get("roundNum", game.roundNum)
-        except Exception as e:
-            print(f"Error updating game board: {e}")
-            return jsonify({"status": "error", "message": "Failed to update game board"}), 500
 
-        response = {"status": "success", "message": "Game state updated", "game": asdict(game)}
-        return jsonify(response), 200
-    except Exception as e:
-        print(f"Error in receiveEndTurn: {e}")
-        return jsonify({"status": "error", "message": "Internal server error"}), 500
+    game.gameBoard = GameBoard(
+        p1Attack=[Card(**card) for card in game_board_data.get("p1Attack", [])],
+        p1Defence=[Card(**card) for card in game_board_data.get("p1Defence", [])],
+        p2Attack=[Card(**card) for card in game_board_data.get("p2Attack", [])],
+        p2Defence=[Card(**card) for card in game_board_data.get("p2Defence", [])],
+        p1bank=[Card(**card) for card in game_board_data.get("p1bank", [])],
+        p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
+    )
+    runAttackSequence(game)
+    
+    game.roundNum = data.get("roundNum", game.roundNum)
+
+    response = {"status": "success", "message": "Game state updated", "game": asdict(game)}
+    return jsonify(response), 200
 
 
 @app.route("/testGame2/deleteGame", methods=["POST"])
