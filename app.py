@@ -373,8 +373,6 @@ def getCurrentGame():
         global globalGameList
         dumpGlobalState()
         username = session.get("Username")
-        #if username == None:
-         #   return '{"status" : "GAME_DELETED"}' 
 
         if session.get("CurrentGame"): 
             game = globalGameList[(session["CurrentGame"] - 1)]
@@ -402,12 +400,16 @@ def getCurrentGame():
                     globalGameCount -= 1
                 return jsonify({"status": "game_over", "winner": winner, "currentGame": asdict(game)}), 200
             
-            if game.player2 and game.player2.username:
-                game_dict = asdict(game)
-                game_dict["opponentProfilepic"] = getProfilePicPath(game.player2.username)
-                return jsonify(game_dict)
-
-            return jsonify(asdict(game))
+            gameDict = asdict(game)
+            # Set opponent profile pic based on which player you are
+            if username == game.player1.username and game.player2:
+                gameDict["opponentProfilepic"] = getProfilePicPath(game.player2.username)
+            elif username == game.player2.username:
+                gameDict["opponentProfilepic"] = getProfilePicPath(game.player1.username)
+            else:
+                gameDict["opponentProfilepic"] = "images/profilePics/Default.png"
+                
+            return jsonify(gameDict)
  
         for game in globalGameList:
             if (game.player2 == None ) and username != game.player1.username:
@@ -510,7 +512,7 @@ def deleteGame():
 
         # Adjust game IDs for all games with higher IDs
         for i in range(game_id - 1, len(globalGameList)):
-            globalGameList[i].gameId -= 1
+            globalGameList[i].game_id -= 1
 
         # Adjust the global game count
         global globalGameCount
@@ -659,7 +661,7 @@ def resetUserGameState(username):
         
     # Adjust game IDs
     for i, game in enumerate(globalGameList):
-        game.gameId = i + 1
+        game.game_id = i + 1
         
     global globalGameCount
     globalGameCount = len(globalGameList)
