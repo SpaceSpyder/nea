@@ -63,4 +63,9 @@
         </div>
     </div>
 </body>
+<script>
+    if (/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      window.location.href = "/notSupported"; // redirect to a "not supported" page
+    }
+</script>
 </html>

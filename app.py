@@ -707,6 +707,12 @@ def runAttackSequence(game):
                 
 
 
+@app.route("/notSupported", methods=["GET"])
+def notSupported():
+
+    username = session.get("Username")
+    return render_template("notSupported.html", username=username, profilepic=getProfilePicPath(username), opponentProfilepic="images/profilePics/Default.png")
+
 @app.teardown_appcontext
 def close_db(e=None):
     closeDb(e)
