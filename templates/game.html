@@ -14,10 +14,9 @@
             height: 1080px;
             margin: 0;
             padding: 0;
-            /*background-attachment: fixed;*/
-            /*background-attachment: fixed;*/
+
             background-image: url('images/game_wood_background_001.png');
-            /* background-size: cover;  Ensures the image covers the entire viewport */
+
             background-repeat: no-repeat; /* Prevents the image from repeating */
             overflow: hidden;
         }
@@ -32,7 +31,7 @@
             top: -20px; /* Adjust top position */
             left: -20px; /* Adjust left position */
             border: rgba(255, 0, 0, 0);
-            /*border: red solid 2px;*/
+
         }
 
         .values {
@@ -42,7 +41,6 @@
             position: absolute;
             text-align: center;
             font-weight: bold;
-            /*border: red 1px solid;*/
             font-size: 112px;
             padding: 0px;
             letter-spacing: -12px;
@@ -57,7 +55,7 @@
             position: absolute; /* Position the button in the center of the page */
             top: 50%; /* Move to the vertical center */
             left: 50%; /* Move to the horizontal center */
-            transform: translate(-50%, -50%) rotate(45deg); /* Combine translate and rotate */
+            transform: translate(-50%, -50%) rotate(45deg);
             z-index: 4; /* Ensure it appears above other elements */
             background: #fff; /* Button background color */
             height: 60px;
@@ -93,7 +91,7 @@
             padding: 10px;
             box-sizing: border-box; /* Ensure padding is included in the element's size */
         }
-
+        
         .fullscreenPrompt text {
             display: inline-block;
             vertical-align: middle;
@@ -101,7 +99,7 @@
             padding-top: 23.1%; /* To center the text vertically */
             text-shadow: 0px 0px 20px black, 0px 0px 5px black, 0px 0px 20px black; /* Shadow added here */
         }
-
+        
         .opponent-profile-pic {
             position: absolute;
             right: 43px;
@@ -114,64 +112,64 @@
 <body>
     
     <div id="cardContainer"></div><!--holds all the cards-->
-
-
+    
+    
     <div id="userHealth" class="values" style="right: 43px;top: 920px;">10</div>
     <div id="opponentHealth" class="values" style="right: 43px;top: 52px;">10</div>
     <div id="userMana" class="values" style="right: 203px;top: 920px;">5</div>
     <div id="opponentMana" class="values" style="right: 203px;top: 52px;">5</div>
-
+    
     <div id="userInfo">
         <div class="values user-info" style="right: 595px; bottom: 70px; position: fixed;">{{ username }}</div>
         <img src="{{profilepic}}" alt="Profile Picture" class="profilePic" style="bottom: 70px; position: fixed;">
     </div>
-
+    
     <div id="opponentInfo">
         <div class="values" style="right: 595px; top: 70px;">{{ opponentName }}</div>
         <img src="{{opponentProfilepic}}" alt="Profile Picture" class="profilePic opponent-profile-pic" style="top: 70px; position: fixed;">
     </div>
-
-
-
+    
+    
+    
     <div class="endTurn">
         <div class="endTurnText">End Turn</div>
         <button onclick="sendEndTurn(hitboxContents)" id="endTurn" class="endTurn"></button>
     </div>
     
-
+    
     <div class="fullscreenPrompt" id="waitForOtherPlayerTurnPrompt">
         <text>Waiting for other player to join</text>
     </div>
-
-    {% include 'htmlChildren/dropDown.html' %}
-
-
-<script>
-    let isFullscreen = null; // To store the fullscreen state
-    const enterFullscreenPrompt = document.getElementById('enterFullscreenPrompt');
-    const waitForOtherPlayerTurnPrompt = document.getElementById('waitForOtherPlayerTurnPrompt');
-    let callCount = 0;
-    let intervalId;
-    const username = "{{ username }}";
-    let runOncePerTurn = false;
-    let noOneOnline = false;
-    let gameDeleted = false; 
-    let gameEnded = false; 
-    let game = null; // Initialize game variable
     
-    // Define hitbox positions based on player
-    let inPlayAreas = [
-        { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p2Defence (top)
-        { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p2Attack
-        { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p1Attack
-        { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p1Defence (bottom)
+    {% include 'htmlChildren/dropDown.html' %}
+    
+    
+    <script>
+        let isFullscreen = null; // To store the fullscreen state
+        const enterFullscreenPrompt = document.getElementById('enterFullscreenPrompt');
+        const waitForOtherPlayerTurnPrompt = document.getElementById('waitForOtherPlayerTurnPrompt');
+        let callCount = 0;
+        let intervalId;
+        const username = "{{ username }}";
+        let runOncePerTurn = false;
+        let noOneOnline = false;
+        let gameDeleted = false; 
+        let gameEnded = false; 
+        let game = null; // Initialize game variable
+        
+        // Define hitbox positions based on player
+        let inPlayAreas = [
+            { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p2Defence (top)
+            { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p2Attack
+            { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p1Attack
+            { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p1Defence (bottom)
         { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },   // p2bank
         { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } }    // p1bank
     ];
 
     // Check if the device is mobile and redirect to a "not supported" page
     if (/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      window.location.href = "/notSupported"; // redirect to a "not supported" page
+        window.location.href = "/notSupported"; // redirect to a "not supported" page
     }
     
     function checkFullscreen() {
@@ -273,41 +271,41 @@ function dragElement(element) {
         // Set highest z-index to keep dragged card visible above others
         element.style.zIndex = 10;
     } 
+    
+    function closeDragElement(e) { // handles card being let go
+        e.target.classList.remove("drag"); // removes shadow
+        document.onmouseup = null; // removes events
+        document.onmousemove = null;
         
-        function closeDragElement(e) { // handles card being let go
-            e.target.classList.remove("drag"); // removes shadow
-            document.onmouseup = null; // removes events
-            document.onmousemove = null;
-            
-            e.target.style.zIndex = 1; // puts on top
-            let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y (of the card) for the snap
-            
-            if (dropLocation) { // if it has data it will snap
-                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y && area.topLeft.x === dropLocation.topLeft.x && area.bottomRight.x === dropLocation.bottomRight.x);
-                snapCardY(dropLocation, e.target); // passes the area its over and the card 
-                snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
-                numberOfCards = hitboxContents[hitboxNum].length; // creates a variable to say how many cards are in the hitbox and +1 
-                if (numberOfCards > 6) numberOfCards = 6;
-                redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
-            }
-            else { // if it doesnt have data it will snap back to the hand
-                e.target.style.left = "0px";
-                e.target.style.top = "5px";
-            }
+        e.target.style.zIndex = 1; // puts on top
+        let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y (of the card) for the snap
+        
+        if (dropLocation) { // if it has data it will snap
+            let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y && area.topLeft.x === dropLocation.topLeft.x && area.bottomRight.x === dropLocation.bottomRight.x);
+            snapCardY(dropLocation, e.target); // passes the area its over and the card 
+            snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
+            numberOfCards = hitboxContents[hitboxNum].length; // creates a variable to say how many cards are in the hitbox and +1 
+            if (numberOfCards > 6) numberOfCards = 6;
+            redrawCards(numberOfCards, hitboxNum, dropLocation.topLeft.x);
         }
-        
-        function snapCardX(hitboxNum, element, cardX, dropLocation) {
-            hitboxContents[hitboxNum].push(element); // adds the new card to the array
-            hitboxContents[hitboxNum].sort((a, b) => parseInt(a.style.left) - parseInt(b.style.left)); // sorts the array
+        else { // if it doesnt have data it will snap back to the hand
+            e.target.style.left = "0px";
+            e.target.style.top = "5px";
         }
-        
-        function snapCardY(dropLocation, element) { // takes snapping location and snaps the card
-            element.style.top = (dropLocation.topLeft.y - 0) + "px";
-        }
-        
-        function redrawCards(numberOfCards, hitboxNum, left) {
-            let currentPos = getCardPositions(numberOfCards);
-            for (let i = 0; i < hitboxContents[hitboxNum].length; i++) {
+    }
+    
+    function snapCardX(hitboxNum, element, cardX, dropLocation) {
+        hitboxContents[hitboxNum].push(element); // adds the new card to the array
+        hitboxContents[hitboxNum].sort((a, b) => parseInt(a.style.left) - parseInt(b.style.left)); // sorts the array
+    }
+    
+    function snapCardY(dropLocation, element) { // takes snapping location and snaps the card
+        element.style.top = (dropLocation.topLeft.y - 0) + "px";
+    }
+    
+    function redrawCards(numberOfCards, hitboxNum, left) {
+        let currentPos = getCardPositions(numberOfCards);
+        for (let i = 0; i < hitboxContents[hitboxNum].length; i++) {
                 hitboxContents[hitboxNum][i].style.left = (left + currentPos[i] + 3) + "px";
             }
         }
@@ -331,59 +329,60 @@ function dragElement(element) {
             }
             return positionS;
         }
+}
         
         function redrawAllCards(game) {
-        if (!runOncePerTurn) {
-            runOncePerTurn = true;
-        } else {
-            return;
-        }
-        
-        const gameBoard = game.gameBoard;
-        if (!gameBoard) {
-            console.error("gameBoard is null or undefined");
-            return;
-        }
-        
-        // Clear existing data
-        hitboxContents = [[], [], [], [], [], []];
-        cardData = [];
-        document.getElementById('cardContainer').innerHTML = '';
-        
-        // Create arrays of card data for each section based on player
-        const sections = username === game.player2.username ? [
-            // Player 2's view (reversed)
-            {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (bottom)
-            {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
-            {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
-            {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (top)
-            {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
-            {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
-        ] : [
-            // Player 1's view (original)
-            {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (top)
-            {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
-            {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
-            {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (bottom)
-            {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
-            {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
-        ];
-        
-        // Process each section
-        sections.forEach(({data, hitboxIndex}) => {
-            if (data.length > 0) {
-                const area = inPlayAreas[hitboxIndex];
-                const positions = getCardPositions(data.length);
-                
-                data.forEach((cardInfo, index) => {
-                    // Create card div
-                    const cardDiv = document.createElement("div");
-                    cardDiv.classList.add("card");
-                    cardDiv.id = `card_${cardInfo.cardId}`;
+            if (!runOncePerTurn) {
+                runOncePerTurn = true;
+            } else {
+                return;
+            }
+            
+            const gameBoard = game.gameBoard;
+            if (!gameBoard) {
+                console.error("gameBoard is null or undefined");
+                return;
+            }
+            
+            // Clear existing data
+            hitboxContents = [[], [], [], [], [], []];
+            cardData = [];
+            document.getElementById('cardContainer').innerHTML = '';
+            
+            // Create arrays of card data for each section based on player
+            const sections = username === game.player2.username ? [
+                // Player 2's view (reversed)
+                {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (bottom)
+                {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
+                {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
+                {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (top)
+                {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
+                {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
+            ] : [
+                // Player 1's view (original)
+                {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (top)
+                {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
+                {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
+                {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (bottom)
+                {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
+                {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
+            ];
+            
+            // Process each section
+            sections.forEach(({data, hitboxIndex}) => {
+                if (data.length > 0) {
+                    const area = inPlayAreas[hitboxIndex];
+                    const positions = getCardPositions(data.length);
                     
-                    // Create and add main card image
-                    const cardImage = document.createElement("img");
-                    cardImage.src = `images/CardPictures/${cardInfo.name}.png`;
+                    data.forEach((cardInfo, index) => {
+                        // Create card div
+                        const cardDiv = document.createElement("div");
+                        cardDiv.classList.add("card");
+                        cardDiv.id = `card_${cardInfo.cardId}`;
+                        
+                        // Create and add main card image
+                        const cardImage = document.createElement("img");
+                        cardImage.src = `images/CardPictures/${cardInfo.name}.png`;
                     cardImage.style.width = "100%";
                     cardImage.style.height = "100%";
                     cardImage.style.pointerEvents = "none";
@@ -412,50 +411,49 @@ function dragElement(element) {
                     cardDiv.dataset.cost = cardInfo.cost;
                     
                     // Position the card
-                cardDiv.style.position = "absolute";
-                cardDiv.style.left = (area.topLeft.x + positions[index]) + "px";
-                cardDiv.style.top = area.topLeft.y + "px";
-                cardDiv.style.zIndex = "1";
-                
-                // Add to DOM
-                document.getElementById('cardContainer').appendChild(cardDiv);
-                
-                // Make draggable
-                dragElement(cardDiv);
-                
-                // Add to tracking arrays
-                hitboxContents[hitboxIndex].push(cardDiv);
-                cardData.push({
-                    element: cardDiv,
-                    hitbox: hitboxIndex,
-                    index: index,
-                    owner: "me",
-                    cardInfo: {
-                        cardId: cardInfo.cardId,
-                        name: cardInfo.name,
-                        attack: cardInfo.attack,
-                        health: cardInfo.health,
-                        spawnHealth: cardInfo.spawnHealth, // SPAWNHEALTH AND HEALTH ARE COMPLETELY DDIFFERENT
-                        cost: cardInfo.cost
-                    }
+                    cardDiv.style.position = "absolute";
+                    cardDiv.style.left = (area.topLeft.x + positions[index]) + "px";
+                    cardDiv.style.top = area.topLeft.y + "px";
+                    cardDiv.style.zIndex = "1";
+                    
+                    // Add to DOM
+                    document.getElementById('cardContainer').appendChild(cardDiv);
+                    
+                    // Make draggable
+                    dragElement(cardDiv);
+                    
+                    // Add to tracking arrays
+                    hitboxContents[hitboxIndex].push(cardDiv);
+                    cardData.push({
+                        element: cardDiv,
+                        hitbox: hitboxIndex,
+                        index: index,
+                        owner: "me",
+                        cardInfo: {
+                            cardId: cardInfo.cardId,
+                            name: cardInfo.name,
+                            attack: cardInfo.attack,
+                            health: cardInfo.health,
+                            spawnHealth: cardInfo.spawnHealth, // SPAWNHEALTH AND HEALTH ARE COMPLETELY DDIFFERENT
+                            cost: cardInfo.cost
+                        }
+                    });
                 });
-            });
-        }
-    });
+            }
+        });
+        
+        console.log("Cards redrawn:", hitboxContents);
+    }
     
-    console.log("Cards redrawn:", hitboxContents);
-}
-
-
-function getCurrentGame() {
-    if (gameDeleted) return; // Skip if game is deleted
-    
-    const previousRoundNum = window.currentRoundNum || 0;
-    
-    if (!username) {
-        swal.fire({
-            icon: 'error',
-            title: 'Error',
+    function getCurrentGame() {
+        if (gameDeleted) return; // Skip if game is deleted
+        
+        const previousRoundNum = window.currentRoundNum || 0;
+        
+        if (!username) {
+            swal.fire({
+                icon: 'error',
+                title: 'Error',
             text: 'not logged in'
         });
         document.location.href = "/login";
@@ -658,7 +656,6 @@ if (game.player1 && game.player2 && game.player2.username) {
 function sendEndTurn(hitboxContents) {
     waitForOtherPlayerTurnPrompt.style.display = "block";
     console.log("end turn");
-    //const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
     document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
     
     // Don't calculate damage here since getCurrentGame does it
@@ -901,19 +898,7 @@ function sendEndTurn(hitboxContents) {
             const cards = document.getElementsByClassName('card');
             let needsUpdate = true;
             
-            
-            // if (needsUpdate) {
-                //     fetch('game/receiveEndTurn', {
-                    //         method: 'POST',
-                    //         headers: {
-                        //             'Content-Type': 'application/json'
-                        //         },
-                        //         body: JSON.stringify(game)
-                        //     })
-                        //     .then(response => response.json())
-                        //     .catch(error => console.error('Error updating game state:', error));
-                        // }
-                        // Update displays for all cards
+
                         Array.from(cards).forEach(card => {
                             debugger;
                             const health = parseInt(card.dataset.health);
@@ -1009,6 +994,8 @@ function sendEndTurn(hitboxContents) {
     
     setInterval(checkFullscreen, 1000); // Run the check every 1 seconds (1000 milliseconds)
     setInterval(() => console.log("card data:", cardData), 2000);
+
+
     </script>
 </body>
 </html>
