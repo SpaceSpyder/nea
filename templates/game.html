@@ -145,12 +145,6 @@
 
     {% include 'htmlChildren/dropDown.html' %}
 
-    <!--
-    <div class="fullscreenPrompt" id="enterFullscreenPrompt">
-        <text>Click to enter fullscreen</text>
-    </div>
-    -->
-
 
 <script>
     let isFullscreen = null; // To store the fullscreen state
@@ -175,6 +169,7 @@
         { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } }    // p1bank
     ];
 
+    // Check if the device is mobile and redirect to a "not supported" page
     if (/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
       window.location.href = "/notSupported"; // redirect to a "not supported" page
     }
@@ -186,18 +181,13 @@
         isFullscreen = currentlyFullscreen;
         
         // Perform actions based on the new fullscreen state
-        // Perform actions based on the new fullscreen state
         if (isFullscreen && !gameDeleted && !gameEnded) { // Only call if game isn't deleted
         getCurrentGame(); // Call the function to check if the other player has joined every second
         
-        
-        //console.log("Page is in fullscreen");
     } else {
-        //enterFullscreenPrompt.display = "none";
-        //waitForOtherPlayerTurnPrompt.style.display = "none";
         console.log("Page is not in fullscreen");
     }
-}  // Close the checkFullscreen function
+} 
 
 document.addEventListener('click', function () {
     if (!document.fullscreenElement) {
@@ -208,7 +198,6 @@ document.addEventListener('click', function () {
 });
 
 let cardData = [];
-// Select all elements with class 'card' and make them draggable
 // Select all elements with class 'card' and make them draggable
 var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
 cards.forEach(card => {
@@ -266,23 +255,24 @@ function dragElement(element) {
     }
     
     function elementDrag(e) {
-        e = e ||  window.event;
+        e = e || window.event;
         e.preventDefault();
-        // calculate the new cursor position:
-        // set the element's new position:
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        // set the element's new position:
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-                // set the element's new position:
-                element.style.top = (element.offsetTop - pos2) + "px";
-                element.style.left = (element.offsetLeft - pos1) + "px";
-                element.style.zIndex = 10;
-            }
-            
-            
-        }
+        
+        // Calculate mouse movement delta since last frame
+        pos1 = pos3 - e.clientX;  // Calculate horizontal movement
+        pos2 = pos4 - e.clientY;  // Calculate vertical movement
+        
+        // Store current mouse coordinates for next frame
+        pos3 = e.clientX;  // Save current X position
+        pos4 = e.clientY;  // Save current Y position
+        
+        // Move the dragged element by applying the movement delta
+        element.style.top = (element.offsetTop - pos2) + "px";   // Update vertical position
+        element.style.left = (element.offsetLeft - pos1) + "px"; // Update horizontal position
+        
+        // Set highest z-index to keep dragged card visible above others
+        element.style.zIndex = 10;
+    } 
         
         function closeDragElement(e) { // handles card being let go
             e.target.classList.remove("drag"); // removes shadow
@@ -313,12 +303,6 @@ function dragElement(element) {
         
         function snapCardY(dropLocation, element) { // takes snapping location and snaps the card
             element.style.top = (dropLocation.topLeft.y - 0) + "px";
-            // highlight hitbox for debugging
-            // let hl = document.getElementById("highl");
-            //hl.style.left = dropLocation.topLeft.x + "px";
-            //hl.style.top = dropLocation.topLeft.y + "px";
-            //hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
-            //hl.style.height = dropLocation.bottomRight.y - dropLocation.topLeft.y + "px";
         }
         
         function redrawCards(numberOfCards, hitboxNum, left) {
@@ -1028,4 +1012,3 @@ function sendEndTurn(hitboxContents) {
     </script>
 </body>
 </html>
-

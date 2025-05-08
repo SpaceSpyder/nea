@@ -17,7 +17,7 @@ except ImportError as e:
 
 from templates.scripts.cropImage import (cropImage)
 from templates.scripts.clearImages import (removeUnusedImages)
-from templates.scripts.utils import ( # python functions from utils.py
+from templates.scripts.utils import ( 
     getProfilePicPath,
     getUserIdByUsername,
     getUserDetailsByUsername,
@@ -32,8 +32,7 @@ from templates.scripts.utils import ( # python functions from utils.py
 
 )
 from dataclasses import dataclass, asdict
-from moduels import Game, GameBoard, Card, Player # Import Game, GameBoard, and Card classes
-
+from moduels import Game, GameBoard, Card, Player 
 
 
 DefaultPfpPath = "images/profilePics/Default.png"
@@ -41,12 +40,9 @@ DefaultPfpPath = "images/profilePics/Default.png"
 # Flask app setup
 app = Flask(__name__, static_folder="templates", static_url_path="") # Set the static folder to the templates directory
 app.config["SECRET_KEY"] = binascii.hexlify(os.urandom(24)).decode('utf-8') # Generate a random secret key
-
-# Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-
-app.config["UPLOAD_FOLDER"] = os.path.join("templates", "images", "profilePics") # Set the upload folder
+app.config["UPLOAD_FOLDER"] = os.path.join("templates", "images", "profilePics")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)  # session timeout after 1 hour
 
 
@@ -55,18 +51,15 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)  # session timeout
 @app.route("/")
 def index():
     username = session.get("Username") # get username from session
-    profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()
-    return render_template("index.html", profilePic=profilePicPath)
+    profilePicPath = getProfilePicPath(username) if username else getProfilePicPath() # get profile picture path from the user details
+    return render_template("index.html", profilePic=profilePicPath) # sends client the hoempage with the profile picture path
 
 
 @app.route("/howToPlay")
 def howToPlay():
-    username = session.get("Username")
-    profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()
+    username = session.get("Username") # get username from session
+    profilePicPath = getProfilePicPath(username) if username else getProfilePicPath() # get profile picture path from the user details
     return render_template("howToPlay.html", profilePic=profilePicPath)
-
-
-# -------- login and sign up ---------
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -110,7 +103,7 @@ def signUp():
     if request.method == "POST": # when the form is submitted
         username = request.form["username"]
         email = request.form["email"]
-        password = generate_password_hash(request.form["password"]) # makes db more secure
+        password = generate_password_hash(request.form["password"]) # hash the password
         
         try: # try to insert the user into the database
             insertUser(username, password, email)
@@ -120,11 +113,11 @@ def signUp():
             return redirect(url_for("index"))
 
         except sqlite3.IntegrityError as e: # if the username already exists
-            if "UNIQUE constraint failed: Users.Username" in str(e):
+            if "UNIQUE constraint failed: Users.Username" in str(e): # check if the error is due to unique constraint
                 flash("Username already exists. Please choose a different username.", "error")
             else: # unknown error
                 flash("ERROR signing up. Please try again.", "error")
-                print(f"Error: {str(e)}", "error")
+                print(f"Error: {str(e)}", "error") # print the error message
             return render_template("signUp.html", profilePic=profilePicPath)
 
     return render_template("signUp.html", profilePic=profilePicPath)
@@ -137,23 +130,20 @@ def logout():
     return redirect(url_for("login"))
 
 
-# -------- profile stuff ---------
-
-
 @app.route("/profile")
 def profile():
-    if not session.get("Username"):
-        return redirect(url_for("login"))
-    profilePicPath = getProfilePicPath(session["Username"])
+    if not session.get("Username"): # Check if the user is logged in
+        return redirect(url_for("login")) # Redirect to login page if not logged in
+    profilePicPath = getProfilePicPath(session["Username"]) # get profile picture path from the user details
 
     return render_template("profile.html", profilePic=profilePicPath)
 
 
 
-@app.route("/profile/stats", methods=["GET"])
+@app.route("/profile/stats", methods=["GET"]) 
 @app.route("/profile/stats/<username>", methods=["GET"])
 @app.route("/stats", methods=["GET"])
-@app.route("/stats/<username>", methods=["GET"])
+@app.route("/stats/<username>", methods=["GET"]) # gets the usernname from the url
 def stats(username=None):
     if not session.get("Username"):  # Check if the user is logged in
         return redirect(url_for("login"))
@@ -162,7 +152,7 @@ def stats(username=None):
     if username is None:
         username = session["Username"]
 
-    accountPicPath = getProfilePicPath(username) if username else getProfilePicPath() # pfp from the url
+    accountPicPath = getProfilePicPath(username) if username else getProfilePicPath() # profie pic from the url
     accountUsername = username # username from the url
     profilePicPath = getProfilePicPath(session["Username"])  # pfp from session
     sessionUsername = session["Username"]  # username from session
@@ -184,12 +174,12 @@ def stats(username=None):
     return render_template("stats.html", profilePic=profilePicPath, stats=statsData, username=sessionUsername, urlProfilePic=accountPicPath, account_username=accountUsername)
 
 def getUserId(cursor, username): # get user id from username
-    cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
-    result = cursor.fetchone()
+    cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,)) # Query to get user ID from the database
+    result = cursor.fetchone() # Fetch the first result from the query
     return result[0] if result else None
 
-def getUserStats(cursor, userId, username):
-    if userId:
+def getUserStats(cursor, userId, username): # get user stats from the database
+    if userId: # Check if userId is valid
         # Query to get user statistics from the database
         cursor.execute("SELECT GamesPlayed, GamesWon, DateCreated, FavouriteCard FROM UserStats WHERE UserId = ?", (userId,))
         userStats = cursor.fetchone()
@@ -207,7 +197,7 @@ def getUserStats(cursor, userId, username):
 
 @app.route("/decks/<username>", methods=["GET", "POST"])
 @app.route("/profile/decks/<username>", methods=["GET", "POST"])
-def showDecks(username):
+def showDecks(username): 
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
     profilePicPath = getProfilePicPath(session["Username"])  # get pfp
@@ -219,11 +209,9 @@ def showDecks(username):
         flash("User not found", "error")
         return redirect(url_for("index"))
 
-    if request.method == "POST":
+    if request.method == "POST": # if the form is submitted
         selected_cards = request.form.get("selectedCards")
-        if selected_cards:
-            #selected_cards = json.loads(selected_cards)
-            
+        if selected_cards: # if the user selected cards
             flash("New deck created successfully!", "success")
             return redirect(url_for("showDecks", username=username))
 
@@ -233,16 +221,16 @@ def showDecks(username):
 
     # Fetch the current deck number from the Users table
     try:
-        conn = sqlite3.connect("databases/database.db")
+        conn = sqlite3.connect("databases/database.db") # Connect to the database
         cursor = conn.cursor()
         cursor.execute("""
             SELECT CurrentDeck FROM Users
             WHERE Username = ?
-        """, (username,))
-        currentDeckNum = cursor.fetchone()
-        if currentDeckNum:
+        """, (username,)) # Query to get the current deck number for the user
+        currentDeckNum = cursor.fetchone() # Fetch the first result from the query
+        if currentDeckNum: # if the user has a current deck
             currentDeckNum = currentDeckNum[0]
-        else:
+        else: # if the user does not have a current deck
             currentDeckNum = None
 
         # Fetch the current deck from the Decks table
@@ -250,19 +238,19 @@ def showDecks(username):
             cursor.execute("""
                 SELECT Deck FROM Decks
                 WHERE Owner = ? AND UserDeckNum = ?
-            """, (username, currentDeckNum))
-            deckRow = cursor.fetchone()
-            if deckRow:
-                currentDeck = deckRow[0].split(", ")
-            else:
+            """, (username, currentDeckNum)) # Query to get the current deck for the user
+            deckRow = cursor.fetchone() # Fetch the first result from the query
+            if deckRow: # if the user has a current deck
+                currentDeck = deckRow[0].split(", ") # Split the deck string into a list of cards
+            else: # if the user does not have a current deck
                 currentDeck = []
         else:
             currentDeck = []
-    except sqlite3.Error as e:
+    except sqlite3.Error as e: # if there is an error with the database
         flash(f"Error: check server terminal", "error")
         print(f"SQLite error: {str(e)}")
         currentDeck = []
-    finally:
+    finally: # close db connection
         cursor.close()
         conn.close()
 
@@ -278,24 +266,24 @@ def change_profile_pic():
     profilePicPath = getProfilePicPath(session["Username"])  # get pfp
     username = session["Username"]  # get username
 
-    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"} # allowed file extensions
 
-    def allowed_file(filename):
+    def allowed_file(filename): # check if the file is allowed
         return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    if request.method == "POST":
-        if "profilePic" not in request.files:
+    if request.method == "POST": # if the form is submitted
+        if "profilePic" not in request.files: # check if the file is in the request
             flash("No file part", "error")
             return redirect(url_for("profile"))
 
-        file = request.files["profilePic"]
+        file = request.files["profilePic"] # get the file from the request
 
-        if file.filename == "":
+        if file.filename == "": # check if the file has a filename
             flash("No selected file", "error")
             return redirect(url_for("profile"))
 
-        if file and allowed_file(file.filename):
-            try:
+        if file and allowed_file(file.filename): # check if the file is allowed
+            try: # Validate the file type
                 # Validate image content
                 img = Image.open(file.stream)
                 img.verify()  # Confirm it's a real image
@@ -308,6 +296,7 @@ def change_profile_pic():
             file_ext = file.filename.rsplit(".", 1)[1].lower()
             filename = f"{username}_{uuid.uuid4().hex}.{file_ext}"
 
+            # Set the upload folder
             upload_folder = os.path.join("templates", "images", "profilePics")
             app.config["UPLOAD_FOLDER"] = upload_folder
 
@@ -322,23 +311,23 @@ def change_profile_pic():
                 # Update the database
                 conn = getDb()
                 cursor = conn.cursor()
-                cursor.execute("UPDATE Users SET ProfilePicture = ? WHERE Username = ?", (filename, username))
-                conn.commit()
+                cursor.execute("UPDATE Users SET ProfilePicture = ? WHERE Username = ?", (filename, username)) # Update the profile picture in the database
+                conn.commit() # Commit the changes to the database
                 flash("Profile picture updated successfully!", "success")
-            except Exception as e:
-                if 'conn' in locals():
+            except Exception as e: # if there is an error with the database
+                if 'conn' in locals(): # Rollback in case of error
                     conn.rollback()
                 flash(f"An error occurred: {str(e)}", "error")
-            finally:
-                if 'cursor' in locals():
+            finally: # close db connection
+                if 'cursor' in locals(): # Close the cursor
                     cursor.close()
-                if 'conn' in locals():
+                if 'conn' in locals(): # Close the connection
                     conn.close()
 
-            removeUnusedImages()
+            removeUnusedImages() # remove unused images from the profilePics folder
             return redirect(url_for("profile"))
 
-        else:
+        else: # if the file is not allowed
             flash("Unsupported file type", "error")
             return redirect(url_for("change_profile_pic"))
 
@@ -347,14 +336,14 @@ def change_profile_pic():
 
 
 
-@app.route("/testGame")
+@app.route("/testGame") # used for testing / debugging 
 def testGame():
     # Check if the user is logged in
     username = checkUsername()
-    if username:
+    if username: # check if the user is logged in
         profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()  # get profile picture path from the user details
         return render_template("prenetGame.html", profilePic=profilePicPath)
-    else:
+    else: # if the user is not logged in, redirect to login page
         return render_template("prenetGame.html")
 
 
@@ -369,39 +358,41 @@ def game():
  
 @app.route("/game/getCurrentGame", methods=["GET"])
 def getCurrentGame():
+        # sets global variables for the game
         global globalGameCount
         global globalGameList
-        dumpGlobalState()
-        username = session.get("Username")
+        dumpGlobalState() # for debugging
+        username = session.get("Username") # get username from session
 
-        if session.get("CurrentGame"): 
-            game = globalGameList[(session["CurrentGame"] - 1)]
-            if (game and game.player1 and 
+        if session.get("CurrentGame"): # check if the user is in a game
+            game = globalGameList[(session["CurrentGame"] - 1)] # get the game from the global game list
+            if (game and game.player1 and
                 ((game.player1.health <= 0) or 
-                 (game.player2 and game.player2.health <= 0))):
+                 (game.player2 and game.player2.health <= 0))): # check if the game is over
                 
                 # End the game if either player is dead
-                winner = "player1" if (game.player2 and game.player2.health <= 0) else "player2"
-                winnerUsername = game.player1.username if winner == "player1" else (game.player2.username if game.player2 else "Unknown")
-                if username == winnerUsername:
+                winner = "player1" if (game.player2 and game.player2.health <= 0) else "player2" # sets the winner
+                winnerUsername = game.player1.username if winner == "player1" else (game.player2.username if game.player2 else "Unknown") # sets the winner username
+                if username == winnerUsername: # check if the user is the winner
                     increaseGamesWon(username)  # Increases the number of games won for the user
 
-                if username == game.player1.username:
-                    game.player1.status = "dead"
-                elif game.player2 and username == game.player2.username:
-                    game.player2.status = "dead"
+                if username == game.player1.username: # check if the user is player 1
+                    game.player1.status = "dead" # sets the player 1 status to dead
+                elif game.player2 and username == game.player2.username: # check if the user is player 2
+                    game.player2.status = "dead" # sets the player 2 status to dead
                     
                 game.status = "game_over"
-                session.pop("CurrentGame")
+                session.pop("CurrentGame") # remove the current game from the session
                 increaseGamesPlayed(username)  # Increases the number of games played for the user
 
-                if (game.player1.status == "dead" and game.player2 and game.player2.status == "dead"):
+                if (game.player1.status == "dead" and game.player2 and game.player2.status == "dead"): # check if both players are dead
                     globalGameList.remove(game)  # Remove the game from the list
-                    globalGameCount -= 1
-                return jsonify({"status": "game_over", "winner": winner, "currentGame": asdict(game)}), 200
+                    globalGameCount -= 1 # Decrease the global game count
+                return jsonify({"status": "game_over", "winner": winner, "currentGame": asdict(game)}), 200 # Return game over status
             
-            gameDict = asdict(game)
-            # Set opponent profile pic based on which player you are
+            gameDict = asdict(game) # Convert the game object to a dictionary
+
+            # setting up opponent profile picture
             if username == game.player1.username and game.player2:
                 gameDict["opponentProfilepic"] = getProfilePicPath(game.player2.username)
             elif username == game.player2.username:
@@ -409,110 +400,107 @@ def getCurrentGame():
             else:
                 gameDict["opponentProfilepic"] = "images/profilePics/Default.png"
                 
-            return jsonify(gameDict)
+            return jsonify(gameDict) # Return the game object as JSON
  
-        for game in globalGameList:
+        for game in globalGameList: # check if the user is already in a game
             if (game.player2 == None ) and username != game.player1.username:
                 player2 = Player(username, False, 10, 5)  # Create player2 with default health and mana
                 game.player2 = player2  # Assign user to player2 if slot is empty
-                dumpGlobalState()
-                session["CurrentGame"] = globalGameCount
-                session.modified = True
-                game.player1.health = 100
-                game.player2.health = 100
+                dumpGlobalState() # for debugging
+                session["CurrentGame"] = globalGameCount # set the current game in the session
+                session.modified = True 
+                game.player1.health = 10
+                game.player2.health = 10
                 return jsonify({"isPlayer1": False})  # User is player2
-        
-
-            
  
         globalGameCount += 1
         player1 = Player(username, True, 10, 5)  # Create player1 with default health and mana
-        newGame = Game(player1, None, globalGameCount, 0)
-        globalGameList.append(newGame)
-        session["CurrentGame"] = globalGameCount
+        newGame = Game(player1, None, globalGameCount, 0) # Create a new game object
+        globalGameList.append(newGame) # Add the new game to the global game list
+        session["CurrentGame"] = globalGameCount # set the current game in the session
         dumpGlobalState()
         session.modified = True
         return jsonify({"isPlayer1": True})
  
  
-@app.route("/game/waitForSecondPlayer", methods=["GET"])
+@app.route("/game/waitForSecondPlayer", methods=["GET"]) # wait for second player to join the game
 def waitForSecondPlayer():
     global globalGameCount
     global globalGameList
-    dumpGlobalState()
-    if session.get("CurrentGame"): 
-        game = globalGameList[(session["CurrentGame"] - 1)]
+    dumpGlobalState() # for debugging
+    if session.get("CurrentGame"): # check if the user is in a game
+        game = globalGameList[(session["CurrentGame"] - 1)] # get the game from the global game list
         return jsonify({"player2Found": game.player2.username})  # Return player2's username
     return jsonify({"ERROR_no_current_game": True})  # Error if no current game
 
-@app.route("/game/receiveEndTurn", methods=["POST"])
+@app.route("/game/receiveEndTurn", methods=["POST"]) # receive end turn from the client
 def receiveEndTurn():
-    print("Received end turn from: ", session.get("Username"))  
-    data = request.get_json()
+    print("Received end turn from: ", session.get("Username")) # for debugging
+    data = request.get_json() # get the data from the client
     if not data:
         return jsonify({"status": "error", "message": "Invalid data"}), 400
 
-    game_id = session.get("CurrentGame")
-    if game_id is None:
+    gameID = session.get("CurrentGame") # get the current game from the session
+    if gameID is None:
         return jsonify({"status": "error", "message": "No current game"}), 400
 
-    global globalGameList
-    game = globalGameList[game_id - 1]
-    game_board_data = data.get("gameBoard", {})
+    global globalGameList # get the global game list
+    game = globalGameList[gameID - 1] # get the game from the global game list
+    gameBoardData = data.get("gameBoard", {}) # get the game board data from the client
 
 
-    game.gameBoard = GameBoard(
-        p1Attack=[Card(**card) for card in game_board_data.get("p1Attack", [])],
-        p1Defence=[Card(**card) for card in game_board_data.get("p1Defence", [])],
-        p2Attack=[Card(**card) for card in game_board_data.get("p2Attack", [])],
-        p2Defence=[Card(**card) for card in game_board_data.get("p2Defence", [])],
-        p1bank=[Card(**card) for card in game_board_data.get("p1bank", [])],
-        p2bank=[Card(**card) for card in game_board_data.get("p2bank", [])]
+    game.gameBoard = GameBoard( # set up the game board
+        p1Attack=[Card(**card) for card in gameBoardData.get("p1Attack", [])],
+        p1Defence=[Card(**card) for card in gameBoardData.get("p1Defence", [])],
+        p2Attack=[Card(**card) for card in gameBoardData.get("p2Attack", [])],
+        p2Defence=[Card(**card) for card in gameBoardData.get("p2Defence", [])],
+        p1bank=[Card(**card) for card in gameBoardData.get("p1bank", [])],
+        p2bank=[Card(**card) for card in gameBoardData.get("p2bank", [])]
     )
-    game.player1.mana = data.get("player1", {}).get("mana", -1)
-    game.player2.mana = data.get("player2", {}).get("mana", -1)
-    runAttackSequence(game)
+    game.player1.mana = data.get("player1", {}).get("mana", -1) # ajust player 1 mana
+    game.player2.mana = data.get("player2", {}).get("mana", -1) # ajust player 2 mana
+    runAttackSequence(game) # run the attack sequence
     
-    game.roundNum = data.get("roundNum", game.roundNum)
+    game.roundNum = data.get("roundNum", game.roundNum) # get the round number from the client
 
-    response = {"status": "success", "message": "Game state updated", "game": asdict(game)}
-    return jsonify(response), 200
+    response = {"status": "success", "message": "Game state updated", "game": asdict(game)} # create a response object with the game state
+    return jsonify(response), 200 # Return success response
 
 
-@app.route("/game/deleteGame", methods=["POST"])
+@app.route("/game/deleteGame", methods=["POST"]) # delete the game
 def deleteGame():
     try:
-        username = session.get("Username")
+        username = session.get("Username") # get username from session
         if not username:
             return jsonify({"status": "NOT_LOGGED_IN", "message": "You are not logged in"})
 
-        game_id = session.get("CurrentGame")
-        if game_id is None:
-            session.pop("CurrentGame", None)
-            session.pop("InGame", None)
+        gameID = session.get("CurrentGame") # get the current game from the session
+        if gameID is None: # check if the user is in a game
+            session.pop("CurrentGame", None) # remove the current game from the session
+            session.pop("InGame", None) # remove the in game status from the session
             return jsonify({"status": "success", "message": "No active game to delete", "redirect": "/index"})
 
-        global globalGameList
+        global globalGameList # get the global game list
 
-        if game_id < 1 or game_id > len(globalGameList):
-            session.pop("CurrentGame", None)
-            session.pop("InGame", None)
+        if gameID < 1 or gameID > len(globalGameList): # check if the game ID is valid  
+            session.pop("CurrentGame", None) # remove the current game from the session
+            session.pop("InGame", None) # remove the in game status from the session
             return jsonify({"status": "success", "message": "Invalid game ID cleared", "redirect": "/index"})
 
-        game = globalGameList[game_id - 1]
+        game = globalGameList[gameID - 1] # get the game from the global game list
 
-        if username != game.player1.username and username != game.player2.username:
+        if username != game.player1.username and username != game.player2.username: # check if the user is a player in the game
             return jsonify({"status": "error", "message": "You are not a player in this game"})
 
         player1 = game.player1
         player2 = game.player2
 
         # Remove the game from the list
-        globalGameList.pop(game_id - 1)
+        globalGameList.pop(gameID - 1)
 
         # Adjust game IDs for all games with higher IDs
-        for i in range(game_id - 1, len(globalGameList)):
-            globalGameList[i].game_id -= 1
+        for i in range(gameID - 1, len(globalGameList)):
+            globalGameList[i].gameID -= 1
 
         # Adjust the global game count
         global globalGameCount
@@ -523,16 +511,16 @@ def deleteGame():
         session.pop("InGame", None)
 
         # Clear the other player's session
-        if player1 and player1.username != username:
-            for sess_key, sess_data in session.items():
-                if sess_data.get("Username") == player1:
-                    session.pop(sess_key, None)
+        if player1 and player1.username != username: # check if player 1 is not the user
+            for sessionKey, sessionData in session.items(): 
+                if sessionData.get("Username") == player1: 
+                    session.pop(sessionKey, None)
                     break
 
         if player2 and player2.username != username:
-            for sess_key, sess_data in session.items():
-                if sess_data.get("Username") == player2.username:
-                    session.pop(sess_key, None)
+            for sessionKey, sessionData in session.items():
+                if sessionData.get("Username") == player2.username:
+                    session.pop(sessionKey, None)
                     break
 
         dumpGlobalState()
@@ -541,25 +529,28 @@ def deleteGame():
             "status": "success",
             "message": "Game deleted successfully",
             "redirect": "/index"
-        })
-    except Exception as e:
+        }) # Return success response
+    except Exception as e: # handle any exceptions that occur during the process
         print(f"Error in deleteGame: {e}")
         return jsonify({"status": "error", "message": str(e)})
 
 
-@app.route("/modifyDeck/<username>", methods=["POST"])
+@app.route("/modifyDeck/<username>", methods=["POST"]) # modify the deck of the user
 def modifyDeck(username):
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
 
-    selectedCards = request.form.get("selectedCards")
+    # get the date from the form
+    selectedCards = request.form.get("selectedCards") 
     selectedDeck = request.form.get("deck")
     deckName = request.form.get("deckNameInput")
+
+    # for debugging
     print("deckName: ", deckName)
     print("selectedCards: ", selectedCards)
 
-    if selectedDeck == "create":
-        conn = getDb()
+    if selectedDeck == "create": # if the user wants to create a new deck
+        conn = getDb() # Connect to the database
         cursor = conn.cursor()
         try:
             with conn:
@@ -568,8 +559,8 @@ def modifyDeck(username):
                     SELECT COALESCE(MAX(UserDeckNum), 0) + 1
                     FROM Decks
                     WHERE Owner = ?
-                """, (username,))
-                userDeckNum = cursor.fetchone()[0]
+                """, (username,)) # Query to get the next UserDeckNum for the user
+                userDeckNum = cursor.fetchone()[0] # Fetch the first result from the query
 
                 # If deckName is empty or only whitespace, set default
                 if not deckName or not deckName.strip():
@@ -579,8 +570,9 @@ def modifyDeck(username):
                 cursor.execute("""
                     INSERT INTO Decks (Owner, UserDeckNum, Deck, DeckName)
                     VALUES (?, ?, ?, ?)
-                """, (username, userDeckNum, selectedCards, deckName))
+                """, (username, userDeckNum, selectedCards, deckName)) # Insert the new deck into the database
                 flash("New deck created successfully!", "success")
+
         except sqlite3.Error as e:
             flash(f"Error: {e}", "error")
             print(f"SQLite error: {str(e)}")
@@ -597,7 +589,7 @@ def modifyDeck(username):
                     UPDATE Users
                     SET CurrentDeck = ?
                     WHERE Username = ?
-                """, (selectedDeck, username))
+                """, (selectedDeck, username)) # Update the current deck for the user in the database
                 flash("Current deck updated successfully!", "success")
         except sqlite3.Error as e:
             flash(f"Error: check server terminal", "error")
@@ -631,7 +623,7 @@ def getRandomCard():
         return jsonify({"error": str(e)}), 500
 
 
-def dumpGlobalState(): # for debugging purposes
+def dumpGlobalState(): # for debugging
     global globalGameList
     global globalGameCount
     print("Global Game List")
@@ -639,14 +631,14 @@ def dumpGlobalState(): # for debugging purposes
     print("Global Game Count")
     print(globalGameCount)
     print("Session")
-    if session.get("CurrentGame"):
+
+    if session.get("CurrentGame"): # check if the user is in a game
         print("Found session:" + str(session["CurrentGame"]))
-    else:
+    else: # if the user is not in a game
         print("No session")
 
 
-def resetUserGameState(username):
-    """Reset a user's game state so they can join new games."""
+def resetUserGameState(username): # reset the game state of the user
     session.pop("CurrentGame", None)
     session.pop("InGame", None)
     
@@ -661,10 +653,10 @@ def resetUserGameState(username):
         
     # Adjust game IDs
     for i, game in enumerate(globalGameList):
-        game.game_id = i + 1
+        game.gameID = i + 1
         
     global globalGameCount
-    globalGameCount = len(globalGameList)
+    globalGameCount = len(globalGameList) # Update the global game count
 
     dumpGlobalState()
 
@@ -681,44 +673,51 @@ def test_alert(alert_type):
 
 
 def runAttackSequence(game):
-    # check whose turn it is
+    # Determine if it's player 1's turn based on even/odd round number
     player1sTurn = game.roundNum % 2 == 0
-    # each attack card attacks in sequence the other players attack cards and then defence cards and then the player
-    # while there are attack cards
-    # take the next attacking card and try and attack the other player's attack cards, defence cards and then the player
+
+    # Get the attacking cards based on whose turn it is
     attacking_cards = game.gameBoard.p1Attack if player1sTurn else game.gameBoard.p2Attack
+    # Get the defending player's attack cards
     defending_attack_cards = game.gameBoard.p2Attack if player1sTurn else game.gameBoard.p1Attack
+    # Get the defending player's defence cards
     defending_defence_cards = game.gameBoard.p2Defence if player1sTurn else game.gameBoard.p1Defence
+
+    # Keep track of which defending cards we've attacked
     defending_attack_card_index = 0
     defending_defence_card_index = 0
+
+    # Process each attacking card in sequence
     for i in range(0, len(attacking_cards)):
+        # First try to attack enemy attack cards if any remain
         if defending_attack_card_index < len(defending_attack_cards):
-            defending_attack_cards[defending_attack_card_index].health -= attacking_cards[i].attack 
+            defending_attack_cards[defending_attack_card_index].health -= attacking_cards[i].attack
             defending_attack_card_index += 1
+        # If no attack cards left, attack defence cards
         elif defending_defence_card_index < len(defending_defence_cards):
             defending_defence_cards[defending_defence_card_index].health -= attacking_cards[i].attack
             defending_defence_card_index += 1
+
+        # After attacking cards, deal damage to player and give attacker mana
         if player1sTurn:
-            game.player2.health -= attacking_cards[i].attack
-            game.player1.mana += 2
+            game.player2.health -= attacking_cards[i].attack  # Damage enemy player
+            game.player1.mana += 2  # Give mana to attacking player
         else:
-            game.player1.health -= attacking_cards[i].attack
-            game.player2.mana += 2
-                
+            game.player1.health -= attacking_cards[i].attack  # Damage enemy player 
+            game.player2.mana += 2  # Give mana to attacking player
 
 
-@app.route("/notSupported", methods=["GET"])
+@app.route("/notSupported", methods=["GET"]) # not supported page
 def notSupported():
-
     username = session.get("Username")
     return render_template("notSupported.html", username=username, profilepic=getProfilePicPath(username), opponentProfilepic="images/profilePics/Default.png")
 
-@app.teardown_appcontext
+@app.teardown_appcontext # close the database connection when the app context ends
 def close_db(e=None):
     closeDb(e)
 
-
-if __name__ == "__main__":
+# flask app run
+if __name__ == "__main__": 
     globalGameCount = 0
     globalGameList = []
     app.run(debug=True)

@@ -1,43 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-    <link rel="shortcut icon" type="image/png" href="/images/ShieldLogo.png">
-    <style>
-        main {
-            margin-left: 300px;
-            margin-top: 48px;
-        }
-
-    </style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Profile</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+        <link rel="shortcut icon" type="image/png" href="/images/ShieldLogo.png">
+        <style>
+            main {
+                margin-left: 300px;
+                margin-top: 48px;
+            }
+            
+        </style>
 </head>
 
 <body>
     {% include 'htmlChildren/navbar.html' %} <!-- navbar  -->
-
+    
     <!-- Flash messages block -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
     {% endwith %}
     
     <main>
         <p style="padding-top: 50px; font-size: large;"></p>
     </main>
-
+    
     {% include 'htmlChildren/sideNav.html' %}
 </body>
 </html>
 <script>
-        if (/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      window.location.href = "/notSupported"; // redirect to a "not supported" page
+    // Check if the device is mobile
+    if (/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        window.location.href = "/notSupported"; // redirect to a "not supported" page
     }
 </script>
