@@ -10,9 +10,8 @@
 </head>
 
 <body>
-    {% include 'htmlChildren/navbar.html' %} <!-- navbar  -->
+    {% include 'htmlChildren/navbar.html' %} 
     
-    <!-- Flash messages block -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     <ul class="flashes">

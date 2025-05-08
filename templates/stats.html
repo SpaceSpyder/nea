@@ -10,35 +10,35 @@
         
 
         .profile-pic2 {
-            max-width: 150px; /* Set a maximum width */
-            height: auto; /* Maintain aspect ratio */
+            max-width: 150px; 
+            height: auto; 
         }
 
         .favourite-card img {
-            max-width: 100%; /* Ensure the image does not overflow */
-            height: auto; /* Maintain aspect ratio */
-            width: 100px; /* Set a fixed width */
-            height: 150px; /* Set a fixed height */
+            max-width: 100%; 
+            height: auto; 
+            width: 100px;
+            height: 150px; 
         }
 
         .main1 {
-            overflow: unset;     /* Add scrollbars if content overflows */
+            overflow: unset;   
             padding-left: 262px;
             padding-top: 20px;
-            z-index: -1;        /* Ensure it is above background elements */
+            z-index: -1;    
             pointer-events: none;
             display: inline-block;
         }
 
         .Account-pic {
-            max-width: 150px; /* Set a maximum width */
-            height: auto; /* Maintain aspect ratio */
+            max-width: 150px;
+            height: auto; 
         }
     </style>
 </head>
 <body>
-    {% include 'htmlChildren/navbar.html' %} <!-- navbar here -->
-    {% include 'htmlChildren/sideNav.html' %} <!-- side navigation here -->
+    {% include 'htmlChildren/navbar.html' %}
+    {% include 'htmlChildren/sideNav.html' %} 
 
     <div class="main1">
         <img class="Account-pic" src="{{ urlProfilePic }}" alt="Account Picture">
@@ -46,7 +46,7 @@
         <h2>{{ account_username }}'s Statistics</h2>
         <div class="stats-container">
             <div class="stats-table">
-                <table border="1">
+                <table>
                     <tr>
                         <th>Rank</th>
                         <td>{{ stats.Rank }}</td>

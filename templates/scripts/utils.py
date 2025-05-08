@@ -28,7 +28,7 @@ def getUserIdByUsername(username):
     conn = getDb()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
+        cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,)) # Get user ID by username
         userId = cursor.fetchone()
         return userId[0] if userId else None
     except Exception as e:
@@ -40,9 +40,9 @@ def getUserDetailsByUsername(username):
     conn = getDb()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
+        cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,)) # Get all user details
         user = cursor.fetchone()
-        if user:
+        if user: # If user exists, store details in session
             session["Id"] = user[0]
             session["Username"] = user[1]
             session["Email"] = user[3]
@@ -57,7 +57,7 @@ def getDecksForUser(username):
     conn = getDb()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username,))
+        cursor.execute("SELECT * FROM Decks WHERE Owner = ?", (username,)) # Get all decks for the user
         decks = cursor.fetchall()
         return decks
     except Exception as e:
@@ -70,7 +70,7 @@ def getDeckForUser(username, deckId=None):
     try:
         cursor = conn.cursor()
         if deckId is None:
-            cursor.execute("SELECT CurrentDeck FROM Users WHERE Username = ?", (username,))
+            cursor.execute("SELECT CurrentDeck FROM Users WHERE Username = ?", (username,)) # Get the current deck ID for the user
             deckIdRow = cursor.fetchone()
             if not deckIdRow:
                 return []
@@ -78,7 +78,7 @@ def getDeckForUser(username, deckId=None):
         cursor.execute(
             "SELECT Deck FROM Decks WHERE Owner = ? AND UserDeckNum = ?",
             (username, deckId)
-        )
+        ) # Get the deck for the user
         deckRow = cursor.fetchone()
         if deckRow:
             return deckRow[0].split(", ")
@@ -99,7 +99,7 @@ def getProfilePicPath(username=None):
     try:
         conn = getDb()
         cursor = conn.cursor()
-        cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,))
+        cursor.execute("SELECT ProfilePicture FROM Users WHERE Username = ?", (username,)) # Get the profile picture for the user
         result = cursor.fetchone()
         if result and result[0]:
             from flask import has_app_context
@@ -124,7 +124,7 @@ def calculateRank(username):
     try:
         cursor = conn.cursor()
         # Get the number of wins for the current user
-        cursor.execute("SELECT COUNT(*) FROM UserStats WHERE GamesWon = ?", (username,))
+        cursor.execute("SELECT COUNT(*) FROM UserStats WHERE GamesWon = ?", (username,)) # Get the number of wins
         userWins = cursor.fetchone()[0]
 
         # Count how many users have more wins than the current user
@@ -133,7 +133,7 @@ def calculateRank(username):
             FROM UserStats 
             GROUP BY GamesWon 
             HAVING COUNT(*) > ?
-        """, (userWins,))
+        """, (userWins,)) # Count users with more wins
         rank = cursor.fetchone()[0] + 1  # Rank is the count of users with more wins + 1
 
         return rank
@@ -152,7 +152,7 @@ def GetDeckNames(username):
             SELECT DeckName
             FROM Decks
             WHERE Owner = ?
-        """, (username,))
+        """, (username,)) # Fetch all deck names for the user
 
         # Fetch all results and append DeckName to the list
         rows = cursor.fetchall()
@@ -206,7 +206,7 @@ def increaseGamesPlayed(username):
                 UPDATE UserStats 
                 SET GamesPlayed = GamesPlayed + 1
                 WHERE UserId = ?
-            """, (userId,))
+            """, (userId,)) # Increase the number of games played
     except sqlite3.OperationalError as e:
         print(f"Error increasing games played: {e}")
         raise
@@ -222,7 +222,7 @@ def increaseGamesWon(username):
                 UPDATE UserStats 
                 SET GamesWon = GamesWon + 1
                 WHERE UserId = ?
-            """, (userId,))
+            """, (userId,)) # Increase the number of games won
     except sqlite3.OperationalError as e:
         print(f"Error increasing games won: {e}")
         raise

@@ -34,7 +34,6 @@
             background-image: url('images/Tablet.png');
         }
 
-        /* Button Styling */
         .button {
             font-family: "UnifrakturMaguntia", cursive;
             font-weight: bold;
@@ -44,14 +43,12 @@
             border: solid 4px #0000003c;
             border-radius: 0px;
             cursor: pointer;
-            /*background-image: url('../images/button1.png');*/
             transition: background-color 0.3s ease;
         }
 
         .button:hover {
             background-color: #0000001f;
             mix-blend-mode: multiply;
-            /*background-image: url('../images/button1.png');*/
         }
 
         .tablet input{
@@ -71,8 +68,8 @@
             let username = document.querySelector("input[name='username']").value;
             let password = document.querySelector("input[name='password']").value;
             if (username === "" || password === "") {
-                alert("Please fill out all fields.");  // Optional: or display inline message
-                event.preventDefault();  // Prevents the form from submitting
+                alert("Please fill out all fields.");  
+                event.preventDefault(); 
             }
         }
     </script>

@@ -10,7 +10,7 @@
 
         .make-deck-grid, .display-deck-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr); /* Ensure exactly 7 columns */
+            grid-template-columns: repeat(7, 1fr); 
             gap: 10px 8px;
             overflow: visible;
             width: 100%;
@@ -19,22 +19,20 @@
 
         .display-deck-grid img,
         .make-deck-grid img, .card-div {
-            width: 200px; /*do not change*/
-            height: 300px; /*do not change*/
+            width: 200px; 
+            height: 300px; 
             box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
         }
 
-        /* Default: Cards are grey */
         .make-deck-grid img {
-            filter: grayscale(100%); /* Make the card grey by default */
-            transition: filter 0.3s ease; /* Smooth transition effect */
+            filter: grayscale(100%); 
+            transition: filter 0.3s ease; 
             object-fit: cover;
         }
 
-        /* When selected, remove grayscale to show color */
         .make-deck-grid img.selected {
-            filter: grayscale(0); /* Remove grayscale to make the card colorful */
-            opacity: 1;  /* Optional: ensure opacity is fully restored */
+            filter: grayscale(0); 
+            opacity: 1;
         }
 
         .make-deck-grid img:hover {
