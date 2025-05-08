@@ -3,19 +3,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Metamorphous&display=swap');
 
 
-/* Root Variables for Global Use */
 :root {
     --main-bg-color: #e4e4e4;
     --text-color: rgba(0, 0, 0, 0.65);
 }
 
-/* Body Styling */
+
 body {
     font-family: "Metamorphous", serif;
 
 }
 
-/* Main Content */
 .main {
     margin-left: 252px;
     font-size: 28px;
@@ -23,8 +21,6 @@ body {
     margin-top: 10px;
 }
 
-
-/* Media Query for Smaller Screens */
 @media screen and (max-height: 450px) {
     .sidenav {
         padding-top: 15px;
@@ -34,7 +30,6 @@ body {
     }
 }
 
-/* Navbar Styling */
 .navbar {
     list-style-type: none;
     margin: 0;
@@ -49,7 +44,7 @@ body {
     position: relative;
     border-radius: 5px;
     background-color: #ffffff8e;
-    /*opacity: 0.9;*/
+    
 }
 
 .navbar-left, .navbar-right {
@@ -74,59 +69,50 @@ body {
 }
 
 .navbar-left a:hover, .navbar-right a:hover {
-    /*background-color: #556c6842;*/
+ 
     transform: scale(1.05);
 }
 
-/* Profile Picture Styling */
 .profile-pic {
     padding: 0;
     border: none;
     object-fit: cover;
-    width: 100%;                /* Full width of the container */
-    height: 100%;               /* Full height of the container */
-    object-fit: cover;          /* Crop the image while maintaining aspect ratio */
-    object-position: center;    /* Center the image */
+    width: 100%;         
+    height: 100%;          
+    object-fit: cover;       
+    object-position: center;   
     border-radius: 10%;
     padding: 0%;
 }
 
 .nav-pfp-container {
-    width: 40px;               /* Set the width of the square */
-    height: 40px;              /* Set the height of the square */
-    overflow: hidden;           /* Hide overflow to crop the image */
-    position: relative;         /* Positioning context for absolute child */
+    width: 40px;          
+    height: 40px;        
+    overflow: hidden;   
+    position: relative;   
     border-radius: 0 !important;
     background-color: transparent !important;
     padding: 0%;
 }
 
 .large-pfp-container {
-    width: 220px;               /* Set the width of the square */
-    height: 220px;              /* Set the height of the square */
-    overflow: hidden;           /* Hide overflow to crop the image */
-    position: relative;         /* Positioning context for absolute child */
+    width: 220px;          
+    height: 220px;           
+    overflow: hidden;          
+    position: relative;         
     border-radius: 0 !important;
     background-color: transparent !important;
 }
-
-
-
 
 .title {
     font-size: 30px;
     color: #000000;
 }
 
-/* Subtitle Styling */
 .sub-title {
     font-size: large;
 }
 
-
-
-
-/* Text Styles */
 .large-text {
     font-size: 70px;
     font-family: "UnifrakturMaguntia", cursive;
@@ -143,7 +129,6 @@ body {
     color: #969696;
 }
 
-
 .success {
     color: green;
 }
@@ -152,8 +137,6 @@ body {
     color: red;
 }
 
-
-/* Button Styling */
 .button {
     font-size: 40px;
     font-family: "UnifrakturMaguntia", cursive;
@@ -164,17 +147,13 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    /*background-image: url('../images/button1.png');*/
     transition: background-color 0.3s ease;
 }
 
 .button:hover {
     background-color: #3c92a14c;
-    /*background-image: url('../images/button1.png');*/
 }
 
-
-/* Tablet Styles */
 .tablet {
     background-color: rgb(181, 130, 103);
     height: 480px;
@@ -184,7 +163,7 @@ body {
     display: flex;
     flex-direction: column;
 
-    align-items: center;  /* Center the text horizontally */
+    align-items: center; 
     text-align: center;
 }
 
@@ -192,7 +171,6 @@ body {
     display: block;
 }
 
-/* Horizontal Rule */
 hr {
     border: 0;
     border-top: 2px solid rgba(0, 0, 0, 0.708);
@@ -202,9 +180,9 @@ hr {
 .flashes {
     list-style-type: none;
     padding: 0;
-    width: 100%; /* Make the container wider */
-    margin: 0 auto; /* Center the container */
-    align-items: center; /* Center the flash messages horizontally */
+    width: 100%;
+    margin: 0 auto;
+    align-items: center;
 }
 
 .flashes li {
@@ -212,8 +190,7 @@ hr {
     margin-top: 10px;
     border-radius: 5px;
     opacity: 1;
-    animation: fadeOut 3s 3s forwards; /* Apply the fadeOut animation */
-    /* max-width: 90%; */ /* Ensure the flash messages do not exceed the screen width */
+    animation: fadeOut 3s 3s forwards;
     position: relative;
     z-index: 10;
 }
