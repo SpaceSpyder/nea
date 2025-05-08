@@ -71,17 +71,17 @@ def getDeckForUser(username, deckId=None):
         cursor = conn.cursor()
         if deckId is None:
             cursor.execute("SELECT CurrentDeck FROM Users WHERE Username = ?", (username,))
-            deckId_row = cursor.fetchone()
-            if not deckId_row:
+            deckIdRow = cursor.fetchone()
+            if not deckIdRow:
                 return []
-            deckId = deckId_row[0]
+            deckId = deckIdRow[0]
         cursor.execute(
             "SELECT Deck FROM Decks WHERE Owner = ? AND UserDeckNum = ?",
             (username, deckId)
         )
-        deck_row = cursor.fetchone()
-        if deck_row:
-            return deck_row[0].split(", ")
+        deckRow = cursor.fetchone()
+        if deckRow:
+            return deckRow[0].split(", ")
         else:
             return []
     except Exception as e:
@@ -179,13 +179,13 @@ def insertUser(username, password, email):
             
             # Get the user ID of the newly inserted user
             cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
-            user_id = cursor.fetchone()[0]
+            userID = cursor.fetchone()[0]
             
             # Insert a new record into the UserStats table
             cursor.execute("""
                 INSERT INTO UserStats (UserId, GamesPlayed, GamesWon, DateCreated, FavouriteCard)
                 VALUES (?, 0, 0, ?, "/images/CardPictures/Knight.png")
-            """, (user_id, date))
+            """, (userID, date))
 
             cursor.execute("""
                 INSERT INTO Decks (Owner, UserDeckNum, Deck, DeckName)

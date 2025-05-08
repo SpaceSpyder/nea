@@ -214,8 +214,8 @@ def showDecks(username):
     session_username = session["Username"]  # get username
 
     # Check if the user exists
-    user_id = getUserIdByUsername(username)
-    if not user_id:
+    userID = getUserIdByUsername(username)
+    if not userID:
         flash("User not found", "error")
         return redirect(url_for("index"))
 
@@ -239,34 +239,34 @@ def showDecks(username):
             SELECT CurrentDeck FROM Users
             WHERE Username = ?
         """, (username,))
-        current_deck_num = cursor.fetchone()
-        if current_deck_num:
-            current_deck_num = current_deck_num[0]
+        currentDeckNum = cursor.fetchone()
+        if currentDeckNum:
+            currentDeckNum = currentDeckNum[0]
         else:
-            current_deck_num = None
+            currentDeckNum = None
 
         # Fetch the current deck from the Decks table
-        if current_deck_num is not None:
+        if currentDeckNum is not None:
             cursor.execute("""
                 SELECT Deck FROM Decks
                 WHERE Owner = ? AND UserDeckNum = ?
-            """, (username, current_deck_num))
-            deck_row = cursor.fetchone()
-            if deck_row:
-                current_deck = deck_row[0].split(", ")
+            """, (username, currentDeckNum))
+            deckRow = cursor.fetchone()
+            if deckRow:
+                currentDeck = deckRow[0].split(", ")
             else:
-                current_deck = []
+                currentDeck = []
         else:
-            current_deck = []
+            currentDeck = []
     except sqlite3.Error as e:
         flash(f"Error: check server terminal", "error")
         print(f"SQLite error: {str(e)}")
-        current_deck = []
+        currentDeck = []
     finally:
         cursor.close()
         conn.close()
 
-    return render_template("decks.html", profilePic=profilePicPath, username=session_username, decks=decks, current_deck=current_deck, account_username=accountUsername)
+    return render_template("decks.html", profilePic=profilePicPath, username=session_username, decks=decks, currentDeck=currentDeck, account_username=accountUsername)
 
 
 
@@ -567,17 +567,17 @@ def modifyDeck(username):
                     FROM Decks
                     WHERE Owner = ?
                 """, (username,))
-                user_deck_num = cursor.fetchone()[0]
+                userDeckNum = cursor.fetchone()[0]
 
                 # If deckName is empty or only whitespace, set default
                 if not deckName or not deckName.strip():
-                    deckName = f"Deck {user_deck_num}"
+                    deckName = f"Deck {userDeckNum}"
 
                 # Insert the new deck into the Decks table
                 cursor.execute("""
                     INSERT INTO Decks (Owner, UserDeckNum, Deck, DeckName)
                     VALUES (?, ?, ?, ?)
-                """, (username, user_deck_num, selectedCards, deckName))
+                """, (username, userDeckNum, selectedCards, deckName))
                 flash("New deck created successfully!", "success")
         except sqlite3.Error as e:
             flash(f"Error: {e}", "error")
