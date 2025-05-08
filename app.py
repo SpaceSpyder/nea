@@ -35,9 +35,8 @@ from dataclasses import dataclass, asdict
 from moduels import Game, GameBoard, Card, Player # Import Game, GameBoard, and Card classes
 
 
-# Database setup
-DATABASE_URI = "databases/database.db"
-DEFAULT_PIC_PATH = "images/profilePics/Default.png"
+
+DefaultPfpPath = "images/profilePics/Default.png"
 
 # Flask app setup
 app = Flask(__name__, static_folder="templates", static_url_path="") # Set the static folder to the templates directory
@@ -57,14 +56,14 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)  # session timeout
 def index():
     username = session.get("Username") # get username from session
     profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()
-    return render_template("index.html", profile_pic=profilePicPath)
+    return render_template("index.html", profilePic=profilePicPath)
 
 
 @app.route("/howToPlay")
 def howToPlay():
     username = session.get("Username")
     profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()
-    return render_template("howToPlay.html", profile_pic=profilePicPath)
+    return render_template("howToPlay.html", profilePic=profilePicPath)
 
 
 # -------- login and sign up ---------
@@ -72,7 +71,7 @@ def howToPlay():
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    profilePicPath = DEFAULT_PIC_PATH # Default profile picture path
+    profilePicPath = DefaultPfpPath # Default profile picture path
 
     # Check if the user is already logged in
     if "Username" in session:
@@ -95,7 +94,7 @@ def login():
         else:
             flash("Incorrect username / password!", "error")  # Displays an error message if login fails
 
-    return render_template("login.html",profile_pic=profilePicPath)
+    return render_template("login.html",profilePic=profilePicPath)
 
 
 @app.route("/signUp", methods=["GET", "POST"])
@@ -106,7 +105,7 @@ def signUp():
         flash("You are already signed up!", "info")
         return redirect(url_for("index"))
 
-    profilePicPath = DEFAULT_PIC_PATH  # Default profile picture path
+    profilePicPath = DefaultPfpPath  # Default profile picture path
 
     if request.method == "POST": # when the form is submitted
         username = request.form["username"]
@@ -126,9 +125,9 @@ def signUp():
             else: # unknown error
                 flash("ERROR signing up. Please try again.", "error")
                 print(f"Error: {str(e)}", "error")
-            return render_template("signUp.html", profile_pic=profilePicPath)
+            return render_template("signUp.html", profilePic=profilePicPath)
 
-    return render_template("signUp.html", profile_pic=profilePicPath)
+    return render_template("signUp.html", profilePic=profilePicPath)
 
 
 @app.route("/logout")
@@ -147,7 +146,7 @@ def profile():
         return redirect(url_for("login"))
     profilePicPath = getProfilePicPath(session["Username"])
 
-    return render_template("profile.html", profile_pic=profilePicPath)
+    return render_template("profile.html", profilePic=profilePicPath)
 
 
 
@@ -182,7 +181,7 @@ def stats(username=None):
         cursor.close()
         conn.close()
 
-    return render_template("stats.html", profile_pic=profilePicPath, stats=statsData, username=sessionUsername, account_pic=accountPicPath, account_username=accountUsername)
+    return render_template("stats.html", profilePic=profilePicPath, stats=statsData, username=sessionUsername, urlProfilePic=accountPicPath, account_username=accountUsername)
 
 def getUserId(cursor, username): # get user id from username
     cursor.execute("SELECT Id FROM Users WHERE Username = ?", (username,))
@@ -267,7 +266,7 @@ def showDecks(username):
         cursor.close()
         conn.close()
 
-    return render_template("decks.html", profile_pic=profilePicPath, username=session_username, decks=decks, current_deck=current_deck, account_username=accountUsername)
+    return render_template("decks.html", profilePic=profilePicPath, username=session_username, decks=decks, current_deck=current_deck, account_username=accountUsername)
 
 
 
@@ -285,11 +284,11 @@ def change_profile_pic():
         return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
     if request.method == "POST":
-        if "profile_pic" not in request.files:
+        if "profilePic" not in request.files:
             flash("No file part", "error")
             return redirect(url_for("profile"))
 
-        file = request.files["profile_pic"]
+        file = request.files["profilePic"]
 
         if file.filename == "":
             flash("No selected file", "error")
@@ -343,7 +342,7 @@ def change_profile_pic():
             flash("Unsupported file type", "error")
             return redirect(url_for("change_profile_pic"))
 
-    return render_template("changePfp.html", profile_pic=profilePicPath)
+    return render_template("changePfp.html", profilePic=profilePicPath)
 
 
 
@@ -354,7 +353,7 @@ def testGame():
     username = checkUsername()
     if username:
         profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()  # get profile picture path from the user details
-        return render_template("game.html", profile_pic=profilePicPath)
+        return render_template("game.html", profilePic=profilePicPath)
     else:
         return render_template("game.html")
 
