@@ -35,10 +35,10 @@ def cropImage(image):
         cropBox = (left, top, right, bottom)
 
         # Crop the image to fit the 250x250 box
-        cropped_image = im.crop(cropBox)
+        croppedImage = im.crop(cropBox)
 
         # Save the cropped image back to the original location (overwriting it)
-        cropped_image.save(imagePath)
+        croppedImage.save(imagePath)
 
     except Exception as e:
         print(f"An error occurred: {e}")

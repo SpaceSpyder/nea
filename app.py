@@ -313,8 +313,8 @@ def change_profile_pic():
 
             try:
                 # Save the file
-                file_path = os.path.join(upload_folder, filename)
-                file.save(file_path)
+                filePath = os.path.join(upload_folder, filename)
+                file.save(filePath)
 
                 # Crop and save the uploaded image
                 cropImage(filename)
@@ -353,21 +353,21 @@ def testGame():
     username = checkUsername()
     if username:
         profilePicPath = getProfilePicPath(username) if username else getProfilePicPath()  # get profile picture path from the user details
-        return render_template("game.html", profilePic=profilePicPath)
+        return render_template("prenetGame.html", profilePic=profilePicPath)
     else:
-        return render_template("game.html")
+        return render_template("prenetGame.html")
 
 
 
-@app.route("/testGame2", methods=["GET"])
-def testGame2():
+@app.route("/game", methods=["GET"])
+def game():
     if not session.get("Username"):  # check if the user is logged in
         return redirect(url_for("login"))
     username = session.get("Username")
-    return render_template("game2.html", username=username, profilepic=getProfilePicPath(username), opponentProfilepic="images/profilePics/Default.png")
+    return render_template("game.html", username=username, profilepic=getProfilePicPath(username), opponentProfilepic="images/profilePics/Default.png")
  
  
-@app.route("/testGame2/getCurrentGame", methods=["GET"])
+@app.route("/game/getCurrentGame", methods=["GET"])
 def getCurrentGame():
         global globalGameCount
         global globalGameList
@@ -433,7 +433,7 @@ def getCurrentGame():
         return jsonify({"isPlayer1": True})
  
  
-@app.route("/testGame2/waitForSecondPlayer", methods=["GET"])
+@app.route("/game/waitForSecondPlayer", methods=["GET"])
 def waitForSecondPlayer():
     global globalGameCount
     global globalGameList
@@ -443,7 +443,7 @@ def waitForSecondPlayer():
         return jsonify({"player2Found": game.player2.username})  # Return player2's username
     return jsonify({"ERROR_no_current_game": True})  # Error if no current game
 
-@app.route("/testGame2/receiveEndTurn", methods=["POST"])
+@app.route("/game/receiveEndTurn", methods=["POST"])
 def receiveEndTurn():
     print("Received end turn from: ", session.get("Username"))  
     data = request.get_json()
@@ -477,7 +477,7 @@ def receiveEndTurn():
     return jsonify(response), 200
 
 
-@app.route("/testGame2/deleteGame", methods=["POST"])
+@app.route("/game/deleteGame", methods=["POST"])
 def deleteGame():
     try:
         username = session.get("Username")

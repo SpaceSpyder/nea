@@ -7,15 +7,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="shortcut icon" type="image/png" href="images/ShieldLogo.png">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             height: 1080px;
             margin: 0;
             padding: 0;
             /*background-attachment: fixed;*/
+            /*background-attachment: fixed;*/
             background-image: url('images/game_wood_background_001.png');
-            /*background-size: cover; /* Ensures the image covers the entire viewport */
+            /* background-size: cover;  Ensures the image covers the entire viewport */
             background-repeat: no-repeat; /* Prevents the image from repeating */
+            overflow: hidden;
         }
 
         .drag {
@@ -27,50 +31,170 @@
             position: absolute;
             top: -20px; /* Adjust top position */
             left: -20px; /* Adjust left position */
-            border: red solid 2px;
+            border: rgba(255, 0, 0, 0);
+            /*border: red solid 2px;*/
         }
 
         .values {
             font-family: "Overpass Mono", monospace;
-            
             height: 118px;
             width: 130px;
             position: absolute;
             text-align: center;
             font-weight: bold;
-            border: red 1px solid;
+            /*border: red 1px solid;*/
             font-size: 112px;
             padding: 0px;
             letter-spacing: -12px;
         }
+
+        .endTurn {
+            text-align: center;
+            width: 60px;
+            display: flex;
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+            position: absolute; /* Position the button in the center of the page */
+            top: 50%; /* Move to the vertical center */
+            left: 50%; /* Move to the horizontal center */
+            transform: translate(-50%, -50%) rotate(45deg); /* Combine translate and rotate */
+            z-index: 4; /* Ensure it appears above other elements */
+            background: #fff; /* Button background color */
+            height: 60px;
+        }
+
+        .endTurn button {
+            opacity: 0;
+        }
+
+        .endTurnText {
+        color: #333;
+        display: table-cell;
+        height: 60px;
+        transform:rotate(-45deg) translate(-1%, 15%);
+        vertical-align: middle;
+        width:60px;
+        text-align: center;
+        vertical-align: middle;
+        }
+
+        .fullscreenPrompt {
+            position: fixed; /* Ensure it stays fixed on the screen */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); /* Dark transparent background */
+            z-index: 5; /* Ensure it sits above other content */
+            display: block; /* Hidden by default */
+            color: #fff; /* Text color */
+            font-size: 40px;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box; /* Ensure padding is included in the element's size */
+        }
+
+        .fullscreenPrompt text {
+            display: inline-block;
+            vertical-align: middle;
+            line-height: normal;
+            padding-top: 23.1%; /* To center the text vertically */
+            text-shadow: 0px 0px 20px black, 0px 0px 5px black, 0px 0px 20px black; /* Shadow added here */
+        }
+
+        .opponent-profile-pic {
+            position: absolute;
+            right: 43px;
+            top: 20px;
+        }
+
     </style>
 </head>
 
 <body>
-    {% include 'htmlChildren/dropDown.html' %}
+    
+    <div id="cardContainer"></div><!--holds all the cards-->
 
-    <!--<div class="background">-->
-    <!--</div>-->
 
-    <!--images and id-->
-    <div id="cardContainer">
-        <img src="images/CardPictures/PossessedArmour.png" class="card" id="card1">
-        <img src="images/CardPictures/knight.png" class="card" id="card2">
-        <img src="images/CardPictures/Darkknight.png" class="card" id="card3">
-        <img src="images/CardPictures/Dragon.png" class="card" id="card4">
-        <img src="images/CardPictures/Wizard.png" class="card" id="card5">
-        <img src="images/CardPictures/KnightCaptain.png" class="card" id="card6">
-        <img src="images/CardPictures/Monk.png" class="card" id="card7">
+    <div id="userHealth" class="values" style="right: 43px;top: 920px;">00</div>
+    <div id="opponentHealth" class="values" style="right: 43px;top: 52px;">00</div>
+    <div id="userMana" class="values" style="right: 203px;top: 920px;">00</div>
+    <div id="opponentMana" class="values" style="right: 203px;top: 52px;">00</div>
+
+    <div id="userInfo">
+        <div class="values user-info" style="right: 595px; bottom: 70px; position: fixed;">{{ username }}</div>
+        <img src="{{profilepic}}" alt="Profile Picture" class="profilePic" style="bottom: 70px; position: fixed;">
     </div>
 
-    <div id="highl"></div>
+    <div id="opponentInfo">
+        <div class="values" style="right: 595px; top: 70px;">{{ opponentName }}</div>
+        <img src="{{opponentProfilepic}}" alt="Profile Picture" class="profilePic opponent-profile-pic" style="top: 70px; position: fixed;">
+    </div>
 
-    <div id="p1Mana" class="values" style="right: 43px;top: 909px;">00</div>
-    <div id="p2Mana" class="values" style="right: 43px;top: 52px;">00</div>
-    <div id="p1Health" class="values" style="right: 203px;top: 909px;">00</div>
-    <div id="p2Health" class="values" style="right: 203px;top: 52px;">00</div>
+
+
+    <div class="endTurn">
+        <div class="endTurnText">End Turn</div>
+        <button onclick="sendEndTurn(hitboxContents)" id="endTurn" class="endTurn"></button>
+    </div>
+    
+
+    <div class="fullscreenPrompt" id="waitForOtherPlayerTurnPrompt">
+        <text>Waiting for other player to join</text>
+    </div>
+
+    {% include 'htmlChildren/dropDown.html' %}
+
+    <!--
+    <div class="fullscreenPrompt" id="enterFullscreenPrompt">
+        <text>Click to enter fullscreen</text>
+    </div>
+    -->
+
 
     <script>
+        let isFullscreen = null; // To store the fullscreen state
+        const enterFullscreenPrompt = document.getElementById('enterFullscreenPrompt');
+        const waitForOtherPlayerTurnPrompt = document.getElementById('waitForOtherPlayerTurnPrompt');
+        let callCount = 0;
+        let intervalId;
+        const username = "{{ username }}";
+        let runOncePerTurn = false;
+        let noOneOnline = false;
+        let gameDeleted = false; 
+        let gameEnded = false; 
+        let game = null; // Initialize game variable
+
+        // Define hitbox positions based on player
+        let inPlayAreas = [
+            { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },      // p2Defence (top)
+            { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },     // p2Attack
+            { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },     // p1Attack
+            { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },    // p1Defence (bottom)
+            { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },   // p2bank
+            { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } }    // p1bank
+        ];
+
+        function checkFullscreen() {
+            const currentlyFullscreen = document.fullscreenElement !== null;
+
+            // Update the stored fullscreen state
+            isFullscreen = currentlyFullscreen;
+
+            // Perform actions based on the new fullscreen state
+            // Perform actions based on the new fullscreen state
+            if (isFullscreen && !gameDeleted && !gameEnded) { // Only call if game isn't deleted
+                getCurrentGame(); // Call the function to check if the other player has joined every second
+
+            
+                //console.log("Page is in fullscreen");
+            } else {
+                //enterFullscreenPrompt.display = "none";
+                //waitForOtherPlayerTurnPrompt.style.display = "none";
+                console.log("Page is not in fullscreen");
+            }
+            }  // Close the checkFullscreen function
+
         document.addEventListener('click', function () {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
@@ -81,27 +205,16 @@
 
         let cardData = [];
         // Select all elements with class 'card' and make them draggable
-        var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
-        cards.forEach(card => {
-            cardData.push({
-                element: card,
-                hitbox: -1,
-                index: -1,
-                owner: "me"
-            });
+     // Select all elements with class 'card' and make them draggable
+     var cards = [...document.getElementsByClassName("card")]; // Get all elements with the class 'card' and store them in an array
+    cards.forEach(card => {
+        cardData.push({
+            element: card,
+            hitbox: -1,
+            index: -1,
+            owner: "me"
         });
-
-        let inPlayAreas = [
-            { topLeft: { x: 30, y: 30 }, bottomRight: { x: 930, y: 255 } },
-            { topLeft: { x: 30, y: 285 }, bottomRight: { x: 930, y: 510 } },
-            { topLeft: { x: 30, y: 570 }, bottomRight: { x: 930, y: 795 } },
-            { topLeft: { x: 30, y: 825 }, bottomRight: { x: 930, y: 1050 } },
-        ];
-
-        let inHandAreas = [
-            { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510 } },
-            { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795 } },
-        ];
+    });
 
         let hitboxContents = [[], [], [], [], [], []];
 
@@ -115,20 +228,30 @@
 
             element.onmousedown = dragMouseDown;
 
-            function dragMouseDown(e) {
+            function dragMouseDown(e) { // handles the card being clicked on
                 e = e || window.event;
                 e.preventDefault();
-                // get the mouse cursor position at startup:
+                                // get the mouse cursor position at startup:
                 pos3 = e.clientX;
                 pos4 = e.clientY;
+
+                if (e.target.dataset.cost > game.player1.mana) {
+                    console.log("Not enough mana to play this card!");
+                    return; // Exit the function if not enough mana
+                }
+                game.player1.mana -= e.target.dataset.cost; // Deduct the cost from the player's mana
+                document.getElementById("userMana").textContent = game.player1.mana; // Update the mana display
+                
                 document.onmouseup = closeDragElement;
                 // call a function whenever the cursor moves:
                 document.onmousemove = elementDrag;
                 e.target.classList.add("drag");
 
+                // Get the drop location for snapping
                 let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
                 if (!dropLocation) return;
-                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
+                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y && area.topLeft.x === dropLocation.topLeft.x && area.bottomRight.x === dropLocation.bottomRight.x);
+                
                 //remove element from array
                 let index = hitboxContents[hitboxNum].indexOf(element);
                 if (index != -1) {
@@ -139,11 +262,13 @@
             }
 
             function elementDrag(e) {
-                e = e || window.event;
+                e = e ||  window.event;
                 e.preventDefault();
                 // calculate the new cursor position:
+                 // set the element's new position:
                 pos1 = pos3 - e.clientX;
                 pos2 = pos4 - e.clientY;
+                // set the element's new position:
                 pos3 = e.clientX;
                 pos4 = e.clientY;
                 // set the element's new position:
@@ -161,11 +286,10 @@
             document.onmousemove = null;
 
             e.target.style.zIndex = 1; // puts on top
-            let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y for the snap
+            let dropLocation = dropToSnap(e.clientX, e.clientY); // runs a function to get the new x and y (of the card) for the snap
 
             if (dropLocation) { // if it has data it will snap
-                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y);
-
+                let hitboxNum = inPlayAreas.findIndex(area => area.topLeft.y === dropLocation.topLeft.y && area.bottomRight.y === dropLocation.bottomRight.y && area.topLeft.x === dropLocation.topLeft.x && area.bottomRight.x === dropLocation.bottomRight.x);
                 snapCardY(dropLocation, e.target); // passes the area its over and the card 
                 snapCardX(hitboxNum, e.target, e.clientX, dropLocation); // passes the area its over and the card 
                 numberOfCards = hitboxContents[hitboxNum].length; // creates a variable to say how many cards are in the hitbox and +1 
@@ -186,11 +310,11 @@
         function snapCardY(dropLocation, element) { // takes snapping location and snaps the card
             element.style.top = (dropLocation.topLeft.y - 0) + "px";
             // highlight hitbox for debugging
-            let hl = document.getElementById("highl");
-            hl.style.left = dropLocation.topLeft.x + "px";
-            hl.style.top = dropLocation.topLeft.y + "px";
-            hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
-            hl.style.height = dropLocation.bottomRight.y - dropLocation.topLeft.y + "px";
+            // let hl = document.getElementById("highl");
+            //hl.style.left = dropLocation.topLeft.x + "px";
+            //hl.style.top = dropLocation.topLeft.y + "px";
+            //hl.style.width = dropLocation.bottomRight.x - dropLocation.topLeft.x + "px";
+            //hl.style.height = dropLocation.bottomRight.y - dropLocation.topLeft.y + "px";
         }
 
         function redrawCards(numberOfCards, hitboxNum, left) {
@@ -202,23 +326,698 @@
 
         function dropToSnap(cardX, cardY) {
             for (let i = 0; i < inPlayAreas.length; i++) {
-                if (cardX > inPlayAreas[i].topLeft.x && cardX < inPlayAreas[i].bottomRight.x && cardY > inPlayAreas[i].topLeft.y && cardY < inPlayAreas[i].bottomRight.y) {
-                    return inPlayAreas[i]; // return the hitbox position
+                if (cardX >= inPlayAreas[i].topLeft.x && cardX <= inPlayAreas[i].bottomRight.x && cardY >= inPlayAreas[i].topLeft.y && cardY <= inPlayAreas[i].bottomRight.y) {
+                    return inPlayAreas[i]; // return the hitbox & position
                 }
             }
             return null;
         }
+
         function getCardPositions(numberOfCards) {
-                // total width / numofcards+1
-                // foreach card half width and minus from the bit above
-                let positionS = [];
-                let offset = (1050 / (numberOfCards + 1));
-                for (let i = 0; i < numberOfCards; i++) {
-                    positionS.push((offset * (i + 1)) - 150);
+            // total width / numofcards+1
+            // foreach card half width and minus from the bit above
+            let positionS = [];
+            let offset = (1050 / (numberOfCards + 1));
+            for (let i = 0; i < numberOfCards; i++) {
+                positionS.push((offset * (i + 1)) - 150);
+            }
+            return positionS;
+        }
+
+    function redrawAllCards(game) {
+        if (!runOncePerTurn) {
+            runOncePerTurn = true;
+        } else {
+            return;
+        }
+
+        const gameBoard = game.gameBoard;
+        if (!gameBoard) {
+            console.error("gameBoard is null or undefined");
+            return;
+        }
+
+        // Clear existing data
+        hitboxContents = [[], [], [], [], [], []];
+        cardData = [];
+        document.getElementById('cardContainer').innerHTML = '';
+
+        // Create arrays of card data for each section based on player
+        const sections = username === game.player2.username ? [
+            // Player 2's view (reversed)
+            {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (bottom)
+            {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
+            {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
+            {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (top)
+            {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
+            {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
+        ] : [
+            // Player 1's view (original)
+            {data: gameBoard.p2Defence || [], hitboxIndex: 0},  // p2Defence (top)
+            {data: gameBoard.p2Attack || [], hitboxIndex: 1},   // p2Attack
+            {data: gameBoard.p1Attack || [], hitboxIndex: 2},   // p1Attack
+            {data: gameBoard.p1Defence || [], hitboxIndex: 3},  // p1Defence (bottom)
+            {data: gameBoard.p2bank || [], hitboxIndex: 4},     // p2bank
+            {data: gameBoard.p1bank || [], hitboxIndex: 5}      // p1bank
+        ];
+
+        // Process each section
+        sections.forEach(({data, hitboxIndex}) => {
+            if (data.length > 0) {
+            const area = inPlayAreas[hitboxIndex];
+            const positions = getCardPositions(data.length);
+            
+            data.forEach((cardInfo, index) => {
+                // Create card div
+                const cardDiv = document.createElement("div");
+                cardDiv.classList.add("card");
+                cardDiv.id = `card_${cardInfo.cardId}`;
+                
+                // Create and add main card image
+                const cardImage = document.createElement("img");
+                cardImage.src = `images/CardPictures/${cardInfo.name}.png`;
+                cardImage.style.width = "100%";
+                cardImage.style.height = "100%";
+                cardImage.style.pointerEvents = "none";
+                cardImage.classList.add("cardImage");
+                cardDiv.appendChild(cardImage);
+                
+                // Add taken damage image
+                const takenDamageHeart = document.createElement("img");
+                takenDamageHeart.src = "images/takenDamage.png";
+                takenDamageHeart.classList.add("takenDamage");
+                cardDiv.appendChild(takenDamageHeart);
+                
+                // Add health display
+                const healthDisplay = document.createElement("p");
+                healthDisplay.classList.add("healthDisplay");
+                healthDisplay.id = `healthDisplay_${cardInfo.cardId}`;
+                healthDisplay.textContent = cardInfo.health;
+                cardDiv.appendChild(healthDisplay);
+                
+                // Set data attributes
+                cardDiv.dataset.cardId = cardInfo.cardId;
+                cardDiv.dataset.name = cardInfo.name;
+                cardDiv.dataset.attack = cardInfo.attack;
+                cardDiv.dataset.spawnHealth = cardInfo.spawnHealth;
+                cardDiv.dataset.health = cardInfo.health;
+                cardDiv.dataset.cost = cardInfo.cost;
+
+                // Position the card
+                cardDiv.style.position = "absolute";
+                cardDiv.style.left = (area.topLeft.x + positions[index]) + "px";
+                cardDiv.style.top = area.topLeft.y + "px";
+                cardDiv.style.zIndex = "1";
+                
+                // Add to DOM
+                document.getElementById('cardContainer').appendChild(cardDiv);
+                
+                // Make draggable
+                dragElement(cardDiv);
+                
+                // Add to tracking arrays
+                hitboxContents[hitboxIndex].push(cardDiv);
+                cardData.push({
+                    element: cardDiv,
+                    hitbox: hitboxIndex,
+                    index: index,
+                    owner: "me",
+                    cardInfo: {
+                        cardId: cardInfo.cardId,
+                        name: cardInfo.name,
+                        attack: cardInfo.attack,
+                        health: cardInfo.health,
+                        spawnHealth: cardInfo.spawnHealth, // SPAWNHEALTH AND HEALTH ARE COMPLETELY DDIFFERENT
+                        cost: cardInfo.cost
+                    }
+                });
+            });
+        }
+    });
+
+    console.log("Cards redrawn:", hitboxContents);
+}
+
+
+function getCurrentGame() {
+    if (gameDeleted) return; // Skip if game is deleted
+    
+    const previousRoundNum = window.currentRoundNum || 0;
+    
+    if (!username) {
+        swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'not logged in'
+        });
+        document.location.href = "/login";
+        return; // Added return to prevent further execution
+    }
+    
+    fetch('game/getCurrentGame')
+        .then(response => response.text())
+        .then(data => {
+            try {
+                game = JSON.parse(data);
+                
+                // Check for redirect
+                if (game.status === "GAME_DELETED") {
+                    gameDeleted = true; // Set flag to prevent further calls
+                    console.log("Game deleted, redirecting...");
+                    swal.fire({
+                        icon: 'info',
+                        title: 'Game Ended',
+                        text: game.message,
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = game.redirect || "/login";
+                    });
+                    return; // Critical: Stop processing
+                } else if (game.status === "game_over"){
+                    gameEnded = true; // Set flag to prevent further calls
+                    if (game.currentGame.player1.username == username){
+                        if (game.winner == "player1"){
+                            swal.fire({
+                                icon: 'success',
+                                title: 'Game Over',
+                                text: 'You won!',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/"; // Redirect to game page
+                                }
+                            });
+                        } else {
+                            swal.fire({
+                                icon: 'error',
+                                title: 'Game Over',
+                                text: 'You lost!',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/"; // Redirect to game page
+                                }
+                            });
+                        }
+                        return;
+
+                    } else if (game.currentGame.player2.username == username){
+                        if (game.winner == "player2"){
+                            swal.fire({
+                                icon: 'success',
+                                title: 'Game Over',
+                                text: 'You won!',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/"; // Redirect to game page
+                                }
+                            });
+                        } else {
+                            swal.fire({
+                                icon: 'error',
+                                title: 'Game Over',
+                                text: 'You lost!',  
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/"; // Redirect to game page
+                                }
+                            });
+                        }
+                        return;
+                    }
                 }
 
-                return positionS;
+                
+
+
+                
+                // Save current round number to detect changes
+                window.currentRoundNum = game.roundNum;
+                const roundChanged = previousRoundNum !== game.roundNum;
+                
+                if (!game.gameBoard) {
+                 return;
+                }
+               
+
+
+                // If player 2, reverse the board layout
+                if (game.player2 && username === game.player2.username) {
+                    inPlayAreas = [
+                        { topLeft: { x: 30,  y: 825 }, bottomRight: { x: 930,  y: 1050 } },   // p2Defence (bottom)
+                        { topLeft: { x: 30,  y: 570 }, bottomRight: { x: 930,  y: 795  } },   // p2Attack
+                        { topLeft: { x: 30,  y: 285 }, bottomRight: { x: 930,  y: 510  } },   // p1Attack
+                        { topLeft: { x: 30,  y: 30  }, bottomRight: { x: 930,  y: 255  } },   // p1Defence (top)
+                        { topLeft: { x: 985, y: 570 }, bottomRight: { x: 1890, y: 795  } },   // p2bank
+                        { topLeft: { x: 985, y: 285 }, bottomRight: { x: 1890, y: 510  } }    // p1bank
+                    ];
+                }
+                
+                // Handle waiting for another player
+                if (!game.player2 || !game.player2.username) {
+                    if (game.player1.username == username) {
+                        const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
+                        promptText.textContent = "Waiting for another player to join";
+                        waitForOtherPlayerTurnPrompt.style.display = "block";
+                        // Continue processing but skip parts that require player2
+                    }
+                    // Skip other player2-dependent code
+                } else {
+                    // Handle turns for player 1
+                    if (game.player1.username == username) {
+                        console.info("game: ", game);
+                        if (game.player2) { // Only proceed if player2 has joined
+                            if (game.roundNum % 2 == 0) { // Player 1's turn
+                                waitForOtherPlayerTurnPrompt.style.display = "none";
+                                redrawAllCards(game);
+                                                    // Update health and mana display of players
+                                
+
+
+                                // Only calculate damage if the round number just changed
+                                if (roundChanged) {
+                                    addCardToSummoningBank();
+                                    calculateBoard();
+                                    document.getElementById("userHealth").textContent = game.player1.health;
+                                    document.getElementById("opponentHealth").textContent = game.player2.health;
+                                    document.getElementById("userMana").textContent = game.player1.mana;
+                                    document.getElementById("opponentMana").textContent = game.player2.mana;
+                                }
+                            } else { // Player 2's turn
+                                waitForOtherPlayerTurnPrompt.style.display = "block";
+                                document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
+                                
+                            }
+                        }
+                    } 
+                    // Handle turns for player 2
+                    else if (game.player2.username == username) {
+                        console.info("game: ", game);
+                        if (game.roundNum % 2 != 0) { // Player 2's turn
+                            waitForOtherPlayerTurnPrompt.style.display = "none";
+                                                // Update health and mana display of players
+
+
+                            redrawAllCards(game);
+                            
+                            
+                            // Only calculate damage if the round number just changed
+                            if (roundChanged) {
+                                addCardToSummoningBank();
+                                calculateBoard();
+                                document.getElementById("userHealth").textContent = game.player2.health;
+                                document.getElementById("opponentHealth").textContent = game.player1.health;
+                                document.getElementById("userMana").textContent = game.player2.mana;
+                                document.getElementById("opponentMana").textContent = game.player1.mana;
+                            }
+                        } else { // Player 1's turn
+                            waitForOtherPlayerTurnPrompt.style.display = "block";
+                            document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
+                        }
+                    }
+
+
+                }
+
+                // Also fix the opponent profile section
+                if (game.player1 && game.player2 && game.player2.username) {
+                    // Figure out which player is the opponent
+                    const currentUser = '{{ username }}';
+                    const opponentName = game.player1.username === currentUser ? 
+                                        game.player2.username : 
+                                        game.player1.username;
+                    
+                    // Update the opponent name in the DOM
+                    document.querySelector('#opponentInfo .values').textContent = opponentName;
+                    
+                    // For the profile pic, you can use a simple endpoint
+                    if (game.opponentProfilepic) {
+                        document.querySelector('#opponentInfo .profilePic').src = game.opponentProfilepic;
+                    }
+                }
+
+            } catch (e) {
+                console.error("Error parsing game data:", e);
             }
+        });
+}
+
+    function sendEndTurn(hitboxContents) {
+        waitForOtherPlayerTurnPrompt.style.display = "block";
+        console.log("end turn");
+        //const promptText = waitForOtherPlayerTurnPrompt.querySelector('text');
+        document.querySelector('#waitForOtherPlayerTurnPrompt text').textContent = "Waiting for other player to finish their turn";
+
+        // Don't calculate damage here since getCurrentGame does it
+        const formattedHitboxContents = hitboxContents.map(hitbox => {
+            return hitbox.map(element => {
+                // Find the card data for this element
+                const cardInfo = cardData.find(c => c.element === element)?.cardInfo;
+                if (!cardInfo) {
+                    console.warn('No card info found for element:', element);
+                    return null;
+                }
+                return {
+                    cardId: cardInfo.cardId,
+                    name: cardInfo.name,
+                    attack: cardInfo.attack,
+                    cost: cardInfo.cost,
+                    health: cardInfo.health,
+                    spawnHealth: cardInfo.spawnHealth
+                };
+
+            }).filter(card => card !== null);
+        });
+
+        runOncePerTurn = false;
+
+        fetch('game/getCurrentGame')
+            .then(response => response.text())
+            .then(data => {
+                try {
+                    const game2 = JSON.parse(data);
+                    if (!game2.gameBoard) { // if its the first turn and the gameboard is empty
+                        console.log("Creating empty gameBoard");
+                        game.gameBoard = {
+                            p2Defence: [],
+                            p2Attack: [],
+                            p1Attack: [],
+                            p1Defence: [],
+                            p2bank: [],
+                            p1bank: []
+                        };
+                    }
+                    game.gameBoard = {
+                        p2Defence: formattedHitboxContents[0],
+                        p2Attack: formattedHitboxContents[1],
+                        p1Attack: formattedHitboxContents[2],
+                        p1Defence: formattedHitboxContents[3], // Updated to use correct index for p1Defence
+                        
+                        p2bank: formattedHitboxContents[4],
+                        p1bank: formattedHitboxContents[5], // Corrected index for p1bank
+                    };
+                    
+
+                    // Include any other necessary game updates here before sending
+                    game.roundNum += 1; // Increment the round number before sending the game state
+
+                    // Send the game state to the server
+                    return fetch('game/receiveEndTurn', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(game)
+                    });
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    throw new Error('Invalid JSON response');
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                try {
+                    const result = JSON.parse(data);
+                    console.log('Success:', result);  // Handle the response data
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    throw new Error('Invalid JSON response');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);  // Handle any errors
+            });
+    }
+
+    
+    function addTestCards() {
+        fetch('/getRandomCard')
+            .then(response => response.json())
+            .then(cardInfo => {
+                if (cardInfo.error) {
+                    console.error('Error:', cardInfo.error);
+                    return;
+                }
+
+            // Create card div
+            const cardDiv = document.createElement("div");
+            cardDiv.classList.add("card");
+            cardDiv.id = `card_${GetCurrentCardId()}`;
+            cardDiv.style.zIndex = "1";
+            
+            // Create and add main card image
+            const cardImage = document.createElement("img");
+            cardImage.src = `images/CardPictures/${cardInfo.name}.png`;
+            cardImage.style.width = "100%";
+            cardImage.style.height = "100%";
+            cardImage.style.pointerEvents = "none";
+            cardImage.classList.add("cardImage");
+            cardDiv.appendChild(cardImage);
+            
+            // Add taken damage image
+            const takenDamageHeart = document.createElement("img");
+            takenDamageHeart.src = "images/takenDamage.png";
+            takenDamageHeart.classList.add("takenDamage");
+            cardDiv.appendChild(takenDamageHeart);
+            
+            // Add health display
+            const healthDisplay = document.createElement("p");
+            healthDisplay.classList.add("healthDisplay");
+            healthDisplay.id = `healthDisplay_${GetCurrentCardId()}`;
+            healthDisplay.textContent = cardInfo.health; // Display the current health
+            cardDiv.appendChild(healthDisplay);
+            
+            // Set data attributes
+            cardDiv.dataset.cardId = GetCurrentCardId();
+            cardDiv.dataset.name = cardInfo.name;
+            cardDiv.dataset.attack = cardInfo.attack;
+            cardDiv.dataset.spawnHealth = cardInfo.spawnHealth;
+            cardDiv.dataset.health = cardInfo.health;
+            cardDiv.dataset.cost = cardInfo.cost;
+
+            document.getElementById("cardContainer").appendChild(cardDiv);
+            dragElement(cardDiv);
+
+            cardData.push({
+                element: cardDiv,
+                hitbox: -1,
+                index: -1,
+                owner: "me",
+                cardInfo: {
+                    cardId: GetCurrentCardId()+1,
+                    name: cardInfo.name,
+                    attack: cardInfo.attack,
+                    spawnHealth: cardInfo.health, //makes sure the spawn health is the same as the health only at card creation
+                    health: cardInfo.health,
+                    cost: cardInfo.cost
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+
+function addCardToSummoningBank() {
+        fetch('/getRandomCard') // change
+            .then(response => response.json())
+            .then(cardInfo => {
+                if (cardInfo.error) {
+                    console.error('Error:', cardInfo.error);
+                    return;
+                }
+
+            // Create card div
+            const cardDiv = document.createElement("div");
+            cardDiv.classList.add("card");
+            cardDiv.id = `card_${GetCurrentCardId()}`;
+            cardDiv.style.zIndex = "1";
+            
+            // Create and add main card image
+            const cardImage = document.createElement("img");
+            cardImage.src = `images/CardPictures/${cardInfo.name}.png`;
+            cardImage.style.width = "100%";
+            cardImage.style.height = "100%";
+            cardImage.style.pointerEvents = "none";
+            cardImage.classList.add("cardImage");
+            cardDiv.appendChild(cardImage);
+            
+            // Add taken damage image
+            const takenDamageHeart = document.createElement("img");
+            takenDamageHeart.src = "images/takenDamage.png";
+            takenDamageHeart.classList.add("takenDamage");
+            cardDiv.appendChild(takenDamageHeart);
+            
+            // Add health display
+            const healthDisplay = document.createElement("p");
+            healthDisplay.classList.add("healthDisplay");
+            healthDisplay.id = `healthDisplay_${GetCurrentCardId()}`;
+            healthDisplay.textContent = cardInfo.health; // Display the current health
+            cardDiv.appendChild(healthDisplay);
+            
+            // Set data attributes
+            cardDiv.dataset.cardId = GetCurrentCardId();
+            cardDiv.dataset.name = cardInfo.name;
+            cardDiv.dataset.attack = cardInfo.attack;
+            cardDiv.dataset.spawnHealth = cardInfo.spawnHealth;
+            cardDiv.dataset.health = cardInfo.health;
+            cardDiv.dataset.cost = cardInfo.cost;
+
+            document.getElementById("cardContainer").appendChild(cardDiv);
+            dragElement(cardDiv);
+
+            cardData.push({
+                element: cardDiv,
+                hitbox: -1,
+                index: -1,
+                owner: "me",
+                cardInfo: {
+                    cardId: GetCurrentCardId()+1,
+                    name: cardInfo.name,
+                    attack: cardInfo.attack,
+                    spawnHealth: cardInfo.health, //makes sure the spawn health is the same as the health only at card creation
+                    health: cardInfo.health,
+                    cost: cardInfo.cost
+                }
+            });
+            const fakeEvent = {
+                target: cardDiv,
+                clientX: cardDiv.offsetLeft,
+                clientY: cardDiv.offsetTop
+            };
+            closeDragElement(fakeEvent); // Simulate mouseup event to snap the card into place
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function GetCurrentCardId() {
+    return cardData.length+1;
+}
+
+function calculateBoard() {
+    fetch('game/getCurrentGame')
+        .then(response => response.text())
+        .then(data => {
+            const game = JSON.parse(data);
+            console.log("board:", game.gameBoard);
+            
+            if (!game) {
+                console.error("Game object is not defined.");
+                return;
+            }
+
+            const cards = document.getElementsByClassName('card');
+            let needsUpdate = true;
+            
+            
+            // if (needsUpdate) {
+            //     fetch('game/receiveEndTurn', {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json'
+            //         },
+            //         body: JSON.stringify(game)
+            //     })
+            //     .then(response => response.json())
+            //     .catch(error => console.error('Error updating game state:', error));
+            // }
+            // Update displays for all cards
+            Array.from(cards).forEach(card => {
+                debugger;
+                const health = parseInt(card.dataset.health);
+                const spawnHealth = parseInt(card.dataset.spawnHealth);
+                const takenDamage = card.querySelector('.takenDamage');
+                const healthDisplay = card.querySelector('.healthDisplay');
+
+                // Always update the health display with current value regardless of damage state
+                if (healthDisplay) {
+                    healthDisplay.textContent = health;
+                }
+
+                if (health <= 0) {
+                    // Remove dead card
+                    card.remove();
+                    
+                    // Clean up references
+                    const cardId = card.dataset.cardId;
+                    const cardIndex = cardData.findIndex(c => c.cardInfo && c.cardInfo.cardId == cardId);
+                    if (cardIndex !== -1) {
+                        cardData.splice(cardIndex, 1);
+                    }
+                    
+                    hitboxContents.forEach((hitbox, hitboxNum) => {
+                        const index = hitbox.findIndex(c => c.dataset.cardId == cardId);
+                        if (index !== -1) {
+                            hitbox.splice(index, 1);
+                            // Add this line to redraw the remaining cards in the hitbox
+                            redrawCards(hitbox.length, hitboxNum, inPlayAreas[hitboxNum].topLeft.x);
+                        }
+                    });
+                } else if (health < spawnHealth) {
+                    // Show damage indicators
+                    if (takenDamage) takenDamage.style.display = 'block';
+                    if (healthDisplay) healthDisplay.style.display = 'block'; // Add this line
+                } else {
+                    // No damage, hide the damage indicator
+                    if (takenDamage) takenDamage.style.display = 'none';
+                    if (healthDisplay) healthDisplay.style.display = 'none'; // Add this line
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+function deleteCurrentGame() {
+    if (confirm("Are you sure you want to delete this game? This action cannot be undone.")) {
+        gameDeleted = true; // Set flag immediately to prevent further getCurrentGame calls
+        
+        fetch('game/deleteGame', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                // Show success message
+                swal.fire({
+                    icon: 'success',
+                    title: 'Game Deleted',
+                    text: data.message,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Force redirect immediately
+                    window.location.href = data.redirect || "/login";
+                });
+            } else {
+                gameDeleted = false; // Reset flag if deletion failed
+                swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message
+                });
+            }
+        })
+        .catch(error => {
+            gameDeleted = false; // Reset flag if deletion failed
+            console.error('Error:', error);
+            swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to delete the game. Please try again.'
+            });
+        });
+    }
+}
+
+        
+
+        setInterval(checkFullscreen, 1500); // Run the check every 1.5 seconds (1500 milliseconds)
+        setInterval(() => console.log("card data:", cardData), 2000);
     </script>
 </body>
 </html>
